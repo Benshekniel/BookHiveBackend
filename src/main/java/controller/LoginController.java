@@ -1,8 +1,8 @@
-package Login.controller;
+package controller;
 
-import Login.dto.LoginDto;
-import Login.messageResponse.LoginResponse;
-import Login.service.LoginService;
+import model.dto.LoginDto;
+import model.messageResponse.LoginResponse;
+import service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

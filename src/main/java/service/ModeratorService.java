@@ -1,8 +1,8 @@
-package Login.service;
+package service;
 
-import Login.dto.LoginDto;
-import Login.dto.ModeratorDto;
-import Login.messageResponse.LoginResponse;
+import model.dto.LoginDto;
+import model.dto.ModeratorDto;
+import model.messageResponse.LoginResponse;
 
 public interface ModeratorService {
     String addAccount(ModeratorDto moderatorDto);

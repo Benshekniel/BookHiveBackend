@@ -1,22 +1,29 @@
-package Login.dto;
+package model.entity;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 
-public class AllUsersDTO {
+@Entity
+@Table(name="All_Users")
+public class AllUsers {
 
+    @Id
+    @Column(name="user_id", length = 15)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int user_id;
+    @Column(name="email", length = 255)
     private String email;
+    @Column(name="password", length = 255)
     private String password;
+    @Column(name="role", length = 255)
     private String role;
 
-    public AllUsersDTO(String email, String password, String role) {
-
+    public AllUsers(String email, String password, String role) {
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
-    public AllUsersDTO() {
+    public AllUsers() {
     }
 
     public int getUser_id() {
@@ -34,6 +41,7 @@ public class AllUsersDTO {
     public String getRole() {
         return role;
     }
+
 
     public void setUser_id(int user_id) {
         this.user_id = user_id;
@@ -53,12 +61,11 @@ public class AllUsersDTO {
 
     @Override
     public String toString() {
-        return "AllUsersDTO{" +
+        return "AllUsers{" +
                 "user_id=" + user_id +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
                 '}';
     }
-
 }

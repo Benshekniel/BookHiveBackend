@@ -1,4 +1,4 @@
-package Login.dto;
+package model.dto;
 
 public class LoginDto {
 

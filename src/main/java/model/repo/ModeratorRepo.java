@@ -1,6 +1,6 @@
-package Login.repo;
+package model.repo;
 
-import Login.entity.Moderator;
+import model.entity.Moderator;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;

@@ -1,4 +1,4 @@
-package Login.messageResponse;
+package model.messageResponse;
 
 public class LoginResponse {
     String message;

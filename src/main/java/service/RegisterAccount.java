@@ -1,7 +1,6 @@
-package Login.service;
+package service;
 
-import Login.dto.AllUsersDTO;
-import Login.dto.ModeratorDto;
+import model.dto.AllUsersDTO;
 
 public interface RegisterAccount {
 
