@@ -1,8 +1,8 @@
-package Login.controller;
+package controller;
 
 
-import Login.dto.AllUsersDTO;
-import Login.service.RegisterAccount;
+import model.dto.AllUsersDTO;
+import service.RegisterAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

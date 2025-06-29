@@ -1,7 +1,7 @@
-package Login.controller;
+package controller;
 
-import Login.dto.ModeratorDto;
-import Login.service.ModeratorService;
+import model.dto.ModeratorDto;
+import service.ModeratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
