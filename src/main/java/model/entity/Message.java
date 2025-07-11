@@ -17,13 +17,11 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long messageId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User sender;
+    @Column(name = "sender_id", nullable = false)
+    private Long senderId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id", nullable = false)
-    private User receiver;
+    @Column(name = "receiver_id", nullable = false)
+    private Long receiverId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;

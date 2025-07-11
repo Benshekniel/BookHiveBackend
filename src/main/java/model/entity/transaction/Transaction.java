@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import model.entity.User;
-import model.entity.book.Book;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -42,13 +41,11 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    private Book book;
+    @Column(name = "book_id")
+    private Long bookId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "borrower_id")
-    private User borrower;
+    @Column(name = "borrower_id")
+    private Long borrowerId;
 
     @PrePersist
     protected void onCreate() {

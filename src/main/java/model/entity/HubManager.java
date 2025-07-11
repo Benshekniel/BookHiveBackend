@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import model.entity.delivery.Hub;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,13 +18,11 @@ public class HubManager {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long hubManagerId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hub_id", nullable = false)
-    private Hub hub;
+    @Column(name = "hub_id", nullable = false)
+    private Long hubId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     private LocalDateTime joinedAt;
 

@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import model.entity.User;
-import model.entity.delivery.Hub;
+
 
 @Entity
 @Table(name = "agents")
@@ -18,13 +17,11 @@ public class Agent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long agentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hub_id", nullable = false)
-    private Hub hub;
+    @Column(name = "hub_id", nullable = false)
+    private Long hubId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     private VehicleType vehicleType;

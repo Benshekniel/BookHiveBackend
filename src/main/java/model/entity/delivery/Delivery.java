@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import model.entity.agent.Agent;
-import model.entity.transaction.Transaction;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,17 +33,14 @@ public class Delivery {
 
     private String trackingNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hub_id")
-    private Hub hub;
+    @Column(name = "hub_id")
+    private Long hubId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "agent_id")
-    private Agent agent;
+    @Column(name = "agent_id")
+    private Long agentId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transaction_id")
-    private Transaction transaction;
+    @Column(name = "transaction_id")
+    private Long transactionId;
 
     private LocalDateTime createdAt;
 
