@@ -1,9 +1,8 @@
-package service.impl.hubmanager;
+package service.impl;
 
 import model.entity.Message;
 import model.entity.User;
-import model.dto.MessageCreateDto;
-import model.dto.MessageResponseDto;
+import model.dto.MessageDto.*;
 import model.repo.MessageRepository;
 import model.repo.UserRepository;
 import lombok.RequiredArgsConstructor;

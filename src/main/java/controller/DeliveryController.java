@@ -1,8 +1,9 @@
-package controller.hubmanager;
+package controller;
 
-import model.entity.delivery.Delivery;
-import model.dto.*;
-import service.impl.hubmanager.DeliveryService;
+import model.entity.Delivery;
+import model.dto.DeliveryDto.*;
+import model.dto.AgentDto.AssignAgentDeliveryDto;
+import service.impl.DeliveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/deliveries")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
@@ -87,7 +87,7 @@ public class DeliveryController {
             @PathVariable Long deliveryId,
             @RequestBody UpdateStatusDto statusDto) {
         try {
-            Delivery.DeliveryStatus newStatus = Delivery.DeliveryStatus.valueOf(statusDto.getStatus().toUpperCase());
+            Delivery.DeliveryStatus newStatus = statusDto.getStatus();
             DeliveryResponseDto updatedDelivery = deliveryService.updateDeliveryStatus(deliveryId, newStatus);
             return ResponseEntity.ok(updatedDelivery);
         } catch (Exception e) {
@@ -98,7 +98,7 @@ public class DeliveryController {
     @PutMapping("/{deliveryId}/assign-agent")
     public ResponseEntity<DeliveryResponseDto> assignAgent(
             @PathVariable Long deliveryId,
-            @RequestBody AssignAgentDto assignDto) {
+            @RequestBody AssignAgentDeliveryDto assignDto) {
         try {
             DeliveryResponseDto updatedDelivery = deliveryService.assignAgent(deliveryId, assignDto.getAgentId());
             return ResponseEntity.ok(updatedDelivery);

@@ -1,27 +1,25 @@
-package model.dto.hubmanager;
+package model.dto;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
-
 public class HubDto {
+
     @Data
-    public class HubCreateDto {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HubCreateDto {
         private String name;
         private String address;
         private String city;
     }
 
     @Data
-    public class HubUpdateDto {
-        private String name;
-        private String address;
-        private String city;
-        private Integer numberOfRoutes;
-    }
-
-    @Data
-    public class HubResponseDto {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HubResponseDto {
         private Long hubId;
         private String name;
         private String address;
@@ -36,7 +34,19 @@ public class HubDto {
     }
 
     @Data
-    public class HubStatsDto {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HubUpdateDto {
+        private String name;
+        private String address;
+        private String city;
+        private Integer numberOfRoutes;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HubStatsDto {
         private Long hubId;
         private String hubName;
         private String city;
@@ -47,7 +57,9 @@ public class HubDto {
     }
 
     @Data
-    public class HubPerformanceDto {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HubPerformanceDto {
         private Long hubId;
         private String hubName;
         private Long totalDeliveries;
@@ -59,7 +71,9 @@ public class HubDto {
     }
 
     @Data
-    public class HubManagerResponseDto {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HubManagerResponseDto {
         private Long hubManagerId;
         private Long hubId;
         private String hubName;
@@ -70,7 +84,9 @@ public class HubDto {
     }
 
     @Data
-    public class AssignManagerDto {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AssignManagerDto {
         private Long userId;
     }
 }

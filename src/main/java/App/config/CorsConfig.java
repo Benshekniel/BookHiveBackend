@@ -14,7 +14,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // apply to all paths
-                        .allowedOrigins("http://localhost:9999") // allow your React frontend
+                        .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*") // allow localhost on any port
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

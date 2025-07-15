@@ -8,8 +8,8 @@ import java.util.Optional;
 
 @Repository
 public interface HubManagerRepository extends JpaRepository<HubManager, Long> {
-    Optional<HubManager> findByUserUserId(Long userId);
-    Optional<HubManager> findByHubHubId(Long hubId);
-    boolean existsByUserUserId(Long userId);
-    List<HubManager> findAllByHubHubId(Long hubId);
+    Optional<HubManager> findByUserId(Long userId);
+    Optional<HubManager> findByHubId(Long hubId);
+    boolean existsByUserId(Long userId);
+    List<HubManager> findAllByHubId(Long hubId);
 }

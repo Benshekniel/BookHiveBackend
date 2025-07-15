@@ -1,4 +1,4 @@
-package model.dto.hubmanager;
+package model.dto;
 
 
 import lombok.Data;

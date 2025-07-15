@@ -1,7 +1,9 @@
-package controller.hubmanager;
+package controller;
 
-import service.impl.hubmanager.HubService;
-import model.dto.*;
+import service.impl.HubService;
+import model.dto.HubDto.*;
+import model.dto.AgentDto.*;
+import model.dto.DeliveryDto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/hubs")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class HubController {
 
     private final HubService hubService;

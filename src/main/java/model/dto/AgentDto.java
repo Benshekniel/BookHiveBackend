@@ -1,69 +1,93 @@
-package model.dto.hubmanager;
+package model.dto;
 
-import model.entity.agent.Agent;
-import model.entity.delivery.Delivery;
-import model.entity.AllUsers;
 import lombok.Data;
-import java.time.LocalDateTime;
-
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import model.entity.Agent;
 
 public class AgentDto {
+
     @Data
-    public class AgentCreateDto {
-        private Long userId;
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AgentCreateDto {
         private Long hubId;
+        private Long userId;
         private Agent.VehicleType vehicleType;
         private String vehicleNumber;
     }
 
     @Data
-    public class AgentUpdateDto {
-        private Agent.VehicleType vehicleType;
-        private String vehicleNumber;
-        private Agent.AvailabilityStatus availabilityStatus;
-    }
-
-    @Data
-    public class AgentResponseDto {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AgentResponseDto {
         private Long agentId;
+        private Long hubId;
+        private String hubName;
         private Long userId;
         private String userName;
         private String userEmail;
-        private String userPhone;
-        private Long hubId;
-        private String hubName;
         private Agent.VehicleType vehicleType;
         private String vehicleNumber;
         private Agent.AvailabilityStatus availabilityStatus;
         private Double trustScore;
         private Integer deliveryTime;
         private Integer numberOfDelivery;
-        private Double rating;
+        private double rating;
+        private String userPhone;
     }
 
     @Data
-    public class AgentPerformanceDto {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AgentPerformanceDto {
         private Long agentId;
+        private String agentName;
         private String name;
-        private Integer deliveries;
+        private Long totalDeliveries;
+        private Long successfulDeliveries;
+        private Long failedDeliveries;
         private Double successRate;
+        private Double avgDeliveryTime;
+        private Double trustScore;
+        private Integer deliveries;
         private Integer avgTime;
-        private Double rating;
+        private double rating;
     }
 
     @Data
-    public class UpdateAgentStatusDto {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AgentUpdateDto {
+        private String name;
+        private String phone;
+        private String address;
+        private String nicPhoto;
+        private String status;
+        private String vehicleType;
+        private String vehicleNumber;
+        private String availabilityStatus;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AssignAgentDto {
+        private Long agentId;
+        private Long deliveryId;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AssignAgentDeliveryDto {
+        private Long agentId;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateAgentStatusDto {
         private String status;
     }
-
-    @Data
-    public class UpdateDeliveryStatsDto {
-        private Integer deliveryTime;
-    }
-
-    @Data
-    public class UpdateTrustScoreDto {
-        private Double trustScore;
-    }
-
 }

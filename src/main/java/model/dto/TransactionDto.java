@@ -1,8 +1,5 @@
-package model.dto.hubmanager;
+package model.dto;
 
-import model.entity.agent.Agent;
-import model.entity.delivery.Delivery;
-import model.entity.AllUsers;
 import lombok.Data;
 import java.time.LocalDateTime;
 

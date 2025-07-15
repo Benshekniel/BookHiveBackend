@@ -1,14 +1,12 @@
-package service.impl.hubmanager;
+package service.impl;
 
 import model.entity.User;
-import model.entity.agent.Agent;
-import model.entity.delivery.Hub;
-import model.entity.delivery.Delivery;
-import model.entity.transaction.Transaction;
-import model.entity.book.Book;
-import model.dto.DeliveryCreateDto;
-import model.dto.DeliveryResponseDto;
-import model.dto.DeliveryStatsDto;
+import model.entity.Agent;
+import model.entity.Hub;
+import model.entity.Delivery;
+import model.entity.Transaction;
+import model.entity.Book;
+import model.dto.DeliveryDto.*;
 import model.repo.DeliveryRepository;
 import model.repo.AgentRepository;
 import model.repo.HubRepository;

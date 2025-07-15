@@ -1,8 +1,8 @@
-package controller.hubmanager;
+package controller;
 
-import model.dto.*;
-import model.entity.agent.Agent;
-import service.impl.hubmanager.AgentService;
+import model.dto.AgentDto.*;
+import model.entity.Agent;
+import service.impl.AgentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/agents")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class AgentController {
 
     private final AgentService agentService;
