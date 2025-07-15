@@ -2,7 +2,7 @@ package controller;
 
 import model.dto.LoginDto;
 import model.messageResponse.LoginResponse;
-import service.LoginService;
+import service.Login.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

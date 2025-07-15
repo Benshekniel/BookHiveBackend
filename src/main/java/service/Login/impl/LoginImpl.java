@@ -1,10 +1,10 @@
-package service.impl;
+package service.Login.impl;
 
 import model.dto.LoginDto;
 import model.entity.AllUsers;
 import model.messageResponse.LoginResponse;
 import model.repo.AllUsersRepo;
-import service.LoginService;
+import service.Login.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

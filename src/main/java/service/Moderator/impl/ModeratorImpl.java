@@ -1,11 +1,11 @@
-package service.impl;
+package service.Moderator.impl;
 
 import model.dto.LoginDto;
 import model.dto.ModeratorDto;
 import model.entity.Moderator;
 import model.messageResponse.LoginResponse;
 import model.repo.ModeratorRepo;
-import service.ModeratorService;
+import service.Moderator.ModeratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
