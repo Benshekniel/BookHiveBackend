@@ -28,8 +28,8 @@ public class MessageService {
                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
         Message message = new Message();
-        message.setSender(sender);
-        message.setReceiver(receiver);
+        message.setSenderId(sender.getUserId());
+        message.setReceiverId(receiver.getUserId());
         message.setContent(createDto.getContent());
         message.setIsRead(false);
 
@@ -45,7 +45,7 @@ public class MessageService {
     }
 
     public List<MessageResponseDto> getUserMessages(Long userId) {
-        List<Message> messages = messageRepository.findBySenderUserIdOrReceiverUserIdOrderByCreatedAtDesc(userId, userId);
+        List<Message> messages = messageRepository.findBySenderIdOrReceiverIdOrderByCreatedAtDesc(userId, userId);
         return messages.stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
@@ -59,13 +59,13 @@ public class MessageService {
     }
 
     public void markConversationAsRead(Long receiverId, Long senderId) {
-        List<Message> messages = messageRepository.findBySenderUserIdAndReceiverUserIdOrderByCreatedAtAsc(senderId, receiverId);
+        List<Message> messages = messageRepository.findBySenderIdAndReceiverIdOrderByCreatedAtAsc(senderId, receiverId);
         messages.forEach(message -> message.setIsRead(true));
         messageRepository.saveAll(messages);
     }
 
     public Long getUnreadMessageCount(Long userId) {
-        return messageRepository.countByReceiverUserIdAndIsRead(userId, false);
+        return messageRepository.countByReceiverIdAndIsRead(userId, false);
     }
 
     public void deleteMessage(Long messageId) {
@@ -78,10 +78,18 @@ public class MessageService {
     private MessageResponseDto convertToResponseDto(Message message) {
         MessageResponseDto dto = new MessageResponseDto();
         dto.setMessageId(message.getMessageId());
-        dto.setSenderId(message.getSender().getUserId());
-        dto.setSenderName(message.getSender().getName());
-        dto.setReceiverId(message.getReceiver().getUserId());
-        dto.setReceiverName(message.getReceiver().getName());
+        dto.setSenderId(message.getSenderId());
+        dto.setReceiverId(message.getReceiverId());
+        
+        // Fetch sender and receiver names
+        User sender = userRepository.findById(message.getSenderId())
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
+        User receiver = userRepository.findById(message.getReceiverId())
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+        
+        dto.setSenderName(sender.getName());
+        dto.setReceiverName(receiver.getName());
+        
         dto.setContent(message.getContent());
         dto.setIsRead(message.getIsRead());
         dto.setCreatedAt(message.getCreatedAt());

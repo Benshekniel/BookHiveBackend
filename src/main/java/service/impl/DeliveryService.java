@@ -14,6 +14,7 @@ import model.repo.AgentRepository;
 import model.repo.HubRepository;
 import model.repo.TransactionRepository;
 import model.repo.UserRepository;
+import model.repo.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class DeliveryService {
     private final HubRepository hubRepository;
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final BookRepository bookRepository;
 
     public DeliveryResponseDto createDelivery(DeliveryCreateDto createDto) {
         Transaction transaction = transactionRepository.findById(createDto.getTransactionId())
@@ -45,9 +47,9 @@ public class DeliveryService {
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
         Delivery delivery = new Delivery();
-        delivery.setTransaction(transaction);
-        delivery.setHub(hub);
-        delivery.setAgent(agent);
+        delivery.setTransactionId(transaction.getTransactionId());
+        delivery.setHubId(hub.getHubId());
+        delivery.setAgentId(agent.getAgentId());
         delivery.setPickupAddress(createDto.getPickupAddress());
         delivery.setDeliveryAddress(createDto.getDeliveryAddress());
         delivery.setStatus(Delivery.DeliveryStatus.PENDING);
@@ -64,13 +66,13 @@ public class DeliveryService {
     }
 
     public List<DeliveryResponseDto> getDeliveriesByHub(Long hubId) {
-        return deliveryRepository.findByHubHubId(hubId).stream()
+        return deliveryRepository.findByHubId(hubId).stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
     }
 
     public List<DeliveryResponseDto> getDeliveriesByAgent(Long agentId) {
-        return deliveryRepository.findByAgentAgentId(agentId).stream()
+        return deliveryRepository.findByAgentId(agentId).stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
     }
@@ -118,7 +120,7 @@ public class DeliveryService {
         Agent agent = agentRepository.findById(agentId)
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
-        delivery.setAgent(agent);
+        delivery.setAgentId(agent.getAgentId());
         delivery.setStatus(Delivery.DeliveryStatus.ASSIGNED);
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
@@ -158,11 +160,24 @@ public class DeliveryService {
     private DeliveryResponseDto convertToResponseDto(Delivery delivery) {
         DeliveryResponseDto dto = new DeliveryResponseDto();
         dto.setDeliveryId(delivery.getDeliveryId());
-        dto.setTransactionId(delivery.getTransaction().getTransactionId());
-        dto.setHubId(delivery.getHub().getHubId());
-        dto.setHubName(delivery.getHub().getName());
-        dto.setAgentId(delivery.getAgent().getAgentId());
-        dto.setAgentName(delivery.getAgent().getUser().getName());
+        dto.setTransactionId(delivery.getTransactionId());
+        
+        // Fetch Hub entity
+        Hub hub = hubRepository.findById(delivery.getHubId())
+                .orElseThrow(() -> new RuntimeException("Hub not found"));
+        dto.setHubId(hub.getHubId());
+        dto.setHubName(hub.getName());
+        
+        // Fetch Agent entity
+        Agent agent = agentRepository.findById(delivery.getAgentId())
+                .orElseThrow(() -> new RuntimeException("Agent not found"));
+        dto.setAgentId(agent.getAgentId());
+        
+        // Fetch User for agent name
+        User agentUser = userRepository.findById(agent.getUserId())
+                .orElseThrow(() -> new RuntimeException("Agent user not found"));
+        dto.setAgentName(agentUser.getName());
+        
         dto.setPickupAddress(delivery.getPickupAddress());
         dto.setDeliveryAddress(delivery.getDeliveryAddress());
         dto.setStatus(delivery.getStatus());
@@ -171,13 +186,19 @@ public class DeliveryService {
         dto.setTrackingNumber(delivery.getTrackingNumber());
         dto.setCreatedAt(delivery.getCreatedAt());
 
-        // Book information
-        Book book = delivery.getTransaction().getBook();
+        // Fetch Transaction entity
+        Transaction transaction = transactionRepository.findById(delivery.getTransactionId())
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        
+        // Fetch Book entity
+        Book book = bookRepository.findById(transaction.getBookId())
+                .orElseThrow(() -> new RuntimeException("Book not found"));
         dto.setBookTitle(book.getTitle());
         dto.setBookAuthor(book.getAuthor());
 
-        // Customer information
-        User borrower = delivery.getTransaction().getBorrower();
+        // Fetch Customer entity
+        User borrower = userRepository.findById(transaction.getBorrowerId())
+                .orElseThrow(() -> new RuntimeException("Borrower not found"));
         dto.setCustomerName(borrower.getName());
         return dto;
     }

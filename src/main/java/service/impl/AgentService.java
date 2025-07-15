@@ -37,13 +37,13 @@ public class AgentService {
                 .orElseThrow(() -> new RuntimeException("Hub not found"));
 
         // Check if user is already an agent
-        if (agentRepository.existsByUserUserId(createDto.getUserId())) {
+        if (agentRepository.existsByUserId(createDto.getUserId())) {
             throw new RuntimeException("User is already registered as an agent");
         }
 
         Agent agent = new Agent();
-        agent.setUser(user);
-        agent.setHub(hub);
+        agent.setUserId(user.getUserId());
+        agent.setHubId(hub.getHubId());
         agent.setVehicleType(createDto.getVehicleType());
         agent.setVehicleNumber(createDto.getVehicleNumber());
         agent.setAvailabilityStatus(Agent.AvailabilityStatus.AVAILABLE);
@@ -66,7 +66,7 @@ public class AgentService {
     }
 
     public List<AgentResponseDto> getAgentsByHub(Long hubId) {
-        return agentRepository.findByHubHubId(hubId).stream()
+        return agentRepository.findByHubId(hubId).stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
     }
@@ -78,7 +78,7 @@ public class AgentService {
     }
 
     public List<AgentResponseDto> getAvailableAgentsByHub(Long hubId) {
-        return agentRepository.findByHubHubIdAndAvailabilityStatus(hubId, Agent.AvailabilityStatus.AVAILABLE).stream()
+        return agentRepository.findByHubIdAndAvailabilityStatus(hubId, Agent.AvailabilityStatus.AVAILABLE).stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
     }
@@ -89,7 +89,7 @@ public class AgentService {
     }
 
     public Optional<AgentResponseDto> getAgentByUserId(Long userId) {
-        return agentRepository.findByUserUserId(userId)
+        return agentRepository.findByUserId(userId)
                 .map(this::convertToResponseDto);
     }
 
@@ -143,7 +143,7 @@ public class AgentService {
     }
 
     public List<AgentPerformanceDto> getAgentPerformanceByHub(Long hubId) {
-        List<Agent> agents = agentRepository.findByHubHubId(hubId);
+        List<Agent> agents = agentRepository.findByHubId(hubId);
         return agents.stream()
                 .map(this::convertToPerformanceDto)
                 .collect(Collectors.toList());
@@ -154,7 +154,7 @@ public class AgentService {
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
         // Check if agent has active deliveries
-        long activeDeliveries = deliveryRepository.countByAgentAgentIdAndStatusIn(
+        long activeDeliveries = deliveryRepository.countByAgentIdAndStatusIn(
                 agentId,
                 List.of(Delivery.DeliveryStatus.ASSIGNED, Delivery.DeliveryStatus.PICKED_UP, Delivery.DeliveryStatus.IN_TRANSIT)
         );
@@ -164,7 +164,8 @@ public class AgentService {
         }
 
         // Reset user role if needed
-        User user = agent.getUser();
+        User user = userRepository.findById(agent.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
         user.setRole(User.UserRole.USER);
         userRepository.save(user);
 
@@ -174,11 +175,20 @@ public class AgentService {
     private AgentResponseDto convertToResponseDto(Agent agent) {
         AgentResponseDto dto = new AgentResponseDto();
         dto.setAgentId(agent.getAgentId());
-        dto.setUserId(agent.getUser().getUserId());
-        dto.setUserName(agent.getUser().getName());
-        dto.setUserEmail(agent.getUser().getEmail());
-        dto.setHubId(agent.getHub().getHubId());
-        dto.setHubName(agent.getHub().getName());
+        
+        // Fetch User entity
+        User user = userRepository.findById(agent.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        dto.setUserId(user.getUserId());
+        dto.setUserName(user.getName());
+        dto.setUserEmail(user.getEmail());
+        
+        // Fetch Hub entity
+        Hub hub = hubRepository.findById(agent.getHubId())
+                .orElseThrow(() -> new RuntimeException("Hub not found"));
+        dto.setHubId(hub.getHubId());
+        dto.setHubName(hub.getName());
+        
         dto.setVehicleType(agent.getVehicleType());
         dto.setVehicleNumber(agent.getVehicleNumber());
         dto.setAvailabilityStatus(agent.getAvailabilityStatus());
@@ -195,14 +205,19 @@ public class AgentService {
     private AgentPerformanceDto convertToPerformanceDto(Agent agent) {
         AgentPerformanceDto dto = new AgentPerformanceDto();
         dto.setAgentId(agent.getAgentId());
-        dto.setName(agent.getUser().getName());
+        
+        // Fetch User entity
+        User user = userRepository.findById(agent.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        dto.setName(user.getName());
+        
         dto.setDeliveries(agent.getNumberOfDelivery());
         dto.setAvgTime(agent.getDeliveryTime());
         dto.setRating(agent.getTrustScore() / 20.0);
 
         // Calculate success rate (this could be more sophisticated)
-        Long totalDeliveries = deliveryRepository.countByAgentAgentId(agent.getAgentId());
-        Long successfulDeliveries = deliveryRepository.countByAgentAgentIdAndStatus(
+        Long totalDeliveries = deliveryRepository.countByAgentId(agent.getAgentId());
+        Long successfulDeliveries = deliveryRepository.countByAgentIdAndStatus(
                 agent.getAgentId(), Delivery.DeliveryStatus.DELIVERED
         );
 

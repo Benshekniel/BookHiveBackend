@@ -92,13 +92,13 @@ public class HubService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Check if user is already a hub manager
-        if (hubManagerRepository.existsByUserUserId(userId)) {
+        if (hubManagerRepository.existsByUserId(userId)) {
             throw new RuntimeException("User is already assigned as a hub manager");
         }
 
         HubManager hubManager = new HubManager();
-        hubManager.setHub(hub);
-        hubManager.setUser(user);
+        hubManager.setHubId(hub.getHubId());
+        hubManager.setUserId(user.getUserId());
 
         // Update user role
         user.setRole(User.UserRole.HUB_MANAGER);
@@ -127,13 +127,13 @@ public class HubService {
     }
 
     public List<AgentResponseDto> getHubAgents(Long hubId) {
-        return agentRepository.findByHubHubId(hubId).stream()
+        return agentRepository.findByHubId(hubId).stream()
                 .map(this::convertAgentToResponseDto)
                 .collect(Collectors.toList());
     }
 
     public List<DeliveryResponseDto> getHubDeliveries(Long hubId) {
-        return deliveryRepository.findByHubHubId(hubId).stream()
+        return deliveryRepository.findByHubId(hubId).stream()
                 .map(this::convertDeliveryToResponseDto)
                 .collect(Collectors.toList());
     }
@@ -143,7 +143,7 @@ public class HubService {
                 .orElseThrow(() -> new RuntimeException("Hub not found"));
 
         // Check if hub has active deliveries
-        long activeDeliveries = deliveryRepository.countByHubHubIdAndStatusIn(
+        long activeDeliveries = deliveryRepository.countByHubIdAndStatusIn(
                 hubId,
                 List.of(Delivery.DeliveryStatus.ASSIGNED, Delivery.DeliveryStatus.PICKED_UP, Delivery.DeliveryStatus.IN_TRANSIT)
         );
@@ -153,9 +153,10 @@ public class HubService {
         }
 
         // Remove hub manager role from users
-        List<HubManager> hubManagers = hubManagerRepository.findAllByHubHubId(hubId);
+        List<HubManager> hubManagers = hubManagerRepository.findAllByHubId(hubId);
         for (HubManager hubManager : hubManagers) {
-            User user = hubManager.getUser();
+            User user = userRepository.findById(hubManager.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
             user.setRole(User.UserRole.USER);
             userRepository.save(user);
         }
@@ -180,10 +181,10 @@ public class HubService {
         }
 
         // Get counts
-        dto.setTotalAgents(agentRepository.countByHubHubId(hub.getHubId()));
-        dto.setActiveAgents(agentRepository.countByHubHubIdAndAvailabilityStatus(
+        dto.setTotalAgents(agentRepository.countByHubId(hub.getHubId()));
+        dto.setActiveAgents(agentRepository.countByHubIdAndAvailabilityStatus(
                 hub.getHubId(), Agent.AvailabilityStatus.AVAILABLE));
-        dto.setTotalDeliveries(deliveryRepository.countByHubHubId(hub.getHubId()));
+        dto.setTotalDeliveries(deliveryRepository.countByHubId(hub.getHubId()));
 
         return dto;
     }
@@ -191,11 +192,20 @@ public class HubService {
     private HubManagerResponseDto convertToHubManagerResponseDto(HubManager hubManager) {
         HubManagerResponseDto dto = new HubManagerResponseDto();
         dto.setHubManagerId(hubManager.getHubManagerId());
-        dto.setHubId(hubManager.getHub().getHubId());
-        dto.setHubName(hubManager.getHub().getName());
-        dto.setUserId(hubManager.getUser().getUserId());
-        dto.setUserName(hubManager.getUser().getName());
-        dto.setUserEmail(hubManager.getUser().getEmail());
+        
+        // Fetch Hub entity
+        Hub hub = hubRepository.findById(hubManager.getHubId())
+                .orElseThrow(() -> new RuntimeException("Hub not found"));
+        dto.setHubId(hub.getHubId());
+        dto.setHubName(hub.getName());
+        
+        // Fetch User entity
+        User user = userRepository.findById(hubManager.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        dto.setUserId(user.getUserId());
+        dto.setUserName(user.getName());
+        dto.setUserEmail(user.getEmail());
+        
         dto.setJoinedAt(hubManager.getJoinedAt());
         return dto;
     }
@@ -205,10 +215,10 @@ public class HubService {
         dto.setHubId(hub.getHubId());
         dto.setHubName(hub.getName());
         dto.setCity(hub.getCity());
-        dto.setTotalAgents(agentRepository.countByHubHubId(hub.getHubId()));
-        dto.setActiveAgents(agentRepository.countByHubHubIdAndAvailabilityStatus(
+        dto.setTotalAgents(agentRepository.countByHubId(hub.getHubId()));
+        dto.setActiveAgents(agentRepository.countByHubIdAndAvailabilityStatus(
                 hub.getHubId(), Agent.AvailabilityStatus.AVAILABLE));
-        dto.setTotalDeliveries(deliveryRepository.countByHubHubId(hub.getHubId()));
+        dto.setTotalDeliveries(deliveryRepository.countByHubId(hub.getHubId()));
         dto.setTodayDeliveries(deliveryRepository.countTodayDeliveriesByHub(hub.getHubId()));
         return dto;
     }
@@ -221,10 +231,10 @@ public class HubService {
         dto.setHubName(hub.getName());
 
         // Calculate delivery statistics
-        Long totalDeliveries = deliveryRepository.countByHubHubId(hubId);
-        Long successfulDeliveries = deliveryRepository.countByHubHubIdAndStatus(
+        Long totalDeliveries = deliveryRepository.countByHubId(hubId);
+        Long successfulDeliveries = deliveryRepository.countByHubIdAndStatus(
                 hubId, Delivery.DeliveryStatus.DELIVERED);
-        Long failedDeliveries = deliveryRepository.countByHubHubIdAndStatus(
+        Long failedDeliveries = deliveryRepository.countByHubIdAndStatus(
                 hubId, Delivery.DeliveryStatus.FAILED);
 
         dto.setTotalDeliveries(totalDeliveries);
