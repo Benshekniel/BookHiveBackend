@@ -1,7 +1,7 @@
 package controller;
 
 import model.dto.ModeratorDto;
-import service.ModeratorService;
+import service.Moderator.ModeratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

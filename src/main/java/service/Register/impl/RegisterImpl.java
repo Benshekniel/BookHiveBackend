@@ -1,9 +1,9 @@
-package service.impl;
+package service.Register.impl;
 
 import model.dto.AllUsersDTO;
 import model.entity.AllUsers;
 import model.repo.AllUsersRepo;
-import service.RegisterAccount;
+import service.Register.RegisterAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
