@@ -1,4 +1,4 @@
-package model.repo;
+package model.repo.Hubmanager;
 
 import model.entity.HubManager;
 import org.springframework.data.jpa.repository.JpaRepository;

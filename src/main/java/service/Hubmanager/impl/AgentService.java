@@ -1,14 +1,14 @@
-package service.impl;
+package service.Hubmanager.impl;
 
 import model.entity.AllUsers;
 import model.entity.Agent;
 import model.entity.Hub;
 import model.entity.Delivery;
-import model.dto.AgentDto.*;
-import model.repo.AgentRepository;
+import model.dto.Hubmanager.AgentDto.*;
+import model.repo.Hubmanager.AgentRepository;
 import model.repo.AllUsersRepo;
-import model.repo.HubRepository;
-import model.repo.DeliveryRepository;
+import model.repo.Hubmanager.HubRepository;
+import model.repo.Hubmanager.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +26,121 @@ public class AgentService {
     private final HubRepository hubRepository;
     private final DeliveryRepository deliveryRepository;
 
+    // Optimized getAllAgents using JOIN query
+    public List<AgentResponseDto> getAllAgents() {
+        List<Object[]> results = agentRepository.findAllAgentsWithDetails();
+
+        return results.stream()
+                .map(this::convertToResponseDtoFromJoinQuery)
+                .collect(Collectors.toList());
+    }
+
+    // Fallback method using individual queries (keep for backward compatibility)
+    public List<AgentResponseDto> getAllAgentsOriginal() {
+        return agentRepository.findAll().stream()
+                .map(this::convertToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    // Optimized method for single agent
+    public Optional<AgentResponseDto> getAgentByIdOptimized(Long agentId) {
+        return agentRepository.findAgentWithDetails(agentId)
+                .map(this::convertToResponseDtoFromJoinQuery);
+    }
+
+    // Optimized method for agents by hub
+    public List<AgentResponseDto> getAgentsByHubOptimized(Long hubId) {
+        List<Object[]> results = agentRepository.findAgentsByHubWithDetails(hubId);
+
+        return results.stream()
+                .map(this::convertToResponseDtoFromJoinQuery)
+                .collect(Collectors.toList());
+    }
+
+    // Convert JOIN query result to DTO
+    private AgentResponseDto convertToResponseDtoFromJoinQuery(Object[] result) {
+        Agent agent = (Agent) result[0];
+        String userName = (String) result[1];
+        String userEmail = (String) result[2];
+        String userPhone = (String) result[3];
+        String hubName = (String) result[4];
+        Long totalDeliveries = (Long) result[5];
+
+        AgentResponseDto dto = new AgentResponseDto();
+
+        // Basic agent info
+        dto.setAgentId(agent.getAgentId());
+        dto.setId(agent.getAgentId()); // For frontend compatibility
+        dto.setUserId(agent.getUserId());
+
+        // User details from JOIN query
+        dto.setName(userName != null ? userName : "Unknown Agent");
+        dto.setUserName(userName != null ? userName : "Unknown Agent");
+        dto.setEmail(userEmail != null ? userEmail : "N/A");
+        dto.setUserEmail(userEmail != null ? userEmail : "N/A");
+        dto.setPhoneNumber(userPhone != null ? userPhone : "N/A");
+
+        // Hub details from JOIN query
+        dto.setHubId(agent.getHubId());
+        dto.setHubName(hubName != null ? hubName : "Unknown Hub");
+
+        // Agent specific details
+        dto.setVehicleType(agent.getVehicleType());
+        dto.setVehicleNumber(agent.getVehicleNumber());
+        dto.setAvailabilityStatus(agent.getAvailabilityStatus());
+        dto.setTrustScore(agent.getTrustScore());
+        dto.setDeliveryTime(agent.getDeliveryTime());
+        dto.setNumberOfDelivery(agent.getNumberOfDelivery());
+
+        // Total deliveries from JOIN query
+        dto.setTotalDeliveries(totalDeliveries != null ? totalDeliveries.intValue() : 0);
+
+        // Calculate rating (convert 0-100 trust score to 0-5 rating)
+        dto.setRating(agent.getTrustScore() != null ? agent.getTrustScore() / 20.0 : 0.0);
+
+        return dto;
+    }
+
+    // Original method (keep for backward compatibility)
+    private AgentResponseDto convertToResponseDto(Agent agent) {
+        AgentResponseDto dto = new AgentResponseDto();
+        dto.setAgentId(agent.getAgentId());
+        dto.setId(agent.getAgentId()); // For frontend compatibility
+
+        // Fetch User entity
+        AllUsers user = allUsersRepo.findById((int) agent.getUserId().longValue())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        dto.setUserId((long) user.getUser_id());
+        dto.setName(user.getName());
+        dto.setUserName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setUserEmail(user.getEmail());
+        dto.setPhoneNumber(user.getPhoneNumber());
+
+        // Fetch Hub entity
+        Hub hub = hubRepository.findById(agent.getHubId())
+                .orElseThrow(() -> new RuntimeException("Hub not found"));
+        dto.setHubId(hub.getHubId());
+        dto.setHubName(hub.getName());
+
+        dto.setVehicleType(agent.getVehicleType());
+        dto.setVehicleNumber(agent.getVehicleNumber());
+        dto.setAvailabilityStatus(agent.getAvailabilityStatus());
+        dto.setTrustScore(agent.getTrustScore());
+        dto.setDeliveryTime(agent.getDeliveryTime());
+        dto.setNumberOfDelivery(agent.getNumberOfDelivery());
+
+        // Get total deliveries from database
+        Long totalDeliveries = deliveryRepository.countByAgentId(agent.getAgentId());
+        dto.setTotalDeliveries(totalDeliveries != null ? totalDeliveries.intValue() : 0);
+
+        // Calculate rating (convert 0-100 trust score to 0-5 rating)
+        dto.setRating(agent.getTrustScore() != null ? agent.getTrustScore() / 20.0 : 0.0);
+
+        return dto;
+    }
+
+    // Keep all other existing methods unchanged
     public AgentResponseDto createAgent(AgentCreateDto createDto) {
         AllUsers user = allUsersRepo.findById((int) createDto.getUserId().longValue())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -54,12 +169,6 @@ public class AgentService {
 
         Agent savedAgent = agentRepository.save(agent);
         return convertToResponseDto(savedAgent);
-    }
-
-    public List<AgentResponseDto> getAllAgents() {
-        return agentRepository.findAll().stream()
-                .map(this::convertToResponseDto)
-                .collect(Collectors.toList());
     }
 
     public List<AgentResponseDto> getAgentsByHub(Long hubId) {
@@ -169,45 +278,15 @@ public class AgentService {
         agentRepository.deleteById(agentId);
     }
 
-    private AgentResponseDto convertToResponseDto(Agent agent) {
-        AgentResponseDto dto = new AgentResponseDto();
-        dto.setAgentId(agent.getAgentId());
-        
-        // Fetch User entity
-        AllUsers user = allUsersRepo.findById((int) agent.getUserId().longValue())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        dto.setUserId((long) user.getUser_id());
-        dto.setUserName(user.getName());
-        dto.setUserEmail(user.getEmail());
-        
-        // Fetch Hub entity
-        Hub hub = hubRepository.findById(agent.getHubId())
-                .orElseThrow(() -> new RuntimeException("Hub not found"));
-        dto.setHubId(hub.getHubId());
-        dto.setHubName(hub.getName());
-        
-        dto.setVehicleType(agent.getVehicleType());
-        dto.setVehicleNumber(agent.getVehicleNumber());
-        dto.setAvailabilityStatus(agent.getAvailabilityStatus());
-        dto.setTrustScore(agent.getTrustScore());
-        dto.setDeliveryTime(agent.getDeliveryTime());
-        dto.setNumberOfDelivery(agent.getNumberOfDelivery());
-
-        // Calculate rating (could be based on trust score)
-        dto.setRating(agent.getTrustScore() / 20.0); // Convert 0-100 trust score to 0-5 rating
-
-        return dto;
-    }
-
     private AgentPerformanceDto convertToPerformanceDto(Agent agent) {
         AgentPerformanceDto dto = new AgentPerformanceDto();
         dto.setAgentId(agent.getAgentId());
-        
+
         // Fetch User entity
         AllUsers user = allUsersRepo.findById((int) agent.getUserId().longValue())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         dto.setName(user.getName());
-        
+
         dto.setDeliveries(agent.getNumberOfDelivery());
         dto.setAvgTime(agent.getDeliveryTime());
         dto.setRating(agent.getTrustScore() / 20.0);

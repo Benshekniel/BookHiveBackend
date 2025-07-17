@@ -1,4 +1,4 @@
-package model.dto;
+package model.dto.Hubmanager;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,19 +22,24 @@ public class AgentDto {
     @AllArgsConstructor
     public static class AgentResponseDto {
         private Long agentId;
+        private Long id; // For frontend compatibility
         private Long hubId;
         private String hubName;
         private Long userId;
         private String userName;
+        private String name; // Frontend expects this field
         private String userEmail;
+        private String email; // Frontend expects this field
+        private String userPhone;
+        private String phoneNumber; // Frontend expects this field
         private Agent.VehicleType vehicleType;
         private String vehicleNumber;
         private Agent.AvailabilityStatus availabilityStatus;
         private Double trustScore;
         private Integer deliveryTime;
         private Integer numberOfDelivery;
-        private double rating;
-        private String userPhone;
+        private Integer totalDeliveries; // Frontend expects this field
+        private Double rating; // Changed from double to Double for null safety
     }
 
     @Data
@@ -52,7 +57,7 @@ public class AgentDto {
         private Double trustScore;
         private Integer deliveries;
         private Integer avgTime;
-        private double rating;
+        private Double rating; // Changed from double to Double for consistency
     }
 
     @Data
