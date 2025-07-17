@@ -1,8 +1,8 @@
 package controller;
 
-import model.dto.AgentDto.*;
+import model.dto.Hubmanager.AgentDto.*;
 import model.entity.Agent;
-import service.impl.AgentService;
+import service.Hubmanager.impl.AgentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

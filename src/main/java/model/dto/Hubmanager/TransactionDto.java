@@ -1,4 +1,4 @@
-package model.dto;
+package model.dto.Hubmanager;
 
 import lombok.Data;
 import java.time.LocalDateTime;

@@ -1,9 +1,8 @@
-package service.impl;
+package service.Hubmanager.impl;
 
 import model.entity.Message;
-import model.entity.AllUsers;
-import model.dto.MessageDto.*;
-import model.repo.MessageRepository;
+import model.dto.Hubmanager.MessageDto.*;
+import model.repo.Hubmanager.MessageRepository;
 import model.repo.AllUsersRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
