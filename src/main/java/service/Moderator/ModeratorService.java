@@ -1,4 +1,4 @@
-package service;
+package service.Moderator;
 
 import model.dto.LoginDto;
 import model.dto.ModeratorDto;
