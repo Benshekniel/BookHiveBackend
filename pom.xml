@@ -67,10 +67,6 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-            <scope>provided</scope>
-        </dependency>
-
-
     </dependencies>
 
     <build>
