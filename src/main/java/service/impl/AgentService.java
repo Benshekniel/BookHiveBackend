@@ -1,12 +1,12 @@
 package service.impl;
 
-import model.entity.User;
+import model.entity.AllUsers;
 import model.entity.Agent;
 import model.entity.Hub;
 import model.entity.Delivery;
 import model.dto.AgentDto.*;
 import model.repo.AgentRepository;
-import model.repo.UserRepository;
+import model.repo.AllUsersRepo;
 import model.repo.HubRepository;
 import model.repo.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +22,12 @@ import java.util.stream.Collectors;
 public class AgentService {
 
     private final AgentRepository agentRepository;
-    private final UserRepository userRepository;
+    private final AllUsersRepo allUsersRepo;
     private final HubRepository hubRepository;
     private final DeliveryRepository deliveryRepository;
 
     public AgentResponseDto createAgent(AgentCreateDto createDto) {
-        User user = userRepository.findById(createDto.getUserId())
+        AllUsers user = allUsersRepo.findById((int) createDto.getUserId().longValue())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Hub hub = hubRepository.findById(createDto.getHubId())
@@ -39,7 +39,7 @@ public class AgentService {
         }
 
         Agent agent = new Agent();
-        agent.setUserId(user.getUserId());
+        agent.setUserId((long) user.getUser_id());
         agent.setHubId(hub.getHubId());
         agent.setVehicleType(createDto.getVehicleType());
         agent.setVehicleNumber(createDto.getVehicleNumber());
@@ -49,8 +49,8 @@ public class AgentService {
         agent.setNumberOfDelivery(0);
 
         // Update user role
-        user.setRole(User.UserRole.DELIVERY_AGENT);
-        userRepository.save(user);
+        user.setRole("DELIVERY_AGENT");
+        allUsersRepo.save(user);
 
         Agent savedAgent = agentRepository.save(agent);
         return convertToResponseDto(savedAgent);
@@ -161,10 +161,10 @@ public class AgentService {
         }
 
         // Reset user role if needed
-        User user = userRepository.findById(agent.getUserId())
+        AllUsers user = allUsersRepo.findById((int) agent.getUserId().longValue())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setRole(User.UserRole.USER);
-        userRepository.save(user);
+        user.setRole("USER");
+        allUsersRepo.save(user);
 
         agentRepository.deleteById(agentId);
     }
@@ -174,9 +174,9 @@ public class AgentService {
         dto.setAgentId(agent.getAgentId());
         
         // Fetch User entity
-        User user = userRepository.findById(agent.getUserId())
+        AllUsers user = allUsersRepo.findById((int) agent.getUserId().longValue())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        dto.setUserId(user.getUserId());
+        dto.setUserId((long) user.getUser_id());
         dto.setUserName(user.getName());
         dto.setUserEmail(user.getEmail());
         
@@ -204,7 +204,7 @@ public class AgentService {
         dto.setAgentId(agent.getAgentId());
         
         // Fetch User entity
-        User user = userRepository.findById(agent.getUserId())
+        AllUsers user = allUsersRepo.findById((int) agent.getUserId().longValue())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         dto.setName(user.getName());
         

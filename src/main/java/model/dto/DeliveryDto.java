@@ -18,6 +18,7 @@ public class DeliveryDto {
         private Long requesterId;
         private Long transactionId;
         private Long agentId;
+        private long userId;
     }
 
     @Data
@@ -35,12 +36,24 @@ public class DeliveryDto {
         private Long hubId;
         private String hubName;
         private Long agentId;
+        private long userId;
         private String agentName;
         private String customerName;
         private String customerPhone;
         private Long transactionId;
         private String bookTitle;
         private String bookAuthor;
+        private String agentEmail;
+        private String customerEmail;
+        private String agentPhone;
+        private String value;
+        private String priority;
+        private String description;
+        private String weight;
+        private String dimensions;
+        private String paymentMethod;
+        private String deliveryNotes;
+        private LocalDateTime estimatedDelivery;
     }
 
     @Data

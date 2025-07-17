@@ -1,5 +1,5 @@
 package service.impl;
-import model.entity.User;
+import model.entity.AllUsers;
 import model.entity.HubManager;
 import model.entity.Hub;
 import model.entity.Delivery;
@@ -10,7 +10,7 @@ import model.dto.DeliveryDto.DeliveryResponseDto;
 import model.repo.HubRepository;
 import model.repo.AgentRepository;
 import model.repo.DeliveryRepository;
-import model.repo.UserRepository;
+import model.repo.AllUsersRepo;
 import model.repo.HubManagerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class HubService {
     private final HubRepository hubRepository;
     private final AgentRepository agentRepository;
     private final DeliveryRepository deliveryRepository;
-    private final UserRepository userRepository;
+    private final AllUsersRepo allUsersRepo;
     private final HubManagerRepository hubManagerRepository;
 
     public HubResponseDto createHub(HubCreateDto createDto) {
@@ -83,7 +83,7 @@ public class HubService {
         Hub hub = hubRepository.findById(hubId)
                 .orElseThrow(() -> new RuntimeException("Hub not found"));
 
-        User user = userRepository.findById(userId)
+        AllUsers user = allUsersRepo.findById((int) userId.longValue())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Check if user is already a hub manager
@@ -93,11 +93,11 @@ public class HubService {
 
         HubManager hubManager = new HubManager();
         hubManager.setHubId(hub.getHubId());
-        hubManager.setUserId(user.getUserId());
+        hubManager.setUserId((long) user.getUser_id());
 
         // Update user role
-        user.setRole(User.UserRole.HUB_MANAGER);
-        userRepository.save(user);
+        user.setRole("HUB_MANAGER");
+        allUsersRepo.save(user);
 
         // Update hub manager ID
         hub.setHubManagerId(userId);
@@ -150,10 +150,10 @@ public class HubService {
         // Remove hub manager role from users
         List<HubManager> hubManagers = hubManagerRepository.findAllByHubId(hubId);
         for (HubManager hubManager : hubManagers) {
-            User user = userRepository.findById(hubManager.getUserId())
+            AllUsers user = allUsersRepo.findById((int) hubManager.getUserId().longValue())
                     .orElseThrow(() -> new RuntimeException("User not found"));
-            user.setRole(User.UserRole.USER);
-            userRepository.save(user);
+            user.setRole("USER");
+            allUsersRepo.save(user);
         }
 
         hubRepository.deleteById(hubId);
@@ -171,7 +171,7 @@ public class HubService {
 
         // Get hub manager name if exists
         if (hub.getHubManagerId() != null) {
-            userRepository.findById(hub.getHubManagerId())
+            allUsersRepo.findById((int) hub.getHubManagerId().longValue())
                     .ifPresent(user -> dto.setHubManagerName(user.getName()));
         }
 
@@ -195,9 +195,9 @@ public class HubService {
         dto.setHubName(hub.getName());
         
         // Fetch User entity
-        User user = userRepository.findById(hubManager.getUserId())
+        AllUsers user = allUsersRepo.findById((int) hubManager.getUserId().longValue())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        dto.setUserId(user.getUserId());
+        dto.setUserId((long) user.getUser_id());
         dto.setUserName(user.getName());
         dto.setUserEmail(user.getEmail());
         

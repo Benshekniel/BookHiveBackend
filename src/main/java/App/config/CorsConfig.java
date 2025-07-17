@@ -15,6 +15,8 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // apply to all paths
                         .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*") // allow localhost on any port
+//                        .allowedOriginPatterns("*") // Allow all origins for development
+
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
@@ -22,3 +24,4 @@ public class CorsConfig {
         };
     }
 }
+

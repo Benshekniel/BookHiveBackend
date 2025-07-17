@@ -42,6 +42,6 @@ public class Agent {
     }
 
     public enum AvailabilityStatus {
-        AVAILABLE, BUSY, OFFLINE
+        AVAILABLE, BUSY, UNAVAILABLE, OFFLINE
     }
 }

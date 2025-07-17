@@ -1,10 +1,10 @@
 package service.impl;
 
 import model.entity.Message;
-import model.entity.User;
+import model.entity.AllUsers;
 import model.dto.MessageDto.*;
 import model.repo.MessageRepository;
-import model.repo.UserRepository;
+import model.repo.AllUsersRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,18 +17,18 @@ import java.util.stream.Collectors;
 public class MessageService {
 
     private final MessageRepository messageRepository;
-    private final UserRepository userRepository;
+    private final AllUsersRepo allUsersRepo;
 
     public MessageResponseDto sendMessage(MessageCreateDto createDto) {
-        User sender = userRepository.findById(createDto.getSenderId())
-                .orElseThrow(() -> new RuntimeException("Sender not found"));
+        // User sender = allUsersRepo.findById((int) createDto.getSenderId().longValue())
+        //         .orElseThrow(() -> new RuntimeException("Sender not found"));
 
-        User receiver = userRepository.findById(createDto.getReceiverId())
-                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+        // User receiver = allUsersRepo.findById((int) createDto.getReceiverId().longValue())
+        //         .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
         Message message = new Message();
-        message.setSenderId(sender.getUserId());
-        message.setReceiverId(receiver.getUserId());
+        message.setSenderId(createDto.getSenderId());
+        message.setReceiverId(createDto.getReceiverId());
         message.setContent(createDto.getContent());
         message.setIsRead(false);
 
@@ -81,13 +81,15 @@ public class MessageService {
         dto.setReceiverId(message.getReceiverId());
         
         // Fetch sender and receiver names
-        User sender = userRepository.findById(message.getSenderId())
-                .orElseThrow(() -> new RuntimeException("Sender not found"));
-        User receiver = userRepository.findById(message.getReceiverId())
-                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+        // User sender = allUsersRepo.findById((int) message.getSenderId().longValue())
+        //         .orElseThrow(() -> new RuntimeException("Sender not found"));
+        // User receiver = allUsersRepo.findById((int) message.getReceiverId().longValue())
+        //         .orElseThrow(() -> new RuntimeException("Receiver not found"));
         
-        dto.setSenderName(sender.getName());
-        dto.setReceiverName(receiver.getName());
+        // dto.setSenderName(sender.getName());
+        // dto.setReceiverName(receiver.getName());
+        dto.setSenderName("Sender"); // Temporary placeholder
+        dto.setReceiverName("Receiver"); // Temporary placeholder
         
         dto.setContent(message.getContent());
         dto.setIsRead(message.getIsRead());
