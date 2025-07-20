@@ -1,7 +1,8 @@
 package model.dto;
 
-public class OrgDTO {
+import org.springframework.web.multipart.MultipartFile;
 
+public class OrgDTO {
     private String type;
     private String reg_no;
     private String status;
@@ -15,6 +16,26 @@ public class OrgDTO {
     private String city;
     private String state;
     private String zip;
+    private String imageFileName;
+    private String fileType;
+
+    public OrgDTO(String type, String reg_no, String status, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
+        this.type = type;
+        this.reg_no = reg_no;
+        this.status = status;
+        this.fname = fname;
+        this.lname = lname;
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
+        this.years = years;
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.imageFileName = imageFileName;
+        this.fileType = fileType;
+    }
 
     public OrgDTO(String type, String reg_no, String status, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip) {
         this.type = type;
@@ -39,110 +60,126 @@ public class OrgDTO {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public String getReg_no() {
         return reg_no;
-    }
-
-    public void setReg_no(String reg_no) {
-        this.reg_no = reg_no;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getFname() {
         return fname;
-    }
-
-    public void setFname(String fname) {
-        this.fname = fname;
     }
 
     public String getLname() {
         return lname;
     }
 
-    public void setLname(String lname) {
-        this.lname = lname;
-    }
-
     public String getEmail() {
         return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public int getPhone() {
         return phone;
-    }
-
-    public void setPhone(int phone) {
-        this.phone = phone;
     }
 
     public int getYears() {
         return years;
     }
 
-    public void setYears(int years) {
-        this.years = years;
-    }
-
     public String getAddress() {
         return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public String getCity() {
         return city;
     }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
-
     public String getState() {
         return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
     }
 
     public String getZip() {
         return zip;
     }
 
+    public String getImageFileName() {
+        return imageFileName;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setReg_no(String reg_no) {
+        this.reg_no = reg_no;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setFname(String fname) {
+        this.fname = fname;
+    }
+
+    public void setLname(String lname) {
+        this.lname = lname;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setPhone(int phone) {
+        this.phone = phone;
+    }
+
+    public void setYears(int years) {
+        this.years = years;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
     public void setZip(String zip) {
         this.zip = zip;
+    }
+
+    public void setImageFileName(String imageFileName) {
+        this.imageFileName = imageFileName;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
     }
 
     @Override
     public String toString() {
         return "OrgDTO{" +
-                ", type='" + type + '\'' +
+                "type='" + type + '\'' +
                 ", reg_no='" + reg_no + '\'' +
                 ", status='" + status + '\'' +
                 ", fname='" + fname + '\'' +
@@ -155,6 +192,8 @@ public class OrgDTO {
                 ", city='" + city + '\'' +
                 ", state='" + state + '\'' +
                 ", zip='" + zip + '\'' +
+                ", imageFileName='" + imageFileName + '\'' +
+                ", fileType='" + fileType + '\'' +
                 '}';
     }
 }

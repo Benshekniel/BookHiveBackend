@@ -23,7 +23,8 @@ public class RegisterImpl implements RegisterAccount {
         AllUsers allUsers = new AllUsers(
                 allUsersDTO.getEmail(),
                 this.passwordEncoder.encode(allUsersDTO.getPassword()),
-                allUsersDTO.getRole()
+                allUsersDTO.getRole(),
+                allUsersDTO.getName()
                 );
 
         allUsersRepo.save(allUsers);

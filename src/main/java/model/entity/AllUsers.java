@@ -10,6 +10,8 @@ public class AllUsers {
     @Column(name="user_id", length = 15)
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int user_id;
+    @Column(name="name", length = 255)
+    private String name;
     @Column(name="email", length = 255)
     private String email;
     @Column(name="password", length = 255)
@@ -17,7 +19,9 @@ public class AllUsers {
     @Column(name="role", length = 255)
     private String role;
 
-    public AllUsers(String email, String password, String role) {
+
+    public AllUsers(String name, String email, String password, String role) {
+        this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -28,6 +32,10 @@ public class AllUsers {
 
     public int getUser_id() {
         return user_id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getEmail() {
@@ -42,9 +50,12 @@ public class AllUsers {
         return role;
     }
 
-
     public void setUser_id(int user_id) {
         this.user_id = user_id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setEmail(String email) {
@@ -63,6 +74,7 @@ public class AllUsers {
     public String toString() {
         return "AllUsers{" +
                 "user_id=" + user_id +
+                ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
