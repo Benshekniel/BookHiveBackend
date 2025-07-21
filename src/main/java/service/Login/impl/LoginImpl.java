@@ -23,6 +23,11 @@ public class LoginImpl implements LoginService {
     public LoginResponse loginResponse(LoginDto loginDTO) {
         String msg = "";
         AllUsers allUsers = allUsersRepo.findByEmail(loginDTO.getEmail());
+        String encodePassword = this.passwordEncoder.encode("agent");
+
+        // Log the encoded password
+        System.out.println("Encoded password: " + encodePassword);
+
 
         if (allUsers != null) {
             String password = loginDTO.getPassword();
