@@ -1,0 +1,60 @@
+    @PostMapping("/upload")
+    public void upload(HttpServletRequest request, @RequestParam MultipartFile file) throws IOException {
+        System.out.println("📥 Content-Type: " + request.getContentType());
+
+        System.out.println("📋 Request Headers received:");
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            String headerValue = request.getHeader(headerName);
+            System.out.println(headerName + ": " + headerValue);
+        }
+
+        // Your existing upload logic
+        uploadService.upload(file);
+    }
+
+
+    @PostMapping("/saveRegistrationCopy")
+    public ResponseEntity<Map<String, String>> uploadRegistrationCopy(HttpServletRequest request,
+                                                                      @RequestParam MultipartFile registrationCopyFile) throws IOException {
+
+        System.out.println("📥 Content-Type: " + request.getContentType());
+
+        // Headers logging
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            String headerValue = request.getHeader(headerName);
+            System.out.println(headerName + ": " + headerValue);
+        }
+
+        // 1️⃣ Upload logic
+        uploadService.upload(registrationCopyFile);
+        String savedFileName = uploadService.getFileName(registrationCopyFile);
+        String contentType = uploadService.getFileType(registrationCopyFile);
+
+        // 2️⃣ Respond with filename and type
+        Map<String, String> result = new HashMap<>();
+        result.put("message", "success");
+        result.put("fileName", savedFileName);
+        result.put("fileType", contentType);
+
+        return ResponseEntity.ok(result);
+    }
+    @PostMapping("/register_Org")
+    public ResponseEntity<?> addOrg(@RequestBody OrgDTO orgDTO) throws IOException {
+
+        // Save org first
+        String response = register_OrgAccount.createOrg(orgDTO);
+        if ("success".equals(response)) {
+            // Also create AllUsers account
+            AllUsersDTO allUsersDTO = new AllUsersDTO();
+            allUsersDTO.setEmail(orgDTO.getEmail());
+            allUsersDTO.setPassword(orgDTO.getPassword());
+            allUsersDTO.setRole("organization");
+            response = registerAccount.createAccount(allUsersDTO);
+        }
+
+        return ResponseEntity.ok(Map.of("message", response));
+    }

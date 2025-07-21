@@ -53,7 +53,9 @@ public class Org_RegisterImpl implements Register_OrgAccount {
                 orgDTO.getAddress(),
                 orgDTO.getCity(),
                 orgDTO.getState(),
-                orgDTO.getZip()
+                orgDTO.getZip(),
+                orgDTO.getImageFileName(),
+                orgDTO.getFileType()
         );
 
         orgRepo.save(organization);

@@ -2,40 +2,26 @@ package model.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name="all_users")
+@Table(name="All_Users")
 public class AllUsers {
 
     @Id
     @Column(name="user_id", length = 15)
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int user_id;
-    @Column(name = "name", nullable = false)
+    @Column(name="name", length = 255)
     private String name;
     @Column(name="email", length = 255)
     private String email;
     @Column(name="password", length = 255)
     private String password;
-    @Column(name = "phone_number")
-    private String phoneNumber;
-
-    @Column(name = "address")
-    private String address;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
     @Column(name="role", length = 255)
     private String role;
 
-    public AllUsers(String email, String password, String role) {
+
+    public AllUsers(String name, String email, String password, String role) {
+        this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -46,6 +32,10 @@ public class AllUsers {
 
     public int getUser_id() {
         return user_id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getEmail() {
@@ -60,20 +50,12 @@ public class AllUsers {
         return role;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
     public void setUser_id(int user_id) {
         this.user_id = user_id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setEmail(String email) {
@@ -88,22 +70,11 @@ public class AllUsers {
         this.role = role;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     @Override
     public String toString() {
         return "AllUsers{" +
                 "user_id=" + user_id +
+                ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +

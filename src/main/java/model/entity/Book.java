@@ -5,15 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "books")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Data @NoArgsConstructor @AllArgsConstructor
 public class Book {
 
     @Id
@@ -23,10 +20,18 @@ public class Book {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
-    private String author;
+    // Arrays stored as JSON
+    @Column(columnDefinition = "jsonb")
+    @Convert(converter = StringListConverter.class)
+    private List<String> authors;
 
-    private String genre;
+    @Column(columnDefinition = "jsonb")
+    @Convert(converter = StringListConverter.class)
+    private List<String> genres;
+
+    @Column(columnDefinition = "jsonb")
+    @Convert(converter = StringListConverter.class)
+    private List<String> imageUrls;
 
     @Enumerated(EnumType.STRING)
     private BookCondition condition;
@@ -34,40 +39,71 @@ public class Book {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String imageUrl;
-
     @Enumerated(EnumType.STRING)
     private BookStatus status;
 
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    private BookAvailability availability;
 
-    private BigDecimal price;
+    // Enhanced listing types
+    @Enumerated(EnumType.STRING)
+    private ListingType listingType;
+
+    // Pricing as JSON object
+    @Column(columnDefinition = "jsonb")
+    private String pricing; // {"sellingPrice": 25.99, "lendingPrice": 5.00, "depositAmount": 15.00}
 
     @Column(columnDefinition = "TEXT")
     private String lendingTerms;
 
-    @Enumerated(EnumType.STRING)
-    private BookAvailability availability;
+    // Essential book info
+    private String isbn;
+    private String publisher;
+    private Integer publishedYear;
+    private String language;
+    private Integer pageCount;
+
+    @Column(columnDefinition = "jsonb")
+    @Convert(converter = StringListConverter.class)
+    private List<String> tags;  // ["bestseller", "classic", "award-winner"]
+
+    // Series info as separate JSON object
+    @Column(columnDefinition = "jsonb")
+    private String seriesInfo;  // {"series": "Harry Potter", "seriesNumber": 1, "totalBooks": 7}
+
+    // Timestamps
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // Foreign Keys
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    // Enums
     public enum BookCondition {
-        NEW, EXCELLENT, GOOD, FAIR, POOR
+        NEW, USED, FAIR
     }
 
     public enum BookStatus {
-        AVAILABLE, SOLD, LENT, DONATED, AUCTION
+        UNAVAILABLE, AVAILABLE, SOLD, LENT, DONATED, AUCTION
     }
 
     public enum BookAvailability {
         AVAILABLE, UNAVAILABLE, RESERVED
+    }
+
+    public enum ListingType {
+        SELL_ONLY, LEND_ONLY, EXCHANGE, DONATE, SELL_AND_LEND
     }
 }
