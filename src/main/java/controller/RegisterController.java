@@ -3,6 +3,7 @@ package controller;
 import jakarta.servlet.http.HttpServletRequest;
 import model.dto.AllUsersDTO;
 import model.dto.OrgDTO;
+import model.dto.UsersDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import service.FileUpload.UploadService;
@@ -10,6 +11,7 @@ import service.Register.RegisterAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import service.SignUp.Register_OrgAccount;
+import service.SignUp.Register_UserAccount;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -26,6 +28,9 @@ public class RegisterController {
 
     @Autowired
     private Register_OrgAccount register_OrgAccount;
+
+    @Autowired
+    private Register_UserAccount registerUserAccount;
 
     @Autowired
     private UploadService uploadService;
@@ -62,6 +67,45 @@ public class RegisterController {
             allUsersDTO.setPassword(orgDTO.getPassword());
             allUsersDTO.setRole("organization");
             allUsersDTO.setName(orgDTO.getFname() + " " + orgDTO.getLname());
+            registerAccount.createAccount(allUsersDTO);
+        }
+
+        return ResponseEntity.ok(Map.of("message", response));
+    }
+
+    @PostMapping("/registerUser")
+    public ResponseEntity<Map<String, String>> registerUser(
+            @RequestPart("idFront") MultipartFile idFront,
+            @RequestPart("idBack") MultipartFile idBack,
+            @RequestPart("billImage") MultipartFile billImage,
+
+            @RequestPart("userData") UsersDto usersDto) throws IOException {
+
+        // Save the file
+        String idFrontName = uploadService.getFileName(idFront);
+        String idBackName = uploadService.getFileName(idBack);
+        String billImageName = uploadService.getFileName(billImage);
+
+        // Attach file info to DTO
+        usersDto.setIdFront(idFrontName);
+        usersDto.setIdBack(idBackName);
+        usersDto.setBillImage(billImageName);
+
+
+        // Save org logic
+        String response = registerUserAccount.createUser(usersDto);
+        if ("success".equals(response)) {
+
+            //saving the file to Back-End
+            uploadService.upload(idFront,idFrontName);
+            uploadService.upload(idBack,idBackName);
+            uploadService.upload(billImage,billImageName);
+
+            AllUsersDTO allUsersDTO = new AllUsersDTO();
+            allUsersDTO.setEmail(usersDto.getEmail());
+            allUsersDTO.setPassword(usersDto.getPassword());
+            allUsersDTO.setRole("user");
+            allUsersDTO.setName(usersDto.getFname() + " " + usersDto.getLname());
             registerAccount.createAccount(allUsersDTO);
         }
 

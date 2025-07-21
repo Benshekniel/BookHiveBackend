@@ -9,8 +9,8 @@ public class Organization {
 
     @Id
     @Column(name="org_id", length = 15)
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int orgId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long orgId;
 
     @Column(name="type", length = 255)
     private String type;
@@ -78,7 +78,7 @@ public class Organization {
     public Organization() {
     }
 
-    public int getOrgId() {
+    public Long getOrgId() {
         return orgId;
     }
 
@@ -142,7 +142,7 @@ public class Organization {
         return fileType;
     }
 
-    public void setOrgId(int orgId) {
+    public void setOrgId(Long orgId) {
         this.orgId = orgId;
     }
 
