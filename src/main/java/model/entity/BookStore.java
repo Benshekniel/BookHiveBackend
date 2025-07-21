@@ -17,6 +17,12 @@ public class BookStore {
     @Column(nullable = false)
     private String storeName;
 
+    @Column(nullable = false)
+    private String businessRegistration;
+
+    @Column(nullable = false)
+    private String businessRegistrationCertificate;
+
     private String storeImageURL;
 
     @Column(columnDefinition = "TEXT")
@@ -27,7 +33,15 @@ public class BookStore {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private BookType booksType;
+    private BookType booksType; // "NEW_BOOKS, USED_BOOKS, BOTH"
+
+    @Column(columnDefinition = "jsonb")
+    private String approval;        // {"isApproved": yes/no/pending, "note": "approved by Moderator 12345"}
+
+    @PrePersist
+    protected void onCreate() {
+        approval = "{isApproved: pending}";
+    }
 
     // One-to-One relationship with AllUsers
     @OneToOne

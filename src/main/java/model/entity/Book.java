@@ -10,9 +10,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "books")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Data @NoArgsConstructor @AllArgsConstructor
 public class Book {
 
     @Id
@@ -65,9 +63,13 @@ public class Book {
     private String language;
     private Integer pageCount;
 
-    // Search and categorization as JSON
     @Column(columnDefinition = "jsonb")
-    private String bookMetadata; // {"tags": ["bestseller", "classic"], "series": "Harry Potter", "seriesNumber": 1}
+    @Convert(converter = StringListConverter.class)
+    private List<String> tags;  // ["bestseller", "classic", "award-winner"]
+
+    // Series info as separate JSON object
+    @Column(columnDefinition = "jsonb")
+    private String seriesInfo;  // {"series": "Harry Potter", "seriesNumber": 1, "totalBooks": 7}
 
     // Timestamps
     private LocalDateTime createdAt;
@@ -90,11 +92,11 @@ public class Book {
 
     // Enums
     public enum BookCondition {
-        NEW, EXCELLENT, GOOD, FAIR, POOR
+        NEW, USED, FAIR
     }
 
     public enum BookStatus {
-        AVAILABLE, SOLD, LENT, DONATED, AUCTION
+        UNAVAILABLE, AVAILABLE, SOLD, LENT, DONATED, AUCTION
     }
 
     public enum BookAvailability {

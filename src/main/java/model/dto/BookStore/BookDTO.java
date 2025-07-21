@@ -30,7 +30,8 @@ public class BookDTO {
         private Integer publishedYear;
         private String language;
         private Integer pageCount;
-        private String bookMetadata;
+        private List<String> tags;
+        private String seriesInfo;
         // No bookId, createdAt, updatedAt, userId (auto-generated/set by system)
     }
 
@@ -56,7 +57,8 @@ public class BookDTO {
         private Integer publishedYear;
         private String language;
         private Integer pageCount;
-        private String bookMetadata;
+        private List<String> tags;
+        private String seriesInfo;
     }
 
     // For full book details response
@@ -81,7 +83,8 @@ public class BookDTO {
         private Integer publishedYear;
         private String language;
         private Integer pageCount;
-        private String bookMetadata;
+        private List<String> tags;
+        private String seriesInfo;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private Long userId;

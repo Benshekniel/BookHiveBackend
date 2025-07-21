@@ -17,6 +17,8 @@ public interface BookStoreRepo extends JpaRepository<BookStore, Integer> {
 //    // Find bookstore by user
 //    Optional<BookStore> findByUser(AllUsers user);
 
+    BookStore findByStoreId(Integer storeId);
+
     // Find bookstore by user ID
     @Query("SELECT bs FROM BookStore bs WHERE bs.user.user_id = :user_id")
     Optional<BookStore> findByUserId(@Param("user_id") Integer user_id);
