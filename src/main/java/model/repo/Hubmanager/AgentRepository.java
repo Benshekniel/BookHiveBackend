@@ -23,7 +23,7 @@ public interface AgentRepository extends JpaRepository<Agent, Long> {
     List<Agent> findByTrustScoreGreaterThanEqual(@Param("minScore") Double minScore);
 
     // Optimized query to get all agents with user and hub details in one query
-    @Query("SELECT a, u.name as userName, u.email as userEmail, u.phoneNumber as userPhone, " +
+    @Query("SELECT a,  u.name as userName, u.email as userEmail, u.phoneNumber as userPhone, " +
             "h.name as hubName, " +
             "(SELECT COUNT(d) FROM Delivery d WHERE d.agentId = a.agentId) as totalDeliveries " +
             "FROM Agent a " +
