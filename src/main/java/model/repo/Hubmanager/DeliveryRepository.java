@@ -18,7 +18,6 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     Long countByHubIdAndStatus(Long hubId, Delivery.DeliveryStatus status);
     Long countByHubIdAndStatusIn(Long hubId, List<Delivery.DeliveryStatus> statuses);
 
-    // Additional methods needed by service
     Long countByAgentIdAndStatusIn(Long agentId, List<Delivery.DeliveryStatus> statuses);
     Long countByAgentId(Long agentId);
     Long countByAgentIdAndStatus(Long agentId, Delivery.DeliveryStatus status);
@@ -35,30 +34,14 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     @Query("SELECT AVG(1.0) FROM Delivery d WHERE d.hubId = :hubId")
     Double getAverageDeliveryTimeByHub(@Param("hubId") Long hubId);
 
-    // Updated query with correct joins to all_users table
-    @Query("SELECT d, h.name as hubName, " +
-            "au.name as agentName, au.email as agentEmail, au.phoneNumber as agentPhone, " +
-            "CAST(t.transactionId AS long) as transactionId, b.title as bookTitle, b.author as bookAuthor, " +
-            "cu.name as customerName, cu.email as customerEmail, cu.phoneNumber as customerPhone " +
+    // Simplified query without problematic fields
+    @Query("SELECT d, h.name, au.name, au.email, a.phoneNumber, t.transactionId, b.title, cu.name, cu.email " +
             "FROM Delivery d " +
             "LEFT JOIN Hub h ON d.hubId = h.hubId " +
-            "LEFT JOIN AllUsers au ON d.agentId = au.user_id " +
+            "LEFT JOIN Agent a ON d.agentId = a.agentId " +
+            "LEFT JOIN AllUsers au ON a.userId = au.user_id " +
             "LEFT JOIN Transaction t ON d.transactionId = t.transactionId " +
             "LEFT JOIN Book b ON t.bookId = b.bookId " +
             "LEFT JOIN AllUsers cu ON d.userId = cu.user_id")
     List<Object[]> findAllDeliveriesWithAllDetails();
-
-
-//    @Query("SELECT d, h.name as hubName, " +
-//            "au.name as agentName, au.email as agentEmail, au.phoneNumber as agentPhone, " +
-//            "t.transactionId as transactionId, b.title as bookTitle, b.author as bookAuthor, " +
-//            "cu.name as customerName, cu.email as customerEmail, cu.phoneNumber as customerPhone " +
-//            "FROM Delivery d " +
-//            "LEFT JOIN Hub h ON d.hubId = h.hubId " +
-//            "LEFT JOIN AllUsers au ON d.agentId = au.userId " +
-//            "LEFT JOIN Transaction t ON d.transactionId = t.transactionId " +
-//            "LEFT JOIN Book b ON t.bookId = b.bookId " +
-//            "LEFT JOIN AllUsers cu ON d.userId = cu.userId " +
-//            "WHERE d.deliveryId = :deliveryId")
-//    Optional<Object[]> findDeliveryWithAllDetails(@Param("deliveryId") Long deliveryId);
 }

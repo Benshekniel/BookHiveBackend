@@ -31,7 +31,7 @@ public class AgentDto {
         private String userEmail;
         private String email; // Frontend expects this field
         private String userPhone;
-        private String phoneNumber; // Frontend expects this field
+        private Integer phoneNumber; // Frontend expects this field
         private Agent.VehicleType vehicleType;
         private String vehicleNumber;
         private Agent.AvailabilityStatus availabilityStatus;

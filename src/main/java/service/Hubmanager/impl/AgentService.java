@@ -29,7 +29,6 @@ public class AgentService {
     // Optimized getAllAgents using JOIN query
     public List<AgentResponseDto> getAllAgents() {
         List<Object[]> results = agentRepository.findAllAgentsWithDetails();
-
         return results.stream()
                 .map(this::convertToResponseDtoFromJoinQuery)
                 .collect(Collectors.toList());
@@ -51,20 +50,19 @@ public class AgentService {
     // Optimized method for agents by hub
     public List<AgentResponseDto> getAgentsByHubOptimized(Long hubId) {
         List<Object[]> results = agentRepository.findAgentsByHubWithDetails(hubId);
-
         return results.stream()
                 .map(this::convertToResponseDtoFromJoinQuery)
                 .collect(Collectors.toList());
     }
 
-    // Convert JOIN query result to DTO
+    // Convert JOIN query result to DTO (updated indices to match new query)
     private AgentResponseDto convertToResponseDtoFromJoinQuery(Object[] result) {
         Agent agent = (Agent) result[0];
-        String userName = (String) result[1];
-        String userEmail = (String) result[2];
-        String userPhone = (String) result[3];
-        String hubName = (String) result[4];
-        Long totalDeliveries = (Long) result[5];
+        String userName = result[1] != null ? result[1].toString() : "Unknown Agent";
+        String userEmail = result[2] != null ? result[2].toString() : "N/A";
+        String agentPhone = result[3] != null ? result[3].toString() : "N/A"; // From Agent table
+        String hubName = result[4] != null ? result[4].toString() : "Unknown Hub";
+        Long totalDeliveries = result[5] != null ? ((Number) result[5]).longValue() : 0L;
 
         AgentResponseDto dto = new AgentResponseDto();
 
@@ -74,15 +72,18 @@ public class AgentService {
         dto.setUserId(agent.getUserId());
 
         // User details from JOIN query
-        dto.setName(userName != null ? userName : "Unknown Agent");
-        dto.setUserName(userName != null ? userName : "Unknown Agent");
-        dto.setEmail(userEmail != null ? userEmail : "N/A");
-        dto.setUserEmail(userEmail != null ? userEmail : "N/A");
-        dto.setPhoneNumber(userPhone != null ? userPhone : "N/A");
+        dto.setName(userName);
+        dto.setUserName(userName);
+        dto.setEmail(userEmail);
+        dto.setUserEmail(userEmail);
+        dto.setUserPhone(agentPhone); // Phone from Agent table as String
+
+        // Convert String phone to Integer for DTO compatibility
+        dto.setPhoneNumber(convertPhoneToInteger(agent.getPhoneNumber()));
 
         // Hub details from JOIN query
         dto.setHubId(agent.getHubId());
-        dto.setHubName(hubName != null ? hubName : "Unknown Hub");
+        dto.setHubName(hubName);
 
         // Agent specific details
         dto.setVehicleType(agent.getVehicleType());
@@ -115,7 +116,10 @@ public class AgentService {
         dto.setUserName(user.getName());
         dto.setEmail(user.getEmail());
         dto.setUserEmail(user.getEmail());
-        dto.setPhoneNumber(user.getPhoneNumber());
+
+        // Use phone number from Agent entity
+        dto.setUserPhone(agent.getPhoneNumber() != null ? agent.getPhoneNumber() : "N/A");
+        dto.setPhoneNumber(convertPhoneToInteger(agent.getPhoneNumber()));
 
         // Fetch Hub entity
         Hub hub = hubRepository.findById(agent.getHubId())
@@ -138,6 +142,23 @@ public class AgentService {
         dto.setRating(agent.getTrustScore() != null ? agent.getTrustScore() / 20.0 : 0.0);
 
         return dto;
+    }
+
+    // Helper method to convert String phone to Integer
+    private Integer convertPhoneToInteger(String phoneNumber) {
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            // Remove all non-digit characters and convert to Integer
+            String digitsOnly = phoneNumber.replaceAll("[^0-9]", "");
+            if (digitsOnly.isEmpty()) {
+                return null;
+            }
+            return Integer.valueOf(digitsOnly);
+        } catch (NumberFormatException e) {
+            return null; // Return null if conversion fails
+        }
     }
 
     // Keep all other existing methods unchanged
@@ -221,6 +242,10 @@ public class AgentService {
         if (updateDto.getAvailabilityStatus() != null) {
             agent.setAvailabilityStatus(Agent.AvailabilityStatus.valueOf(updateDto.getAvailabilityStatus()));
         }
+        // Add phone number update if needed
+        if (updateDto.getPhone() != null) {
+            agent.setPhoneNumber(updateDto.getPhone()); // Store as String in entity
+        }
 
         Agent updatedAgent = agentRepository.save(agent);
         return convertToResponseDto(updatedAgent);
@@ -286,22 +311,33 @@ public class AgentService {
         AllUsers user = allUsersRepo.findById((int) agent.getUserId().longValue())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         dto.setName(user.getName());
+        dto.setAgentName(user.getName());
 
         dto.setDeliveries(agent.getNumberOfDelivery());
         dto.setAvgTime(agent.getDeliveryTime());
         dto.setRating(agent.getTrustScore() / 20.0);
+        dto.setTrustScore(agent.getTrustScore());
 
-        // Calculate success rate (this could be more sophisticated)
+        // Calculate delivery statistics
         Long totalDeliveries = deliveryRepository.countByAgentId(agent.getAgentId());
         Long successfulDeliveries = deliveryRepository.countByAgentIdAndStatus(
                 agent.getAgentId(), Delivery.DeliveryStatus.DELIVERED
         );
+        Long failedDeliveries = deliveryRepository.countByAgentIdAndStatus(
+                agent.getAgentId(), Delivery.DeliveryStatus.FAILED
+        );
+
+        dto.setTotalDeliveries(totalDeliveries);
+        dto.setSuccessfulDeliveries(successfulDeliveries);
+        dto.setFailedDeliveries(failedDeliveries);
 
         if (totalDeliveries > 0) {
             dto.setSuccessRate((double) (successfulDeliveries * 100) / totalDeliveries);
         } else {
             dto.setSuccessRate(100.0);
         }
+
+        dto.setAvgDeliveryTime(agent.getDeliveryTime() != null ? agent.getDeliveryTime().doubleValue() : 0.0);
 
         return dto;
     }
