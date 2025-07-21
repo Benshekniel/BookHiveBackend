@@ -9,8 +9,8 @@ public class Organization {
 
     @Id
     @Column(name="org_id", length = 15)
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int orgId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long orgId;
 
     @Column(name="type", length = 255)
     private String type;
@@ -51,10 +51,15 @@ public class Organization {
     @Column(name="zip", length = 255)
     private String zip;
 
+    @Column(name="imageFileName", length = 255)
+    private String imageFileName;     // Stored filename (you'll generate and save it)
 
-    public Organization( String type, String reg_no, String status, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip) {
+    @Column(name="fileType", length = 255)
+    private String fileType;
+
+    public Organization(String type, String regNo, String status, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
         this.type = type;
-        this.regNo = reg_no;
+        this.regNo = regNo;
         this.status = status;
         this.fname = fname;
         this.lname = lname;
@@ -66,12 +71,14 @@ public class Organization {
         this.city = city;
         this.state = state;
         this.zip = zip;
+        this.imageFileName = imageFileName;
+        this.fileType = fileType;
     }
 
     public Organization() {
     }
 
-    public int getOrg_id() {
+    public Long getOrgId() {
         return orgId;
     }
 
@@ -79,7 +86,7 @@ public class Organization {
         return type;
     }
 
-    public String getReg_no() {
+    public String getRegNo() {
         return regNo;
     }
 
@@ -127,17 +134,24 @@ public class Organization {
         return zip;
     }
 
+    public String getImageFileName() {
+        return imageFileName;
+    }
 
-    public void setOrg_id(int org_id) {
-        this.orgId = org_id;
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     public void setType(String type) {
         this.type = type;
     }
 
-    public void setReg_no(String reg_no) {
-        this.regNo = reg_no;
+    public void setRegNo(String regNo) {
+        this.regNo = regNo;
     }
 
     public void setStatus(String status) {
@@ -184,12 +198,20 @@ public class Organization {
         this.zip = zip;
     }
 
+    public void setImageFileName(String imageFileName) {
+        this.imageFileName = imageFileName;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
     @Override
     public String toString() {
         return "Organization{" +
-                "org_id=" + orgId +
+                "orgId=" + orgId +
                 ", type='" + type + '\'' +
-                ", reg_no='" + regNo + '\'' +
+                ", regNo='" + regNo + '\'' +
                 ", status='" + status + '\'' +
                 ", fname='" + fname + '\'' +
                 ", lname='" + lname + '\'' +
@@ -201,6 +223,8 @@ public class Organization {
                 ", city='" + city + '\'' +
                 ", state='" + state + '\'' +
                 ", zip='" + zip + '\'' +
+                ", imageFileName='" + imageFileName + '\'' +
+                ", fileType='" + fileType + '\'' +
                 '}';
     }
 }
