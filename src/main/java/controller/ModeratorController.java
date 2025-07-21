@@ -1,7 +1,6 @@
 package controller;
 
 import model.dto.ModeratorDto;
-import service.Moderator.ModeratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,14 +9,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/moderator")
 public class ModeratorController {
 
-    @Autowired
-    private ModeratorService moderatorService;
-
-    @PostMapping("/add_Account")
-    public String moderatorAdd(@RequestBody ModeratorDto moderatorDto) {
-
-        String Id= moderatorService.addAccount(moderatorDto);
-        return Id;
-
-    }
+//    @Autowired
+//    private ModeratorService moderatorService;
+//
+//    @PostMapping("/add_Account")
+//    public String moderatorAdd(@RequestBody ModeratorDto moderatorDto) {
+//
+//        String Id= moderatorService.addAccount(moderatorDto);
+//        return Id;
+//
+//    }
 }

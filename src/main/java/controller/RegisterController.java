@@ -2,6 +2,7 @@ package controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import model.dto.AllUsersDTO;
+import model.dto.ModeratorDto;
 import model.dto.OrgDTO;
 import model.dto.UsersDto;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import service.FileUpload.UploadService;
 import service.Register.RegisterAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import service.SignUp.Register_ModeratorAccount;
 import service.SignUp.Register_OrgAccount;
 import service.SignUp.Register_UserAccount;
 
@@ -31,6 +33,10 @@ public class RegisterController {
 
     @Autowired
     private Register_UserAccount registerUserAccount;
+
+    @Autowired
+    private Register_ModeratorAccount registerModeratorAccount;
+
 
     @Autowired
     private UploadService uploadService;
@@ -78,7 +84,6 @@ public class RegisterController {
             @RequestPart("idFront") MultipartFile idFront,
             @RequestPart("idBack") MultipartFile idBack,
             @RequestPart("billImage") MultipartFile billImage,
-
             @RequestPart("userData") UsersDto usersDto) throws IOException {
 
         // Save the file
@@ -106,6 +111,25 @@ public class RegisterController {
             allUsersDTO.setPassword(usersDto.getPassword());
             allUsersDTO.setRole("user");
             allUsersDTO.setName(usersDto.getFname() + " " + usersDto.getLname());
+            registerAccount.createAccount(allUsersDTO);
+        }
+
+        return ResponseEntity.ok(Map.of("message", response));
+    }
+
+    @PostMapping("/registerModerator")
+    public ResponseEntity<Map<String, String>> registerModerator(@RequestBody ModeratorDto moderatorDto) {
+
+
+        // Save org logic
+        String response = registerModeratorAccount.createModerator(moderatorDto);
+        if ("success".equals(response)) {
+
+            AllUsersDTO allUsersDTO = new AllUsersDTO();
+            allUsersDTO.setEmail(moderatorDto.getEmail());
+            allUsersDTO.setPassword(moderatorDto.getPassword());
+            allUsersDTO.setRole("moderator");
+            allUsersDTO.setName(moderatorDto.getName());
             registerAccount.createAccount(allUsersDTO);
         }
 

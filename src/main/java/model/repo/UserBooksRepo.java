@@ -1,18 +1,21 @@
 package model.repo;
 
-import model.entity.Moderator;
+import model.entity.Books;
+import model.entity.UserBooks;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+
 @EnableJpaRepositories
 @Repository
-public interface ModeratorRepo extends JpaRepository<Moderator, Long> {
+public interface UserBooksRepo extends JpaRepository<UserBooks, Long> {
 
-    Optional<Moderator> findOneByEmailAndPassword(String email, String password);
+    Optional<UserBooks> findOneByUserEmailAndBookId(String userEmail, Long bookId);
 
-    Moderator findByEmail(String email);
+    UserBooks findByIsbn(String isbn);
+
 
 }
