@@ -11,7 +11,6 @@ import model.repo.Hubmanager.AgentRepository;
 import model.repo.Hubmanager.HubRepository;
 import model.repo.Hubmanager.TransactionRepository;
 import model.repo.AllUsersRepo;
-import model.repo.Hubmanager.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +30,6 @@ public class DeliveryService {
     private final HubRepository hubRepository;
     private final TransactionRepository transactionRepository;
     private final AllUsersRepo allUsersRepo;
-    private final BookRepository bookRepository;
 
     public DeliveryResponseDto createDelivery(DeliveryCreateDto createDto) {
         Transaction transaction = transactionRepository.findById(createDto.getTransactionId())
@@ -63,7 +61,6 @@ public class DeliveryService {
                 .map(this::convertToResponseDtoWithAllDetails)
                 .collect(Collectors.toList());
     }
-
 
     public List<DeliveryResponseDto> getDeliveriesByHub(Long hubId) {
         return deliveryRepository.findByHubId(hubId).stream()
@@ -173,11 +170,7 @@ public class DeliveryService {
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
         dto.setAgentId(agent.getAgentId());
 
-        // Fetch User for agent name
-        // User agentUser = allUsersRepo.findById((int) agent.getUserId().longValue())
-        //         .orElseThrow(() -> new RuntimeException("Agent user not found"));
-        // dto.setAgentName(agentUser.getName());
-        dto.setAgentName("Agent"); // Temporary placeholder
+        dto.setAgentName("Agent"); // Placeholder
 
         dto.setPickupAddress(delivery.getPickupAddress());
         dto.setDeliveryAddress(delivery.getDeliveryAddress());
@@ -187,50 +180,23 @@ public class DeliveryService {
         dto.setTrackingNumber(delivery.getTrackingNumber());
         dto.setCreatedAt(delivery.getCreatedAt());
 
-        // Fetch Transaction entity
-        Transaction transaction = transactionRepository.findById(delivery.getTransactionId())
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
-
-        // Fetch Book entity
-        Book book = bookRepository.findById(transaction.getBookId())
-                .orElseThrow(() -> new RuntimeException("Book not found"));
-        dto.setBookTitle(book.getTitle());
-        dto.setBookAuthor(book.getAuthor());
-
-        // Fetch Customer entity
-        // User borrower = allUsersRepo.findById((int) transaction.getBorrowerId().longValue())
-        //         .orElseThrow(() -> new RuntimeException("Borrower not found"));
-        // dto.setCustomerName(borrower.getName());
-        dto.setCustomerName("Customer"); // Temporary placeholder
+        dto.setCustomerName("Customer"); // Placeholder
         return dto;
     }
 
+    // Updated mapping to match the new query result indices (9 fields instead of 11)
     private DeliveryResponseDto convertToResponseDtoWithAllDetails(Object[] result) {
-        Delivery delivery = (Delivery) result[0];
-        String hubName = (String) result[1];
-        String agentName = (String) result[2];
-        String agentEmail = (String) result[3];
-        String agentPhone = (String) result[4];
-        // Handle transactionId - could be Long or String
-        Long transactionId = null;
-        if (result[5] != null) {
-            if (result[5] instanceof Long) {
-                transactionId = (Long) result[5];
-            } else if (result[5] instanceof String) {
-                try {
-                    transactionId = Long.parseLong((String) result[5]);
-                } catch (NumberFormatException e) {
-                    transactionId = null;
-                }
-            }
-        }
-        String bookTitle = (String) result[6];
-        String bookAuthor = (String) result[7];
-        String customerName = (String) result[8];
-        String customerEmail = (String) result[9];
-        String customerPhone = (String) result[10];
-
         DeliveryResponseDto dto = new DeliveryResponseDto();
+
+        Delivery delivery = (Delivery) result[0];
+        String hubName = result[1] != null ? result[1].toString() : "Unknown Hub";
+        String agentName = result[2] != null ? result[2].toString() : "Unassigned";
+        String agentEmail = result[3] != null ? result[3].toString() : "N/A";
+        String agentPhone = result[4] != null ? result[4].toString() : "N/A"; // From Agent table
+        Long transactionId = result[5] != null ? ((Number) result[5]).longValue() : null;
+        String bookTitle = result[6] != null ? result[6].toString() : "Unknown Book";
+        String customerName = result[7] != null ? result[7].toString() : "Unknown Customer";
+        String customerEmail = result[8] != null ? result[8].toString() : "N/A";
 
         // Basic delivery info
         dto.setDeliveryId(delivery.getDeliveryId());
@@ -245,27 +211,27 @@ public class DeliveryService {
 
         // Hub details
         dto.setHubId(delivery.getHubId());
-        dto.setHubName(hubName != null ? hubName : "Unknown Hub");
+        dto.setHubName(hubName);
 
-        // Agent details (from deliveries.agent_id = all_users.user_id)
+        // Agent details (phone from Agent table)
         dto.setAgentId(delivery.getAgentId());
-        dto.setAgentName(agentName != null ? agentName : "Unassigned");
-        dto.setAgentEmail(agentEmail != null ? agentEmail : "N/A");
-        dto.setAgentPhone(agentPhone != null ? agentPhone : "N/A");
+        dto.setAgentName(agentName);
+        dto.setAgentEmail(agentEmail);
+        dto.setAgentPhone(agentPhone);
 
         // Book details
-        dto.setBookTitle(bookTitle != null ? bookTitle : "Unknown Book");
-        dto.setBookAuthor(bookAuthor != null ? bookAuthor : "Unknown Author");
+        dto.setBookTitle(bookTitle);
+        dto.setBookAuthor("Unknown Author"); // Default since we can't fetch from DB
 
-        // Customer details (from deliveries.user_id = all_users.user_id)
-        dto.setCustomerName(customerName != null ? customerName : "Unknown Customer");
-        dto.setCustomerEmail(customerEmail != null ? customerEmail : "N/A");
-        dto.setCustomerPhone(customerPhone != null ? customerPhone : "N/A");
+        // Customer details
+        dto.setCustomerName(customerName);
+        dto.setCustomerEmail(customerEmail);
+        dto.setCustomerPhone("N/A"); // Default since we can't fetch from AllUsers
 
-        // New fields from entity (removed priority)
-        dto.setValue(delivery.getFormattedValue()); // Use helper method
-        dto.setPriority("normal"); // Default value for frontend compatibility
-        dto.setDescription("Book delivery: " + (bookTitle != null ? bookTitle : "Unknown Book"));
+        // New fields from entity
+        dto.setValue(delivery.getFormattedValue());
+        dto.setPriority("normal");
+        dto.setDescription("Book delivery: " + bookTitle);
         dto.setWeight(delivery.getWeight() != null ? delivery.getWeight() : "N/A");
         dto.setDimensions(delivery.getDimensions() != null ? delivery.getDimensions() : "N/A");
         dto.setPaymentMethod(delivery.getPaymentMethod() != null ? delivery.getPaymentMethod().name() : "N/A");

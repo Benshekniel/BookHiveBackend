@@ -582,6 +582,9 @@ public class RouteService {
         dto.setTrustScore(agent.getTrustScore());
         dto.setDeliveryTime(agent.getDeliveryTime());
         dto.setNumberOfDelivery(agent.getNumberOfDelivery());
+        
+        // Convert Integer phoneNumber to String for RouteDTO.AgentDTO
+        dto.setPhoneNumber(agent.getPhoneNumber() != null ? agent.getPhoneNumber().toString() : "");
 
         // Get user details from AllUsers entity using userId
         try {
@@ -590,7 +593,6 @@ public class RouteService {
                 AllUsers user = userOpt.get();
                 dto.setName(user.getName());
                 dto.setEmail(user.getEmail());
-                dto.setPhoneNumber(user.getPhoneNumber());
 
                 // Split name into first and last name if possible
                 if (user.getName() != null && !user.getName().trim().isEmpty()) {
@@ -605,7 +607,6 @@ public class RouteService {
                 // Set default values if user not found
                 dto.setName("Unknown User");
                 dto.setEmail("");
-                dto.setPhoneNumber("");
                 dto.setFirstName("Unknown");
                 dto.setLastName("User");
                 logger.warn("User not found for agent {} with userId {}", agent.getAgentId(), agent.getUserId());
@@ -615,7 +616,6 @@ public class RouteService {
             // Set default values in case of error
             dto.setName("Error Loading User");
             dto.setEmail("");
-            dto.setPhoneNumber("");
             dto.setFirstName("Error");
             dto.setLastName("Loading");
         }

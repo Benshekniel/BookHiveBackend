@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Entity
 @Table(name = "agents")
 @Data
@@ -34,6 +33,9 @@ public class Agent {
     private Double trustScore = 0.0;
 
     private Integer deliveryTime;
+
+    @Column(name = "phone_number", length = 255)
+    private String phoneNumber; // Changed from Integer to String
 
     private Integer numberOfDelivery = 0;
 
