@@ -12,10 +12,10 @@ public class AllUsers {
 
     @Id
     @Column(name="user_id", length = 15)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer user_id;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
@@ -24,10 +24,10 @@ public class AllUsers {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private String address;
 
     @Column(updatable = false)
