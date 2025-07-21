@@ -21,10 +21,10 @@ public class RegisterImpl implements RegisterAccount {
     public String createAccount(AllUsersDTO allUsersDTO) {
 
         AllUsers allUsers = new AllUsers(
+                allUsersDTO.getName(),
                 allUsersDTO.getEmail(),
                 this.passwordEncoder.encode(allUsersDTO.getPassword()),
-                allUsersDTO.getRole(),
-                allUsersDTO.getName()
+                allUsersDTO.getRole()
                 );
 
         allUsersRepo.save(allUsers);

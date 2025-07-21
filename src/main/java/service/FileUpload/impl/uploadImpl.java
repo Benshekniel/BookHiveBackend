@@ -18,7 +18,7 @@ public class uploadImpl implements UploadService {
         }
 
         // Create directory if it doesn't exist
-        File dir = new File("F:\\zzz");
+        File dir = new File("D:\\zzz");
         if (!dir.exists()) {
             boolean created = dir.mkdirs();
             if (!created) {
