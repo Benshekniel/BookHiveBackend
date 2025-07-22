@@ -8,13 +8,12 @@ import service.BookStore.BookStoreService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+//import java.util.List;
+//import java.util.Optional;
 
-@Component
-//@RestController
-//@RequestMapping("/api/bookstores")
-//@CrossOrigin(origins = "http://localhost:9999")
+@RestController
+@RequestMapping("/api/bookstores")
+@CrossOrigin(origins = "http://localhost:9999")
 @RequiredArgsConstructor
 public class BookStoreController {
 
