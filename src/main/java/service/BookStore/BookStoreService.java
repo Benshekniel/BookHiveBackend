@@ -6,19 +6,19 @@ import java.util.Optional;
 
 public interface BookStoreService {
 
-    BookStoreResponseDTO createBookStore(BookStoreCreateDTO createDTO, Integer userId);
+    BookStoreResponseDTO createBookStore(BookStoreCreateDTO createDTO, Long userId);
 
-    List<BookStoreListDTO> getAllBookStores();
+//    List<BookStoreListDTO> getAllBookStores();
 
-    Optional<BookStorePublicDTO> getBookStoreById(Integer storeId);
+//    Optional<BookStorePublicDTO> getBookStoreById(Integer storeId);
+//
+//    Optional<BookStoreResponseDTO> getBookStoreByUserId(Long userId);
 
-    Optional<BookStoreResponseDTO> getBookStoreByUserId(Integer userId);
+    BookStoreResponseDTO updateBookStore(BookStoreUpdateDTO updateDTO, Long userId);
 
-    BookStoreResponseDTO updateBookStore(BookStoreUpdateDTO updateDTO, Integer userId);
+    void deleteBookStore(Integer storeId, Long userId);
 
-    void deleteBookStore(Integer storeId, Integer userId);
+//    List<BookStoreListDTO> searchBookStores(String query);
 
-    List<BookStoreListDTO> searchBookStores(String query);
-
-    List<BookStoreListDTO> getBookStoresByType(String booksType);
+//    List<BookStoreListDTO> getBookStoresByType(String booksType);
 }

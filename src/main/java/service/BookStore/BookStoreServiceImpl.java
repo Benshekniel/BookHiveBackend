@@ -22,7 +22,7 @@ public class BookStoreServiceImpl implements BookStoreService {
 
     // Create bookstore
     @Override
-    public BookStoreResponseDTO createBookStore(BookStoreCreateDTO createDTO, Integer userId) {
+    public BookStoreResponseDTO createBookStore(BookStoreCreateDTO createDTO, Long userId) {
         // Get the actual user object
         AllUsers user = allUsersRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -33,43 +33,42 @@ public class BookStoreServiceImpl implements BookStoreService {
         }
 
         // Check if user already has a bookstore
-        if (bookStoreRepo.existsByUser(user)) {
-            throw new RuntimeException("User already has a bookstore");
-        }
+//        if (bookStoreRepo.existsByUser(user)) {
+//            throw new RuntimeException("User already has a bookstore");
+//        }
 
         BookStore bookStore = convertCreateDTOToEntity(createDTO);
-        bookStore.setUser(user);
 
         BookStore savedBookStore = bookStoreRepo.save(bookStore);
         return convertEntityToResponseDTO(savedBookStore);
     }
 
     // Get all bookstores
-    @Override
-    public List<BookStoreListDTO> getAllBookStores() {
-        List<BookStore> bookStores = bookStoreRepo.findAll();
-        return bookStores.stream()
-                .map(this::convertEntityToListDTO)
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    public List<BookStoreListDTO> getAllBookStores() {
+//        List<BookStore> bookStores = bookStoreRepo.findAll();
+//        return bookStores.stream()
+//                .map(this::convertEntityToListDTO)
+//                .collect(Collectors.toList());
+//    }
 
     // Get bookstore by store ID (public view)
-    @Override
-    public Optional<BookStorePublicDTO> getBookStoreById(Integer storeId) {
-        Optional<BookStore> bookStore = bookStoreRepo.findById(storeId);
-        return bookStore.map(this::convertEntityToPublicDTO);
-    }
+//    @Override
+//    public Optional<BookStorePublicDTO> getBookStoreById(Integer storeId) {
+//        Optional<BookStore> bookStore = bookStoreRepo.findById(storeId);
+//        return bookStore.map(this::convertEntityToPublicDTO);
+//    }
 
     // Get bookstore by user ID (for owner dashboard)
-    @Override
-    public Optional<BookStoreResponseDTO> getBookStoreByUserId(Integer userId) {
-        Optional<BookStore> bookStore = bookStoreRepo.findByUserId(userId);
-        return bookStore.map(this::convertEntityToResponseDTO);
-    }
+//    @Override
+//    public Optional<BookStoreResponseDTO> getBookStoreByUserId(Long userId) {
+//        Optional<BookStore> bookStore = bookStoreRepo.findByUserId(userId);
+//        return bookStore.map(this::convertEntityToResponseDTO);
+//    }
 
     // Update bookstore
     @Override
-    public BookStoreResponseDTO updateBookStore(BookStoreUpdateDTO updateDTO, Integer userId) {
+    public BookStoreResponseDTO updateBookStore(BookStoreUpdateDTO updateDTO, Long userId) {
         Optional<BookStore> existingBookStoreOpt = bookStoreRepo.findById(updateDTO.getStoreId());
 
         if (existingBookStoreOpt.isEmpty()) {
@@ -79,7 +78,7 @@ public class BookStoreServiceImpl implements BookStoreService {
         BookStore existingBookStore = existingBookStoreOpt.get();
 
         // Check if user owns this bookstore
-        if (!existingBookStore.getUser().getUser_id().equals(userId)) {
+        if (!existingBookStore.getUserId().equals(userId)) {
             throw new RuntimeException("Unauthorized to update this bookstore");
         }
 
@@ -92,7 +91,7 @@ public class BookStoreServiceImpl implements BookStoreService {
 
     // Delete bookstore
     @Override
-    public void deleteBookStore(Integer storeId, Integer userId) {
+    public void deleteBookStore(Integer storeId, Long userId) {
         Optional<BookStore> bookStoreOpt = bookStoreRepo.findById(storeId);
 
         if (bookStoreOpt.isEmpty()) {
@@ -102,7 +101,7 @@ public class BookStoreServiceImpl implements BookStoreService {
         BookStore bookStore = bookStoreOpt.get();
 
         // Check if user owns this bookstore
-        if (!bookStore.getUser().getUser_id().equals(userId)) {
+        if (!bookStore.getUserId().equals(userId)) {
             throw new RuntimeException("Unauthorized to delete this bookstore");
         }
 
@@ -110,23 +109,23 @@ public class BookStoreServiceImpl implements BookStoreService {
     }
 
     // Search bookstores
-    @Override
-    public List<BookStoreListDTO> searchBookStores(String query) {
-        List<BookStore> bookStores = bookStoreRepo.findByStoreNameContainingIgnoreCase(query);
-        return bookStores.stream()
-                .map(this::convertEntityToListDTO)
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    public List<BookStoreListDTO> searchBookStores(String query) {
+//        List<BookStore> bookStores = bookStoreRepo.findByStoreNameContainingIgnoreCase(query);
+//        return bookStores.stream()
+//                .map(this::convertEntityToListDTO)
+//                .collect(Collectors.toList());
+//    }
 
     // Get bookstores by type
-    @Override
-    public List<BookStoreListDTO> getBookStoresByType(String booksType) {
-        BookStore.BookType type = BookStore.BookType.valueOf(booksType.toUpperCase());
-        List<BookStore> bookStores = bookStoreRepo.findByBooksType(type);
-        return bookStores.stream()
-                .map(this::convertEntityToListDTO)
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    public List<BookStoreListDTO> getBookStoresByType(String booksType) {
+//        BookStore.BookType type = BookStore.BookType.valueOf(booksType.toUpperCase());
+//        List<BookStore> bookStores = bookStoreRepo.findByBooksType(type);
+//        return bookStores.stream()
+//                .map(this::convertEntityToListDTO)
+//                .collect(Collectors.toList());
+//    }
 
     // Conversion methods
     private BookStore convertCreateDTOToEntity(BookStoreCreateDTO dto) {
@@ -147,12 +146,12 @@ public class BookStoreServiceImpl implements BookStoreService {
                 bookStore.getDescription(),
                 bookStore.getBusinessHours(),
                 bookStore.getBooksType().toString(),
-                bookStore.getUser().getUser_id(),
-                bookStore.getUser().getName(),
-                bookStore.getUser().getEmail(),
-                bookStore.getUser().getPhoneNumber(),
-                bookStore.getUser().getAddress(),
-                bookStore.getUser().getCreatedAt() // registeredDate from user
+                bookStore.getUserId(),
+                bookStore.getStoreName(),
+                bookStore.getEmail(),
+                bookStore.getPhoneNumber(),
+                bookStore.getAddress(),
+                bookStore.getCreatedAt() // registeredDate from user
         );
     }
 
@@ -163,9 +162,9 @@ public class BookStoreServiceImpl implements BookStoreService {
                 bookStore.getStoreImageURL(),
                 bookStore.getDescription(),
                 bookStore.getBooksType().toString(),
-                bookStore.getUser().getName(),
-                bookStore.getUser().getAddress(),
-                bookStore.getUser().getCreatedAt() // registeredDate from user
+                bookStore.getStoreName(),
+                bookStore.getAddress(),
+                bookStore.getCreatedAt() // registeredDate from user
         );
     }
 
@@ -177,10 +176,10 @@ public class BookStoreServiceImpl implements BookStoreService {
                 bookStore.getDescription(),
                 bookStore.getBusinessHours(),
                 bookStore.getBooksType().toString(),
-                bookStore.getUser().getName(),
-                bookStore.getUser().getPhoneNumber(),
-                bookStore.getUser().getAddress(),
-                bookStore.getUser().getCreatedAt() // registeredDate from user
+                bookStore.getStoreName(),
+                bookStore.getPhoneNumber(),
+                bookStore.getAddress(),
+                bookStore.getCreatedAt() // registeredDate from user
         );
     }
 

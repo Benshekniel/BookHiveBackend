@@ -52,7 +52,7 @@ public class BookStoreDTO {
         private String booksType;
 
         // User info
-        private Integer userId;
+        private Long userId;
         private String ownerName;
         private String email;
         private String phoneNumber;

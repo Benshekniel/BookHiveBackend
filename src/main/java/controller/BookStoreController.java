@@ -3,6 +3,7 @@ package controller;
 
 import lombok.RequiredArgsConstructor;
 import model.dto.BookStore.BookStoreDTO.*;
+import org.springframework.stereotype.Component;
 import service.BookStore.BookStoreService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,9 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/bookstores")
-@CrossOrigin(origins = "http://localhost:9999")
+@Component
+//@RestController
+//@RequestMapping("/api/bookstores")
+//@CrossOrigin(origins = "http://localhost:9999")
 @RequiredArgsConstructor
 public class BookStoreController {
 
@@ -22,7 +24,7 @@ public class BookStoreController {
     @PostMapping
     public ResponseEntity<BookStoreResponseDTO> createBookStore(
             @RequestBody BookStoreCreateDTO createDTO,
-            @RequestParam Integer userId) {  // Temporary - until authentication
+            @RequestParam Long userId) {  // Temporary - until authentication
 
         try {
             BookStoreResponseDTO createdBookStore = bookStoreService.createBookStore(createDTO, userId);
@@ -33,34 +35,34 @@ public class BookStoreController {
     }
 
     // Get all bookstores (public)
-    @GetMapping
-    public ResponseEntity<List<BookStoreListDTO>> getAllBookStores() {
-        List<BookStoreListDTO> bookStores = bookStoreService.getAllBookStores();
-        return ResponseEntity.ok(bookStores);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<BookStoreListDTO>> getAllBookStores() {
+//        List<BookStoreListDTO> bookStores = bookStoreService.getAllBookStores();
+//        return ResponseEntity.ok(bookStores);
+//    }
 
     // Get bookstore by ID (public view)
-    @GetMapping("/{storeId}")
-    public ResponseEntity<BookStorePublicDTO> getBookStoreById(@PathVariable Integer storeId) {
-        Optional<BookStorePublicDTO> bookStore = bookStoreService.getBookStoreById(storeId);
-        return bookStore.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+//    @GetMapping("/{storeId}")
+//    public ResponseEntity<BookStorePublicDTO> getBookStoreById(@PathVariable Integer storeId) {
+//        Optional<BookStorePublicDTO> bookStore = bookStoreService.getBookStoreById(storeId);
+//        return bookStore.map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
     // Get current user's bookstore (owner dashboard)
-    @GetMapping("/my-store")
-    public ResponseEntity<BookStoreResponseDTO> getMyBookStore(@RequestParam Integer userId) {
-        Optional<BookStoreResponseDTO> bookStore = bookStoreService.getBookStoreByUserId(userId);
-        return bookStore.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+//    @GetMapping("/my-store")
+//    public ResponseEntity<BookStoreResponseDTO> getMyBookStore(@RequestParam Long userId) {
+//        Optional<BookStoreResponseDTO> bookStore = bookStoreService.getBookStoreByUserId(userId);
+//        return bookStore.map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
     // Update bookstore
     @PutMapping("/{storeId}")
     public ResponseEntity<BookStoreResponseDTO> updateBookStore(
             @PathVariable Integer storeId,
             @RequestBody BookStoreUpdateDTO updateDTO,
-            @RequestParam Integer userId) {
+            @RequestParam Long userId) {
 
         updateDTO.setStoreId(storeId);
 
@@ -76,7 +78,7 @@ public class BookStoreController {
     @DeleteMapping("/{storeId}")
     public ResponseEntity<Void> deleteBookStore(
             @PathVariable Integer storeId,
-            @RequestParam Integer userId) {
+            @RequestParam Long userId) {
 
         try {
             bookStoreService.deleteBookStore(storeId, userId);
@@ -87,20 +89,20 @@ public class BookStoreController {
     }
 
     // Search bookstores
-    @GetMapping("/search")
-    public ResponseEntity<List<BookStoreListDTO>> searchBookStores(@RequestParam String query) {
-        List<BookStoreListDTO> bookStores = bookStoreService.searchBookStores(query);
-        return ResponseEntity.ok(bookStores);
-    }
-
-    // Get bookstores by type
-    @GetMapping("/type/{booksType}")
-    public ResponseEntity<List<BookStoreListDTO>> getBookStoresByType(@PathVariable String booksType) {
-        try {
-            List<BookStoreListDTO> bookStores = bookStoreService.getBookStoresByType(booksType);
-            return ResponseEntity.ok(bookStores);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
+//    @GetMapping("/search")
+//    public ResponseEntity<List<BookStoreListDTO>> searchBookStores(@RequestParam String query) {
+//        List<BookStoreListDTO> bookStores = bookStoreService.searchBookStores(query);
+//        return ResponseEntity.ok(bookStores);
+//    }
+//
+//    // Get bookstores by type
+//    @GetMapping("/type/{booksType}")
+//    public ResponseEntity<List<BookStoreListDTO>> getBookStoresByType(@PathVariable String booksType) {
+//        try {
+//            List<BookStoreListDTO> bookStores = bookStoreService.getBookStoresByType(booksType);
+//            return ResponseEntity.ok(bookStores);
+//        } catch (IllegalArgumentException e) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
 }

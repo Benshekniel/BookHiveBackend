@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "bookstores")
 @Data @NoArgsConstructor @AllArgsConstructor
@@ -25,6 +27,10 @@ public class BookStore {
 
     private String storeImageURL;
 
+    private String phoneNumber;
+    private String email;
+    private String address;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -36,17 +42,19 @@ public class BookStore {
     private BookType booksType; // "NEW_BOOKS, USED_BOOKS, BOTH"
 
     @Column(columnDefinition = "jsonb")
-    private String approval;        // {"isApproved": yes/no/pending, "note": "approved by Moderator 12345"}
+    private String approval;    // {"isApproved": yes/no/pending, "note": "approved by Moderator 12345"}
+
+    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
+        createdAt = LocalDateTime.now();
         approval = "{isApproved: pending}";
     }
 
     // One-to-One relationship with AllUsers
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private AllUsers user;
+    @JoinColumn(name = "user_id", nullable = false)
+    private Long userId;
 
     public enum BookType {
         NEW_BOOKS, USED_BOOKS, BOTH
