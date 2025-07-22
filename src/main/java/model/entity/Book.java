@@ -15,7 +15,7 @@ public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long bookId;
+    private Integer bookId;
 
     @Column(nullable = false)
     private String title;
@@ -43,18 +43,11 @@ public class Book {
     private BookStatus status;
 
     @Enumerated(EnumType.STRING)
-    private BookAvailability availability;
-
-    // Enhanced listing types
-    @Enumerated(EnumType.STRING)
     private ListingType listingType;
 
     // Pricing as JSON object
     @Column(columnDefinition = "jsonb")
     private String pricing; // {"sellingPrice": 25.99, "lendingPrice": 5.00, "depositAmount": 15.00}
-
-    @Column(columnDefinition = "TEXT")
-    private String lendingTerms;
 
     // Essential book info
     private String isbn;
@@ -62,6 +55,11 @@ public class Book {
     private Integer publishedYear;
     private String language;
     private Integer pageCount;
+
+    private Integer lendingPeriod;
+
+    private Integer bookCount;  // mainly for bookstore when multiple books are from the same
+    private Integer favouritesCount;
 
     @Column(columnDefinition = "jsonb")
     @Convert(converter = StringListConverter.class)
@@ -76,13 +74,14 @@ public class Book {
     private LocalDateTime updatedAt;
 
     // Foreign Keys
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+//    @Column(name = "user_id", nullable = false)
+//    private Long userId;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        favouritesCount = 0;
     }
 
     @PreUpdate
@@ -94,15 +93,9 @@ public class Book {
     public enum BookCondition {
         NEW, USED, FAIR
     }
-
     public enum BookStatus {
         UNAVAILABLE, AVAILABLE, SOLD, LENT, DONATED, AUCTION
     }
-
-    public enum BookAvailability {
-        AVAILABLE, UNAVAILABLE, RESERVED
-    }
-
     public enum ListingType {
         SELL_ONLY, LEND_ONLY, EXCHANGE, DONATE, SELL_AND_LEND
     }
