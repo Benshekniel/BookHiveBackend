@@ -4,6 +4,7 @@ import model.dto.LoginDto;
 import model.entity.AllUsers;
 import model.messageResponse.LoginResponse;
 import model.repo.AllUsersRepo;
+import service.Jwt.JwtService;
 import service.Login.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +19,8 @@ public class LoginImpl implements LoginService {
     private AllUsersRepo allUsersRepo;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtService jwtService;
 
     @Override
     public LoginResponse loginResponse(LoginDto loginDTO) {
@@ -39,8 +42,9 @@ public class LoginImpl implements LoginService {
                 Optional<AllUsers> allUsers1 = allUsersRepo.findOneByEmailAndPassword(loginDTO.getEmail(), encodedPassword);
                 if (allUsers1.isPresent()) {
 
+                    String token = jwtService.generateToken(allUsers.getEmail(),allUsers.getRole()); // Assuming this method exists
                     String userRole = allUsers.getRole();
-                    return new LoginResponse("Login Success", true,userRole);
+                    return new LoginResponse("Login Success", true,userRole,token);
                 } else {
                     return new LoginResponse("Login Failed", false);
                 }
