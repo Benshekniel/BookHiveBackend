@@ -4,10 +4,14 @@ import model.entity.BookStore;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import java.util.Optional;
 
 @Repository
 public interface BookStoreRepo extends JpaRepository<BookStore, Integer> {
 
-//    BookStore findByStoreId(Integer storeId);
+    BookStore findByStoreId(Integer storeId);
 
+    Boolean existsByStoreId(Integer storeId);
+
+    Optional<BookStore> findByStoreName(String storeName);
 }
