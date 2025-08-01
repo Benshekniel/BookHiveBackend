@@ -1,6 +1,7 @@
 package model.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -18,7 +19,7 @@ public class BookStore {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer storeId;
+    private Long storeId;
 
     @Column(nullable = false)
     private String storeName;
@@ -29,11 +30,17 @@ public class BookStore {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    // Uploaded image URLs
     private String storeLogoImage;
     private String storeImage;
 
+    @Column(nullable = false)
     private String email;
+
+    @Column(nullable = false, length = 10)
     private String phoneNumber;
+
+    @Column(nullable = false)
     private String address;
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -53,6 +60,11 @@ public class BookStore {
 
     private String approvalNote;
 
+    // One-to-One relationship with AllUsers table
+    @OneToOne
+    @JoinColumn(name = "userId", nullable = false)
+    private AllUsers userId;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -62,10 +74,6 @@ public class BookStore {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-    // One-to-One relationship with AllUsers
-    @JoinColumn(name = "user_id", nullable = false)
-    private Long userId;
 
     public enum BookType {
         NEW_BOOKS, USED_BOOKS, BOTH

@@ -43,13 +43,13 @@ public class Book {
 
     @Type(StringArrayType.class)
     @Column(columnDefinition = "text[]")
-    private List<String> tags;  // ["bestseller", "classic", "award-winner"]
+    private List<String> tags;          // ["bestseller", "classic", "award-winner"]
 
     @Enumerated(EnumType.STRING)
     private BookCondition condition;
 
     @Column(columnDefinition = "TEXT")
-    private String description;
+    private String description;         // actual description of book's content like a summary
 
     @Enumerated(EnumType.STRING)
     private BookStatus status;
@@ -68,10 +68,12 @@ public class Book {
     // {"sellingPrice": 25.99, "lendingPrice": 5.00, "depositAmount": 15.00}
 
     @Column(columnDefinition = "TEXT")
-    private String lendingTerms;
+    private String lendingTerms;        // just a short description to market the lending conditions.
 
-    // Essential book info
+    // Essential book info:
+    @Column(length = 13)
     private String isbn;
+
     private String publisher;
     private Integer publishedYear;
     private String language;
@@ -79,8 +81,8 @@ public class Book {
 
     private Integer lendingPeriod;
 
-    private Integer bookCount;  // mainly for bookstore when multiple books are from the same
-    private Integer favouritesCount;
+    private Integer bookCount;          // mainly for bookstore when multiple books are from the same bookstore
+    private Integer favouritesCount;    // how many people have marked favourite this book
 
     // Series info as separate JSON object
     @JdbcTypeCode(SqlTypes.JSON)
@@ -92,9 +94,10 @@ public class Book {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Foreign Keys
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    // Foreign Key connecting the owner - user_id column from AllUsers table - many books, one owner
+    @ManyToOne
+    @JoinColumn(name = "ownerID", nullable = false)
+    private AllUsers ownerID;
 
     @PrePersist
     protected void onCreate() {
@@ -117,7 +120,7 @@ public class Book {
     }
 
     public enum BookAvailability {
-        AVAILABLE, UNAVAILABLE, RESERVED
+        UNAVAILABLE, AVAILABLE, RESERVED
     }
 
     public enum ListingType {
