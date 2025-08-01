@@ -34,6 +34,7 @@ public class BookStore {
     private String storeLogoImage;
     private String storeImage;
 
+    @Email
     @Column(nullable = false)
     private String email;
 
@@ -41,7 +42,16 @@ public class BookStore {
     private String phoneNumber;
 
     @Column(nullable = false)
-    private String address;
+    private String address;         // first line of address: house no and street
+
+    @Column(nullable = false)
+    private String city;
+
+    @Column(nullable = false)
+    private String postalCode;
+
+    @Column(nullable = false)
+    private String province;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
