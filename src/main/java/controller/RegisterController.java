@@ -5,6 +5,7 @@ import model.dto.AllUsersDTO;
 import model.dto.ModeratorDto;
 import model.dto.OrgDTO;
 import model.dto.UsersDto;
+import model.entity.AllUsers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import service.FileUpload.UploadService;
@@ -73,7 +74,8 @@ public class RegisterController {
             allUsersDTO.setPassword(orgDTO.getPassword());
             allUsersDTO.setRole("organization");
             allUsersDTO.setName(orgDTO.getFname() + " " + orgDTO.getLname());
-            registerAccount.createAccount(allUsersDTO);
+            allUsersDTO.setStatus(AllUsers.Status.active);
+            response =registerAccount.createAccount(allUsersDTO);
         }
 
         return ResponseEntity.ok(Map.of("message", response));
@@ -111,7 +113,8 @@ public class RegisterController {
             allUsersDTO.setPassword(usersDto.getPassword());
             allUsersDTO.setRole("user");
             allUsersDTO.setName(usersDto.getFname() + " " + usersDto.getLname());
-            registerAccount.createAccount(allUsersDTO);
+            allUsersDTO.setStatus(AllUsers.Status.pending);
+            response = registerAccount.createAccount(allUsersDTO);
         }
 
         return ResponseEntity.ok(Map.of("message", response));

@@ -1,5 +1,7 @@
 package model.dto;
 
+import model.entity.AllUsers;
+
 public class AllUsersDTO {
 
     private int user_id;
@@ -7,12 +9,21 @@ public class AllUsersDTO {
     private String password;
     private String role;
     private String name;
+    private AllUsers.Status status;
 
     public AllUsersDTO(String email, String password, String role, String name) {
         this.email = email;
         this.password = password;
         this.role = role;
         this.name = name;
+    }
+
+    public AllUsersDTO(String email, String password, String role, String name, AllUsers.Status status) {
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.name = name;
+        this.status = status;
     }
 
     public AllUsersDTO() {
@@ -38,6 +49,10 @@ public class AllUsersDTO {
         return name;
     }
 
+    public AllUsers.Status getStatus() {
+        return status;
+    }
+
     public void setUser_id(int user_id) {
         this.user_id = user_id;
     }
@@ -58,14 +73,18 @@ public class AllUsersDTO {
         this.name = name;
     }
 
+    public void setStatus(AllUsers.Status status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "AllUsersDTO{" +
-                "user_id=" + user_id +
-                ", email='" + email + '\'' +
+                "email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
                 ", name='" + name + '\'' +
+                ", status=" + status +
                 '}';
     }
 }

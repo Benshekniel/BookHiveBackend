@@ -19,12 +19,29 @@ public class AllUsers {
     @Column(name="role", length = 255)
     private String role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20, nullable = true)
+    private Status status;
 
+    public enum Status {
+        active, pending, banned, disabled
+    }
+
+    //Without status
     public AllUsers(String name, String email, String password, String role) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+
+    //With status
+    public AllUsers(String name, String email, String password, String role, Status status) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.status = status;
     }
 
     public AllUsers() {
@@ -50,6 +67,10 @@ public class AllUsers {
         return role;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
     public void setUser_id(int user_id) {
         this.user_id = user_id;
     }
@@ -70,6 +91,10 @@ public class AllUsers {
         this.role = role;
     }
 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "AllUsers{" +
@@ -78,6 +103,7 @@ public class AllUsers {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
+                ", status=" + status +
                 '}';
     }
 }
