@@ -5,8 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+import io.hypersistence.utils.hibernate.type.array.StringArrayType;
+import org.hibernate.type.SqlTypes;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "books")
@@ -21,18 +28,22 @@ public class Book {
     @Column(nullable = false)
     private String title;
 
-    // Arrays stored as JSON
-    @Column(columnDefinition = "jsonb")
-    @Convert(converter = StringListConverter.class)
+    // Things stored as arrays:
+    @Type(StringArrayType.class)
+    @Column(columnDefinition = "text[]")
     private List<String> authors;
 
-    @Column(columnDefinition = "jsonb")
-    @Convert(converter = StringListConverter.class)
+    @Type(StringArrayType.class)
+    @Column(columnDefinition = "text[]")
     private List<String> genres;
 
-    @Column(columnDefinition = "jsonb")
-    @Convert(converter = StringListConverter.class)
+    @Type(StringArrayType.class)
+    @Column(columnDefinition = "text[]")
     private List<String> imageUrls;
+
+    @Type(StringArrayType.class)
+    @Column(columnDefinition = "text[]")
+    private List<String> tags;  // ["bestseller", "classic", "award-winner"]
 
     @Enumerated(EnumType.STRING)
     private BookCondition condition;
@@ -51,8 +62,10 @@ public class Book {
     private ListingType listingType;
 
     // Pricing as JSON object
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String pricing; // {"sellingPrice": 25.99, "lendingPrice": 5.00, "depositAmount": 15.00}
+    private Map<String, BigDecimal> pricing;
+    // {"sellingPrice": 25.99, "lendingPrice": 5.00, "depositAmount": 15.00}
 
     @Column(columnDefinition = "TEXT")
     private String lendingTerms;
@@ -64,13 +77,16 @@ public class Book {
     private String language;
     private Integer pageCount;
 
-    @Column(columnDefinition = "jsonb")
-    @Convert(converter = StringListConverter.class)
-    private List<String> tags;  // ["bestseller", "classic", "award-winner"]
+    private Integer lendingPeriod;
+
+    private Integer bookCount;  // mainly for bookstore when multiple books are from the same
+    private Integer favouritesCount;
 
     // Series info as separate JSON object
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String seriesInfo;  // {"series": "Harry Potter", "seriesNumber": 1, "totalBooks": 7}
+    private Map<String, String> seriesInfo;
+    // {"series": "Harry Potter", "seriesNumber": 1, "totalBooks": 7}
 
     // Timestamps
     private LocalDateTime createdAt;

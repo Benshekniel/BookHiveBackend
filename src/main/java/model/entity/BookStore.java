@@ -5,7 +5,11 @@ import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "bookstores")
@@ -32,8 +36,9 @@ public class BookStore {
     private String phoneNumber;
     private String address;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String businessHours; // {"monday": "9:00-18:00", "tuesday": "9:00-18:00", ...}
+    private Map<String, String> businessHours; // {"monday": "9:00-18:00", "tuesday": "9:00-18:00", ...}
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -52,6 +57,10 @@ public class BookStore {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         isApproved = Approval.PENDING;
+    }
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 
     // One-to-One relationship with AllUsers
