@@ -42,9 +42,4 @@ public class BookStoreDTOs {
         private String storeImage;
         private Map<String, String> businessHours;
     }
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class ListBookStoreDTO {
-        private String storeName;
-
-    }
 }
