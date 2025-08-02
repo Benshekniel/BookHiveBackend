@@ -19,7 +19,7 @@ public class BookStore {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long storeId;
+    private Integer storeId;
 
     @Column(nullable = false)
     private String storeName;
@@ -42,16 +42,16 @@ public class BookStore {
     private String phoneNumber;
 
     @Column(nullable = false)
-    private String address;         // first line of address: house no and street
+    private String address;     // first line of address: house no and street
 
     @Column(nullable = false)
     private String city;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5)
     private String postalCode;
 
     @Column(nullable = false)
-    private String province;
+    private String district;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
@@ -71,9 +71,12 @@ public class BookStore {
     private String approvalNote;
 
     // One-to-One relationship with AllUsers table
-    @OneToOne
-    @JoinColumn(name = "userId", nullable = false)
-    private AllUsers userId;
+//    @OneToOne
+//    @JoinColumn(name = "user_id", nullable = false)
+//    private AllUsers userId;
+
+    @Column(nullable = false)
+    private Integer userId;
 
     @PrePersist
     protected void onCreate() {

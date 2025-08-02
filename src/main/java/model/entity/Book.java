@@ -23,7 +23,7 @@ public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="book_Id")
-    private Long bookId;
+    private Integer bookId;
 
     @Column(nullable = false)
     private String title;
@@ -95,9 +95,12 @@ public class Book {
     private LocalDateTime updatedAt;
 
     // Foreign Key connecting the owner - user_id column from AllUsers table - many books, one owner
-    @ManyToOne
-    @JoinColumn(name = "ownerID", nullable = false)
-    private AllUsers ownerID;
+//    @ManyToOne
+//    @JoinColumn(name = "owner_id", nullable = false)
+//    private AllUsers ownerID;
+
+    @Column(nullable = false)
+    private Integer ownerID;
 
     @PrePersist
     protected void onCreate() {
