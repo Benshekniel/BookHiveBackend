@@ -1,8 +1,13 @@
 package controller;
 
-import model.dto.ModeratorDto;
+import model.dto.AllUsersDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import service.Moderator.ModeratorService;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:9999") // Allow Vite's port
@@ -19,4 +24,13 @@ public class ModeratorController {
 //        return Id;
 //
 //    }
+
+    @Autowired
+    private ModeratorService moderatorService;
+
+    @GetMapping("/getPendingRegistrations")
+    public ResponseEntity<List<Map<String, Object>>> getPendingRegistrations() {
+        List<Map<String, Object>> pendings = moderatorService.getAllPending();
+        return ResponseEntity.ok(pendings);
+    }
 }
