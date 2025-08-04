@@ -23,12 +23,8 @@ public class ModeratorImpl implements ModeratorService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private AllUsersRepo allUsersRepo;
-
-
 
     public List<Map<String, Object>> getAllPending() {
-        return allUsersRepo.findAllPending();
+        return moderatorRepo.findAllPending();
     }
 }
