@@ -28,6 +28,101 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     @Query("SELECT ra.agentId FROM RouteAssignment ra WHERE ra.routeId = :routeId AND ra.status = 'ACTIVE'")
     List<Long> findAgentIdsByRouteId(@Param("routeId") Long routeId);
 
+    // ================================
+    // ROUTE ASSIGNMENT METHODS
+    // ================================
+
+    /**
+     * Find routes with boundary coordinates for geocoding and polygon matching
+     */
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = :status AND " +
+            "r.boundaryCoordinates IS NOT NULL AND r.boundaryCoordinates != '' AND TRIM(r.boundaryCoordinates) != ''")
+    List<Route> findRoutesWithBoundariesByHub(@Param("hubId") Long hubId, @Param("status") Route.RouteStatus status);
+
+    /**
+     * Find all routes with boundary coordinates (regardless of hub)
+     */
+    @Query("SELECT r FROM Route r WHERE r.boundaryCoordinates IS NOT NULL AND r.boundaryCoordinates != '' AND TRIM(r.boundaryCoordinates) != ''")
+    List<Route> findAllRoutesWithBoundaries();
+
+    /**
+     * Find routes that contain a specific postal code
+     */
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = 'ACTIVE' AND " +
+            "r.postalCodes IS NOT NULL AND r.postalCodes ILIKE %:postalCode%")
+    List<Route> findActiveRoutesByPostalCode(@Param("hubId") Long hubId, @Param("postalCode") String postalCode);
+
+    /**
+     * Find the closest route by center coordinates
+     */
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = 'ACTIVE' AND " +
+            "r.centerLatitude IS NOT NULL AND r.centerLongitude IS NOT NULL " +
+            "ORDER BY (6371 * acos(cos(radians(:latitude)) * cos(radians(r.centerLatitude)) * " +
+            "cos(radians(r.centerLongitude) - radians(:longitude)) + " +
+            "sin(radians(:latitude)) * sin(radians(r.centerLatitude)))) ASC")
+    List<Route> findClosestRoutesByCoordinates(@Param("hubId") Long hubId,
+                                               @Param("latitude") Double latitude,
+                                               @Param("longitude") Double longitude);
+
+    /**
+     * Check if coordinates fall within route center bounds (approximate check)
+     */
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = 'ACTIVE' AND " +
+            "r.centerLatitude IS NOT NULL AND r.centerLongitude IS NOT NULL AND " +
+            "(6371 * acos(cos(radians(:latitude)) * cos(radians(r.centerLatitude)) * " +
+            "cos(radians(r.centerLongitude) - radians(:longitude)) + " +
+            "sin(radians(:latitude)) * sin(radians(r.centerLatitude)))) <= :radiusKm")
+    List<Route> findRoutesWithinRadius(@Param("hubId") Long hubId,
+                                       @Param("latitude") Double latitude,
+                                       @Param("longitude") Double longitude,
+                                       @Param("radiusKm") Double radiusKm);
+
+    /**
+     * Find routes by neighborhood that might contain the address
+     */
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = 'ACTIVE' AND " +
+            "r.neighborhoods IS NOT NULL AND r.neighborhoods ILIKE %:neighborhood%")
+    List<Route> findRoutesByNeighborhood(@Param("hubId") Long hubId, @Param("neighborhood") String neighborhood);
+
+    /**
+     * Find routes that cover a specific area pattern
+     */
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = 'ACTIVE' AND " +
+            "(r.coverageArea ILIKE %:areaPattern% OR r.neighborhoods ILIKE %:areaPattern% OR r.landmarks ILIKE %:areaPattern%)")
+    List<Route> findRoutesByAreaPattern(@Param("hubId") Long hubId, @Param("areaPattern") String areaPattern);
+
+    /**
+     * Count routes with boundary coordinates
+     */
+    @Query("SELECT COUNT(r) FROM Route r WHERE r.hubId = :hubId AND " +
+            "r.boundaryCoordinates IS NOT NULL AND r.boundaryCoordinates != ''")
+    Long countRoutesWithBoundaries(@Param("hubId") Long hubId);
+
+    /**
+     * Find routes that need boundary coordinate updates
+     */
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = 'ACTIVE' AND " +
+            "(r.boundaryCoordinates IS NULL OR r.boundaryCoordinates = '' OR TRIM(r.boundaryCoordinates) = '')")
+    List<Route> findRoutesNeedingBoundaries(@Param("hubId") Long hubId);
+
+    /**
+     * Update boundary coordinates for a route
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE Route r SET r.boundaryCoordinates = :boundaryCoordinates, r.updatedAt = CURRENT_TIMESTAMP " +
+            "WHERE r.routeId = :routeId")
+    int updateBoundaryCoordinates(@Param("routeId") Long routeId, @Param("boundaryCoordinates") String boundaryCoordinates);
+
+    /**
+     * Update center coordinates for a route
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE Route r SET r.centerLatitude = :latitude, r.centerLongitude = :longitude, r.updatedAt = CURRENT_TIMESTAMP " +
+            "WHERE r.routeId = :routeId")
+    int updateCenterCoordinates(@Param("routeId") Long routeId, @Param("latitude") Double latitude, @Param("longitude") Double longitude);
+
     // Existing methods continue...
     List<Route> findByHubId(Long hubId);
     List<Route> findByStatus(Route.RouteStatus status);
@@ -203,4 +298,55 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @Query("SELECT COUNT(r) FROM Route r WHERE r.hubId = :hubId AND r.routeType = :routeType")
     Long getRouteCountByType(@Param("hubId") Long hubId, @Param("routeType") Route.RouteType routeType);
+
+    // ================================
+    // UTILITY METHODS FOR ROUTE ASSIGNMENT
+    // ================================
+
+    /**
+     * Check if a route has valid boundary coordinates
+     */
+    @Query("SELECT COUNT(r) > 0 FROM Route r WHERE r.routeId = :routeId AND " +
+            "r.boundaryCoordinates IS NOT NULL AND r.boundaryCoordinates != '' AND TRIM(r.boundaryCoordinates) != ''")
+    boolean hasBoundaryCoordinates(@Param("routeId") Long routeId);
+
+    /**
+     * Get route with its boundary coordinates for assignment
+     */
+    @Query("SELECT r FROM Route r WHERE r.routeId = :routeId AND " +
+            "r.boundaryCoordinates IS NOT NULL AND r.boundaryCoordinates != ''")
+    Route findRouteWithBoundaries(@Param("routeId") Long routeId);
+
+    /**
+     * Find routes for delivery assignment optimization
+     */
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = 'ACTIVE' " +
+            "ORDER BY r.priorityLevel ASC, r.estimatedDeliveryTime ASC")
+    List<Route> findOptimalRoutesForAssignment(@Param("hubId") Long hubId);
+
+    /**
+     * Get route assignment statistics
+     */
+    @Query("SELECT " +
+            "COUNT(d) as totalDeliveries, " +
+            "COUNT(CASE WHEN d.status = 'DELIVERED' THEN 1 END) as deliveredCount, " +
+            "COUNT(CASE WHEN d.status = 'PENDING' THEN 1 END) as pendingCount " +
+            "FROM Delivery d WHERE d.routeId = :routeId")
+    Object[] getRouteAssignmentStats(@Param("routeId") Long routeId);
+
+    /**
+     * Find routes with high delivery load for load balancing
+     */
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = 'ACTIVE' AND " +
+            "(SELECT COUNT(d) FROM Delivery d WHERE d.routeId = r.routeId AND d.status IN ('PENDING', 'ASSIGNED', 'PICKED_UP', 'IN_TRANSIT')) " +
+            "> :threshold")
+    List<Route> findOverloadedRoutes(@Param("hubId") Long hubId, @Param("threshold") Long threshold);
+
+    /**
+     * Find routes with low delivery load for load balancing
+     */
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = 'ACTIVE' AND " +
+            "(SELECT COUNT(d) FROM Delivery d WHERE d.routeId = r.routeId AND d.status IN ('PENDING', 'ASSIGNED', 'PICKED_UP', 'IN_TRANSIT')) " +
+            "< :threshold")
+    List<Route> findUnderloadedRoutes(@Param("hubId") Long hubId, @Param("threshold") Long threshold);
 }
