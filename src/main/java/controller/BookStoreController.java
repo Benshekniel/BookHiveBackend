@@ -11,10 +11,13 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/bookstore")
 @CrossOrigin(origins = "http://localhost:9999")
-@RequiredArgsConstructor
 public class BookStoreController {
 
     private final BookStoreService bookStoreService;
+
+    public BookStoreController(BookStoreService bookStoreService) {
+        this.bookStoreService = bookStoreService;
+    }
 
     @PostMapping
     public ResponseEntity<String> registerBookStore (
