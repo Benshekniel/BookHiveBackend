@@ -57,6 +57,40 @@ public class BookRequest {
     private String trackingNumber;
     private LocalDateTime estimatedDelivery;
 
+    // Explicit getters and setters for critical fields
+    public Long getRequestId() { return requestId; }
+    public void setRequestId(Long requestId) { this.requestId = requestId; }
+    
+    public Organization getOrganization() { return organization; }
+    public void setOrganization(Organization organization) { this.organization = organization; }
+    
+    public RequestStatus getStatus() { return status; }
+    public void setStatus(RequestStatus status) { this.status = status; }
+    
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    
+    public String getSubject() { return subject; }
+    public void setSubject(String subject) { this.subject = subject; }
+    
+    public Integer getQuantity() { return quantity; }
+    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
+    public UrgencyLevel getUrgency() { return urgency; }
+    public void setUrgency(UrgencyLevel urgency) { this.urgency = urgency; }
+    
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+    
+    public String getGradeLevel() { return gradeLevel; }
+    public void setGradeLevel(String gradeLevel) { this.gradeLevel = gradeLevel; }
+    
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
+
     @PrePersist
     protected void onCreate() {
         dateRequested = LocalDateTime.now();
