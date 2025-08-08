@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MessageRepository extends JpaRepository<Message, Long> {
+public interface DeliveryMessageRepository extends JpaRepository<Message, Long> {
 
     // Basic queries
     List<Message> findByReceiverIdOrderByCreatedAtDesc(Long receiverId);

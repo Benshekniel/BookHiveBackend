@@ -64,6 +64,10 @@ public class Message {
         return isRead;
     }
 
+    public void setIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
+
     public enum SenderType {
         USER, ORGANIZATION, ADMIN, MODERATOR, SYSTEM
     }
@@ -74,14 +78,5 @@ public class Message {
 
     public enum MessageType {
         GENERAL, DONATION, REQUEST, SYSTEM, FEEDBACK, NOTIFICATION
-    }
-}
-
-    public void setIsRead(boolean isRead) {
-        this.isRead = isRead;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 }
