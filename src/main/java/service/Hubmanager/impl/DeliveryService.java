@@ -3,8 +3,8 @@ package service.Hubmanager.impl;
 import model.entity.Agent;
 import model.entity.Hub;
 import model.entity.Delivery;
+import model.entity.RouteAssignment;
 import model.entity.Transaction;
-import model.entity.Book;
 import model.dto.Hubmanager.DeliveryDto.*;
 import model.repo.Hubmanager.DeliveryRepository;
 import model.repo.Hubmanager.AgentRepository;
@@ -42,9 +42,10 @@ public class DeliveryService {
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
         Delivery delivery = new Delivery();
+        RouteAssignment routeAssignment = new RouteAssignment();
         delivery.setTransactionId(transaction.getTransactionId());
-        delivery.setHubId(hub.getHubId());
-        delivery.setAgentId(agent.getAgentId());
+        routeAssignment.setHubId(hub.getHubId());
+        routeAssignment.setAgentId(agent.getAgentId());
         delivery.setPickupAddress(createDto.getPickupAddress());
         delivery.setDeliveryAddress(createDto.getDeliveryAddress());
         delivery.setStatus(Delivery.DeliveryStatus.PENDING);
@@ -117,7 +118,9 @@ public class DeliveryService {
         Agent agent = agentRepository.findById(agentId)
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
-        delivery.setAgentId(agent.getAgentId());
+        RouteAssignment routeAssignment = new RouteAssignment();
+
+        routeAssignment.setAgentId(agent.getAgentId());
         delivery.setStatus(Delivery.DeliveryStatus.ASSIGNED);
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
@@ -160,15 +163,15 @@ public class DeliveryService {
         dto.setTransactionId(delivery.getTransactionId());
 
         // Fetch Hub entity
-        Hub hub = hubRepository.findById(delivery.getHubId())
-                .orElseThrow(() -> new RuntimeException("Hub not found"));
-        dto.setHubId(hub.getHubId());
-        dto.setHubName(hub.getName());
+//        Hub hub = hubRepository.findById(routeAssignment.getHubId())
+//                .orElseThrow(() -> new RuntimeException("Hub not found"));
+//        dto.setHubId(hub.getHubId());
+//        dto.setHubName(hub.getName());
 
         // Fetch Agent entity
-        Agent agent = agentRepository.findById(delivery.getAgentId())
-                .orElseThrow(() -> new RuntimeException("Agent not found"));
-        dto.setAgentId(agent.getAgentId());
+//        Agent agent = agentRepository.findById(routeAssignment.getAgentId())
+//                .orElseThrow(() -> new RuntimeException("Agent not found"));
+//        dto.setAgentId(agent.getAgentId());
 
         dto.setAgentName("Agent"); // Placeholder
 
@@ -210,11 +213,11 @@ public class DeliveryService {
         dto.setCreatedAt(delivery.getCreatedAt());
 
         // Hub details
-        dto.setHubId(delivery.getHubId());
+//        dto.setHubId(routeAssignment.getHubId());
         dto.setHubName(hubName);
 
         // Agent details (phone from Agent table)
-        dto.setAgentId(delivery.getAgentId());
+//        dto.setAgentId(routeAssignment.getAgentId());
         dto.setAgentName(agentName);
         dto.setAgentEmail(agentEmail);
         dto.setAgentPhone(agentPhone);

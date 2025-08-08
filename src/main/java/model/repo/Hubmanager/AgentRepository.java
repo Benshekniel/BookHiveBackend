@@ -21,26 +21,35 @@ public interface AgentRepository extends JpaRepository<Agent, Long> {
     @Query("SELECT a FROM Agent a WHERE a.trustScore >= :minScore")
     List<Agent> findByTrustScoreGreaterThanEqual(@Param("minScore") Double minScore);
 
-    // Updated: fetches phone number from Agent table, other details from AllUsers
+    // Fixed: Added missing comma and delivery count subquery
     @Query("SELECT a, u.name, u.email, a.phoneNumber, h.name, " +
-            "(SELECT COUNT(d) FROM Delivery d WHERE d.agentId = a.agentId) " +
+            "(SELECT COUNT(d) FROM Delivery d " +
+            "JOIN Route r ON d.routeId = r.routeId " +
+            "JOIN RouteAssignment ra ON r.routeId = ra.routeId " +
+            "WHERE ra.agentId = a.agentId) " +
             "FROM Agent a " +
             "LEFT JOIN AllUsers u ON a.userId = u.user_id " +
             "LEFT JOIN Hub h ON a.hubId = h.hubId")
     List<Object[]> findAllAgentsWithDetails();
 
-    // Query to get single agent with all details
+    // Fixed: Corrected the delivery count subquery logic
     @Query("SELECT a, u.name, u.email, a.phoneNumber, h.name, " +
-            "(SELECT COUNT(d) FROM Delivery d WHERE d.agentId = a.agentId) " +
+            "(SELECT COUNT(d) FROM Delivery d " +
+            "JOIN Route r ON d.routeId = r.routeId " +
+            "JOIN RouteAssignment ra ON r.routeId = ra.routeId " +
+            "WHERE ra.agentId = a.agentId) " +
             "FROM Agent a " +
             "LEFT JOIN AllUsers u ON a.userId = u.user_id " +
             "LEFT JOIN Hub h ON a.hubId = h.hubId " +
             "WHERE a.agentId = :agentId")
     Optional<Object[]> findAgentWithDetails(@Param("agentId") Long agentId);
 
-    // Query to get agents by hub with details
+    // Fixed: Added delivery count to match the service expectations
     @Query("SELECT a, u.name, u.email, a.phoneNumber, h.name, " +
-            "(SELECT COUNT(d) FROM Delivery d WHERE d.agentId = a.agentId) " +
+            "(SELECT COUNT(d) FROM Delivery d " +
+            "JOIN Route r ON d.routeId = r.routeId " +
+            "JOIN RouteAssignment ra ON r.routeId = ra.routeId " +
+            "WHERE ra.agentId = a.agentId) " +
             "FROM Agent a " +
             "LEFT JOIN AllUsers u ON a.userId = u.user_id " +
             "LEFT JOIN Hub h ON a.hubId = h.hubId " +
