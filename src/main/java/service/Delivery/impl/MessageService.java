@@ -1,16 +1,15 @@
-package service.Hubmanager.impl;
+package service.Delivery.impl;
 
 import model.entity.Message;
 import model.entity.AllUsers;
-import model.dto.Hubmanager.MessageDto.*;
-import model.repo.Hubmanager.MessageRepository;
+import model.dto.Delivery.MessageDto.*;
+import model.repo.Delivery.MessageRepository;
 import model.repo.AllUsersRepo;
-import model.repo.Hubmanager.AgentRepository;
+import model.repo.Delivery.AgentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Map;

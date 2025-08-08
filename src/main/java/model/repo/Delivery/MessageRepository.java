@@ -1,4 +1,4 @@
-package model.repo.Hubmanager;
+package model.repo.Delivery;
 
 import model.entity.Message;
 import org.springframework.data.jpa.repository.JpaRepository;

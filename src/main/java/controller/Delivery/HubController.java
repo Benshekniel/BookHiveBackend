@@ -1,9 +1,9 @@
-package controller;
+package controller.Delivery;
 
-import service.Hubmanager.impl.HubService;
-import model.dto.Hubmanager.HubDto.*;
-import model.dto.Hubmanager.AgentDto.*;
-import model.dto.Hubmanager.DeliveryDto.*;
+import service.Delivery.impl.HubService;
+import model.dto.Delivery.HubDto.*;
+import model.dto.Delivery.AgentDto.*;
+import model.dto.Delivery.DeliveryDto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

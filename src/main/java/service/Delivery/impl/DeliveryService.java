@@ -1,15 +1,15 @@
-package service.Hubmanager.impl;
+package service.Delivery.impl;
 
 import model.entity.Agent;
 import model.entity.Hub;
 import model.entity.Delivery;
 import model.entity.RouteAssignment;
 import model.entity.Transaction;
-import model.dto.Hubmanager.DeliveryDto.*;
-import model.repo.Hubmanager.DeliveryRepository;
-import model.repo.Hubmanager.AgentRepository;
-import model.repo.Hubmanager.HubRepository;
-import model.repo.Hubmanager.TransactionRepository;
+import model.dto.Delivery.DeliveryDto.*;
+import model.repo.Delivery.DeliveryRepository;
+import model.repo.Delivery.AgentRepository;
+import model.repo.Delivery.HubRepository;
+import model.repo.Delivery.TransactionRepository;
 import model.repo.AllUsersRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,9 +1,9 @@
 // RouteController.java - All Route-related Controllers consolidated into one file
-package controller;
+package controller.Delivery;
 
-import model.dto.Hubmanager.RouteDTO;
-import model.dto.Hubmanager.RouteDTO.*;
-import service.Hubmanager.impl.RouteService;
+import model.dto.Delivery.RouteDTO;
+import model.dto.Delivery.RouteDTO.*;
+import service.Delivery.impl.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

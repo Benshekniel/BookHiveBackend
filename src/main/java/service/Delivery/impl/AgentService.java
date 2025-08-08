@@ -1,14 +1,14 @@
-package service.Hubmanager.impl;
+package service.Delivery.impl;
 
 import model.entity.AllUsers;
 import model.entity.Agent;
 import model.entity.Hub;
 import model.entity.Delivery;
-import model.dto.Hubmanager.AgentDto.*;
-import model.repo.Hubmanager.AgentRepository;
+import model.dto.Delivery.AgentDto.*;
+import model.repo.Delivery.AgentRepository;
 import model.repo.AllUsersRepo;
-import model.repo.Hubmanager.HubRepository;
-import model.repo.Hubmanager.DeliveryRepository;
+import model.repo.Delivery.HubRepository;
+import model.repo.Delivery.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

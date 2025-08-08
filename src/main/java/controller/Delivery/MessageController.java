@@ -1,7 +1,7 @@
-package controller;
+package controller.Delivery;
 
-import model.dto.Hubmanager.MessageDto.*;
-import service.Hubmanager.impl.MessageService;
+import model.dto.Delivery.MessageDto.*;
+import service.Delivery.impl.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

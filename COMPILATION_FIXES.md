@@ -5,7 +5,7 @@
 ### 1. ✅ Removed Unused HubManagerRepository
 **Problem**: The `HubManagerRepository` field was declared but never used in `MessageService.java`
 **Solution**: 
-- Removed the import: `import model.repo.Hubmanager.HubManagerRepository;`
+- Removed the import: `import model.repo.Delivery.HubManagerRepository;`
 - Removed the unused field: `private final HubManagerRepository hubManagerRepository;`
 
 ### 2. ✅ Cleaned Up MessageService Dependencies

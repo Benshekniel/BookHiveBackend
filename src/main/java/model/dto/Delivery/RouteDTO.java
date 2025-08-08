@@ -1,5 +1,5 @@
 // RouteDTO.java - All Route-related DTOs consolidated into one file
-package model.dto.Hubmanager;
+package model.dto.Delivery;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

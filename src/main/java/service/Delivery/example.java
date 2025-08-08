@@ -1,4 +1,4 @@
-package service.Hubmanager;
+package service.Delivery;
 
 public interface example {
 }
