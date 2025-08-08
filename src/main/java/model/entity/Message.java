@@ -23,8 +23,24 @@ public class Message {
     @Column(name = "receiver_id", nullable = false)
     private Long receiverId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sender_type", nullable = false)
+    private SenderType senderType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "receiver_type", nullable = false)
+    private ReceiverType receiverType;
+
+    @Column(nullable = false)
+    private String subject;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    private MessageType messageType;
+
+    private Long relatedEntityId; // ID of related donation, request, etc.
 
     private LocalDateTime sentAt;
     private LocalDateTime createdAt;
@@ -47,6 +63,19 @@ public class Message {
     public boolean getIsRead() {
         return isRead;
     }
+
+    public enum SenderType {
+        USER, ORGANIZATION, ADMIN, MODERATOR, SYSTEM
+    }
+
+    public enum ReceiverType {
+        USER, ORGANIZATION, ADMIN, MODERATOR
+    }
+
+    public enum MessageType {
+        GENERAL, DONATION, REQUEST, SYSTEM, FEEDBACK, NOTIFICATION
+    }
+}
 
     public void setIsRead(boolean isRead) {
         this.isRead = isRead;

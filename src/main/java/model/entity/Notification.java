@@ -17,8 +17,15 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long notificationId;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private Long userId;
+
+    @Column(name = "org_id")
+    private Long orgId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "recipient_type", nullable = false)
+    private RecipientType recipientType;
 
     @Column(nullable = false)
     private String title;
@@ -27,11 +34,16 @@ public class Notification {
     private String message;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private NotificationType type;
 
     private boolean isRead = false;
 
     private LocalDateTime createdAt;
+
+    private String actionUrl;
+    private Long relatedEntityId;
+    private String relatedEntityType; // "donation", "request", "message"
 
     @PrePersist
     protected void onCreate() {
@@ -39,6 +51,10 @@ public class Notification {
     }
 
     public enum NotificationType {
-        DELIVERY_UPDATE, SYSTEM_ALERT, PROMOTION, GENERAL
+        INFO, SUCCESS, WARNING, ERROR, DELIVERY_UPDATE, SYSTEM_ALERT, PROMOTION, GENERAL
+    }
+
+    public enum RecipientType {
+        USER, ORGANIZATION, ADMIN, MODERATOR
     }
 }
