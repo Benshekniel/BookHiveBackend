@@ -39,6 +39,9 @@ public class RouteAssignment {
     @Column(name = "start_date")
     private LocalDate startDate;
 
+    public void setHubId(Long hubId) {
+    }
+
     public enum AssignmentStatus {
         ACTIVE, INACTIVE
     }
