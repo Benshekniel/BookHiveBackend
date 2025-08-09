@@ -10,18 +10,25 @@ import java.util.Optional;
 
 @Repository
 public interface AgentRepository extends JpaRepository<Agent, Long> {
+
+    // Basic finder methods
     List<Agent> findByHubId(Long hubId);
     List<Agent> findByAvailabilityStatus(Agent.AvailabilityStatus status);
     List<Agent> findByHubIdAndAvailabilityStatus(Long hubId, Agent.AvailabilityStatus status);
     Optional<Agent> findByUserId(Long userId);
     boolean existsByUserId(Long userId);
+
+    // Count methods
     Long countByHubId(Long hubId);
     Long countByHubIdAndAvailabilityStatus(Long hubId, Agent.AvailabilityStatus status);
 
+    @Query("SELECT COUNT(a) FROM Agent a WHERE a.availabilityStatus = :status")
+    Long countByAvailabilityStatus(@Param("status") Agent.AvailabilityStatus status);
+
+    // Complex queries with details
     @Query("SELECT a FROM Agent a WHERE a.trustScore >= :minScore")
     List<Agent> findByTrustScoreGreaterThanEqual(@Param("minScore") Double minScore);
 
-    // Fixed: Added missing comma and delivery count subquery
     @Query("SELECT a, u.name, u.email, a.phoneNumber, h.name, " +
             "(SELECT COUNT(d) FROM Delivery d " +
             "JOIN Route r ON d.routeId = r.routeId " +
@@ -32,7 +39,6 @@ public interface AgentRepository extends JpaRepository<Agent, Long> {
             "LEFT JOIN Hub h ON a.hubId = h.hubId")
     List<Object[]> findAllAgentsWithDetails();
 
-    // Fixed: Corrected the delivery count subquery logic
     @Query("SELECT a, u.name, u.email, a.phoneNumber, h.name, " +
             "(SELECT COUNT(d) FROM Delivery d " +
             "JOIN Route r ON d.routeId = r.routeId " +
@@ -44,7 +50,6 @@ public interface AgentRepository extends JpaRepository<Agent, Long> {
             "WHERE a.agentId = :agentId")
     Optional<Object[]> findAgentWithDetails(@Param("agentId") Long agentId);
 
-    // Fixed: Added delivery count to match the service expectations
     @Query("SELECT a, u.name, u.email, a.phoneNumber, h.name, " +
             "(SELECT COUNT(d) FROM Delivery d " +
             "JOIN Route r ON d.routeId = r.routeId " +

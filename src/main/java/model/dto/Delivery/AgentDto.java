@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import model.entity.Agent;
+import java.time.LocalDateTime;
 
 public class AgentDto {
 
@@ -15,6 +16,7 @@ public class AgentDto {
         private Long userId;
         private Agent.VehicleType vehicleType;
         private String vehicleNumber;
+        private String phoneNumber; // Added phone number field
     }
 
     @Data
@@ -25,21 +27,23 @@ public class AgentDto {
         private Long id; // For frontend compatibility
         private Long hubId;
         private String hubName;
+        private String hubCity; // Added hub city field
         private Long userId;
         private String userName;
         private String name; // Frontend expects this field
         private String userEmail;
         private String email; // Frontend expects this field
         private String userPhone;
-        private Integer phoneNumber; // Frontend expects this field
+        private String phoneNumber; // Changed to String for consistency
         private Agent.VehicleType vehicleType;
         private String vehicleNumber;
         private Agent.AvailabilityStatus availabilityStatus;
         private Double trustScore;
         private Integer deliveryTime;
         private Integer numberOfDelivery;
-        private Integer totalDeliveries; // Frontend expects this field
-        private Double rating; // Changed from double to Double for null safety
+        private Long totalDeliveries; // Changed to Long for consistency
+        private Double rating;
+        private LocalDateTime createdAt; // Added created at field
     }
 
     @Data
@@ -57,7 +61,8 @@ public class AgentDto {
         private Double trustScore;
         private Integer deliveries;
         private Integer avgTime;
-        private Double rating; // Changed from double to Double for consistency
+        private Double rating;
+        private Agent.AvailabilityStatus availabilityStatus; // Added availability status
     }
 
     @Data
