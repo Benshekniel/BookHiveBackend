@@ -1,6 +1,7 @@
 package model.repo.Delivery;
 
 import model.entity.Delivery;
+import model.entity.Route;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,6 +38,7 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
             "WHERE r.hubId = :hubId AND d.status IN :statuses")
     Long countByHubIdAndStatusIn(@Param("hubId") Long hubId, @Param("statuses") List<Delivery.DeliveryStatus> statuses);
 
+    List<Delivery> findByTransactionId(Long transactionId);
     // Custom queries for agent-related methods (agentId is in RouteAssignment, not Delivery)
     @Query("SELECT d FROM Delivery d " +
             "LEFT JOIN Route r ON d.routeId = r.routeId " +
@@ -86,4 +88,20 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
             "LEFT JOIN Book b ON t.bookId = b.bookId " +
             "LEFT JOIN AllUsers cu ON d.userId = cu.user_id")
     List<Object[]> findAllDeliveriesWithAllDetails();
+
+    // New methods for route assignment
+    @Query("SELECT r FROM Route r WHERE r.hubId = :hubId AND r.status = :status")
+    List<Route> findActiveRoutesByHub(@Param("hubId") Long hubId, @Param("status") Route.RouteStatus status);
+
+    // Find deliveries without assigned routes
+    @Query("SELECT d FROM Delivery d WHERE d.routeId IS NULL")
+    List<Delivery> findDeliveriesWithoutRoute();
+
+    // Find deliveries by route and status
+    @Query("SELECT d FROM Delivery d WHERE d.routeId = :routeId AND d.status = :status")
+    List<Delivery> findByRouteIdAndStatus(@Param("routeId") Long routeId, @Param("status") Delivery.DeliveryStatus status);
+
+    // Update route assignment for a delivery
+    @Query("UPDATE Delivery d SET d.routeId = :routeId WHERE d.deliveryId = :deliveryId")
+    int updateRouteAssignment(@Param("deliveryId") Long deliveryId, @Param("routeId") Long routeId);
 }
