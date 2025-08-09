@@ -37,9 +37,6 @@ public class Delivery {
     @Column(name = "route_id")
     private Long routeId;
 
-//    @Column(name = "agent_id")
-//    private Long agentId;
-
     @Column(name = "transaction_id")
     private Long transactionId;
 

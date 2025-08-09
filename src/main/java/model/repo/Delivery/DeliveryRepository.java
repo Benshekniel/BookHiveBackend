@@ -38,6 +38,7 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
             "WHERE r.hubId = :hubId AND d.status IN :statuses")
     Long countByHubIdAndStatusIn(@Param("hubId") Long hubId, @Param("statuses") List<Delivery.DeliveryStatus> statuses);
 
+    List<Delivery> findByTransactionId(Long transactionId);
     // Custom queries for agent-related methods (agentId is in RouteAssignment, not Delivery)
     @Query("SELECT d FROM Delivery d " +
             "LEFT JOIN Route r ON d.routeId = r.routeId " +

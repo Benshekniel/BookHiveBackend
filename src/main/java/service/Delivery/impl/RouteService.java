@@ -1,4 +1,4 @@
-// RouteService.java - Fixed for Simple Route Entity (No Nested Classes)
+// RouteService.java - Enhanced for proper boundary coordinate handling
 package service.Delivery.impl;
 
 import model.dto.Delivery.RouteDTO;
@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +38,9 @@ public class RouteService {
 
     @Autowired
     private AllUsersRepo allUsersRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     // ================================
     // BASIC CRUD OPERATIONS
@@ -117,13 +122,13 @@ public class RouteService {
         Route.TrafficPattern trafficPattern = null;
 
         try {
-            if (searchDTO.getRouteType() != null) {
+            if (searchDTO.getRouteType() != null && !searchDTO.getRouteType().trim().isEmpty()) {
                 routeType = Route.RouteType.valueOf(searchDTO.getRouteType().toUpperCase());
             }
-            if (searchDTO.getStatus() != null) {
+            if (searchDTO.getStatus() != null && !searchDTO.getStatus().trim().isEmpty()) {
                 status = Route.RouteStatus.valueOf(searchDTO.getStatus().toUpperCase());
             }
-            if (searchDTO.getTrafficPattern() != null) {
+            if (searchDTO.getTrafficPattern() != null && !searchDTO.getTrafficPattern().trim().isEmpty()) {
                 trafficPattern = Route.TrafficPattern.valueOf(searchDTO.getTrafficPattern().toUpperCase());
             }
         } catch (IllegalArgumentException e) {
@@ -150,11 +155,17 @@ public class RouteService {
             throw new IllegalArgumentException("Hub ID is required");
         }
 
+        // Validate boundary coordinates if provided
+        if (createDTO.getBoundaryCoordinates() != null && !createDTO.getBoundaryCoordinates().trim().isEmpty()) {
+            validateBoundaryCoordinates(createDTO.getBoundaryCoordinates());
+        }
+
         Route route = new Route();
         mapCreateDTOToEntity(createDTO, route);
         route = routeRepository.save(route);
 
-        logger.info("Created route with ID: {}", route.getRouteId());
+        logger.info("Created route with ID: {} with boundary coordinates: {}",
+                route.getRouteId(), route.getBoundaryCoordinates() != null ? "YES" : "NO");
         return convertToDTO(route);
     }
 
@@ -162,6 +173,11 @@ public class RouteService {
         logger.info("Updating route with ID: {}", routeId);
 
         return routeRepository.findById(routeId).map(route -> {
+            // Validate boundary coordinates if being updated
+            if (updateDTO.getBoundaryCoordinates() != null && !updateDTO.getBoundaryCoordinates().trim().isEmpty()) {
+                validateBoundaryCoordinates(updateDTO.getBoundaryCoordinates());
+            }
+
             mapUpdateDTOToEntity(updateDTO, route);
             route = routeRepository.save(route);
             logger.info("Updated route with ID: {}", routeId);
@@ -207,6 +223,11 @@ public class RouteService {
 
         List<Route> routes = bulkCreateDTO.getRoutes().stream()
                 .map(createDTO -> {
+                    // Validate boundary coordinates for each route
+                    if (createDTO.getBoundaryCoordinates() != null && !createDTO.getBoundaryCoordinates().trim().isEmpty()) {
+                        validateBoundaryCoordinates(createDTO.getBoundaryCoordinates());
+                    }
+
                     Route route = new Route();
                     mapCreateDTOToEntity(createDTO, route);
                     return route;
@@ -238,14 +259,111 @@ public class RouteService {
     }
 
     // ================================
-    // ASSIGNMENT OPERATIONS (Simplified - No Nested Classes)
+    // BOUNDARY COORDINATE OPERATIONS
+    // ================================
+
+    @Transactional(readOnly = true)
+    public List<RouteBoundaryDTO> getRouteBoundaries(Long routeId) {
+        logger.debug("Fetching boundaries for route ID: {}", routeId);
+
+        Optional<Route> routeOpt = routeRepository.findById(routeId);
+        if (routeOpt.isPresent()) {
+            Route route = routeOpt.get();
+            List<RouteBoundaryDTO> boundaries = new ArrayList<>();
+
+            if (route.getBoundaryCoordinates() != null && !route.getBoundaryCoordinates().trim().isEmpty()) {
+                RouteBoundaryDTO boundary = new RouteBoundaryDTO();
+                boundary.setRouteId(routeId);
+                boundary.setRouteName(route.getName());
+                boundary.setCoordinates(route.getBoundaryCoordinates());
+                boundary.setBoundaryType("PRIMARY");
+                boundary.setIsActive(true);
+                boundary.setCreatedAt(route.getCreatedAt());
+                boundary.setUpdatedAt(route.getUpdatedAt());
+                boundaries.add(boundary);
+            }
+
+            return boundaries;
+        }
+
+        return new ArrayList<>();
+    }
+
+    public Optional<RouteBoundaryDTO> updateRouteBoundaries(Long routeId, String boundaryCoordinates) {
+        logger.info("Updating boundaries for route ID: {}", routeId);
+
+        // Validate boundary coordinates
+        if (boundaryCoordinates != null && !boundaryCoordinates.trim().isEmpty()) {
+            validateBoundaryCoordinates(boundaryCoordinates);
+        }
+
+        Optional<Route> routeOpt = routeRepository.findById(routeId);
+        if (routeOpt.isPresent()) {
+            Route route = routeOpt.get();
+            route.setBoundaryCoordinates(boundaryCoordinates);
+            routeRepository.save(route);
+
+            RouteBoundaryDTO boundary = new RouteBoundaryDTO();
+            boundary.setRouteId(routeId);
+            boundary.setCoordinates(boundaryCoordinates);
+            boundary.setBoundaryType("PRIMARY");
+            boundary.setIsActive(true);
+            boundary.setUpdatedAt(LocalDateTime.now());
+            boundary.setRouteName(route.getName());
+
+            logger.info("Successfully updated boundaries for route ID: {}", routeId);
+            return Optional.of(boundary);
+        }
+
+        logger.warn("Route not found for boundary update: {}", routeId);
+        return Optional.empty();
+    }
+
+    private void validateBoundaryCoordinates(String boundaryCoordinates) {
+        try {
+            JsonNode coordinatesArray = objectMapper.readTree(boundaryCoordinates);
+
+            if (!coordinatesArray.isArray()) {
+                throw new IllegalArgumentException("Boundary coordinates must be an array");
+            }
+
+            if (coordinatesArray.size() < 3) {
+                throw new IllegalArgumentException("Boundary coordinates must contain at least 3 points");
+            }
+
+            for (JsonNode coordinate : coordinatesArray) {
+                if (!coordinate.has("lat") || !coordinate.has("lng")) {
+                    throw new IllegalArgumentException("Each coordinate must have 'lat' and 'lng' properties");
+                }
+
+                double lat = coordinate.get("lat").asDouble();
+                double lng = coordinate.get("lng").asDouble();
+
+                if (lat < -90 || lat > 90) {
+                    throw new IllegalArgumentException("Latitude must be between -90 and 90");
+                }
+
+                if (lng < -180 || lng > 180) {
+                    throw new IllegalArgumentException("Longitude must be between -180 and 180");
+                }
+            }
+
+            logger.debug("Boundary coordinates validation passed for {} points", coordinatesArray.size());
+
+        } catch (Exception e) {
+            logger.error("Invalid boundary coordinates format: {}", e.getMessage());
+            throw new IllegalArgumentException("Invalid boundary coordinates format: " + e.getMessage());
+        }
+    }
+
+    // ================================
+    // ASSIGNMENT OPERATIONS
     // ================================
 
     @Transactional(readOnly = true)
     public List<RouteAssignmentDTO> getAssignmentsByRoute(Long routeId) {
         logger.debug("Fetching assignments for route ID: {}", routeId);
 
-        // Validate route exists
         Optional<Route> routeOpt = routeRepository.findById(routeId);
         if (!routeOpt.isPresent()) {
             logger.error("Route not found with ID: {}", routeId);
@@ -253,23 +371,19 @@ public class RouteService {
         }
 
         Route route = routeOpt.get();
-
-        // Get agents assigned to this route
         List<Agent> agents = routeRepository.findByRouteId(routeId);
 
-        // Convert to RouteAssignmentDTO list
         return agents.stream().map(agent -> {
             RouteAssignmentDTO assignment = new RouteAssignmentDTO();
             assignment.setRouteId(routeId);
             assignment.setRouteName(route.getName());
             assignment.setAgentId(agent.getAgentId());
 
-            // Get user details from AllUsers using userId
             Optional<AllUsers> userOpt = allUsersRepository.findById(agent.getUserId().intValue());
             if (userOpt.isPresent()) {
                 AllUsers user = userOpt.get();
                 assignment.setAgentName(user.getName());
-                assignment.setAssignedByName(user.getName()); // Assuming assignedByName uses same user details
+                assignment.setAssignedByName(user.getName());
             } else {
                 assignment.setAgentName("Unknown Agent");
                 assignment.setAssignedByName("Unknown");
@@ -277,7 +391,6 @@ public class RouteService {
                         agent.getAgentId(), agent.getUserId());
             }
 
-            // Set assignment details
             assignment.setStatus("ACTIVE");
             assignment.setAssignedAt(LocalDateTime.now());
             assignment.setAgentVehicleType(agent.getVehicleType() != null ?
@@ -305,19 +418,16 @@ public class RouteService {
     public RouteAssignmentDTO assignAgentToRoute(Long routeId, AgentAssignmentRequestDTO requestDTO) {
         logger.info("Assigning agent {} to route {}", requestDTO.getAgentId(), routeId);
 
-        // Validate route exists
         if (!routeRepository.existsById(routeId)) {
             logger.error("Route not found with ID: {}", routeId);
             throw new IllegalArgumentException("Route not found with ID: " + routeId);
         }
 
-        // Validate agent exists
         if (!agentRepository.existsById(requestDTO.getAgentId())) {
             logger.error("Agent not found with ID: {}", requestDTO.getAgentId());
             throw new IllegalArgumentException("Agent not found with ID: " + requestDTO.getAgentId());
         }
 
-        // Create a simple assignment DTO (without persisting to database for now)
         RouteAssignmentDTO assignment = new RouteAssignmentDTO();
         assignment.setRouteId(routeId);
         assignment.setAgentId(requestDTO.getAgentId());
@@ -331,7 +441,6 @@ public class RouteService {
 
     public boolean removeAgentFromRoute(Long routeId, Long agentId) {
         logger.info("Removing agent {} from route {}", agentId, routeId);
-        // Simplified implementation - return true for now
         return true;
     }
 
@@ -355,18 +464,16 @@ public class RouteService {
 
     public Optional<RouteAssignmentDTO> updateAssignmentStatus(Long assignmentId, String status) {
         logger.info("Updating assignment {} status to {}", assignmentId, status);
-        // Simplified implementation
         return Optional.empty();
     }
 
     public boolean deleteAssignment(Long assignmentId) {
         logger.info("Deleting assignment with ID: {}", assignmentId);
-        // Simplified implementation
         return true;
     }
 
     // ================================
-    // PERFORMANCE OPERATIONS (Simplified)
+    // PERFORMANCE OPERATIONS
     // ================================
 
     @Transactional(readOnly = true)
@@ -387,9 +494,9 @@ public class RouteService {
         analytics.setDateFrom(dateFrom);
         analytics.setDateTo(dateTo);
 
-        // Get basic route counts
         Long totalRoutes = routeRepository.countByHubId(hubId);
         Long activeRoutes = routeRepository.countByHubIdAndStatus(hubId, Route.RouteStatus.ACTIVE);
+        Long routesWithBoundaries = routeRepository.countRoutesWithBoundaries(hubId);
 
         analytics.setTotalRoutes(totalRoutes.intValue());
         analytics.setActiveRoutes(activeRoutes.intValue());
@@ -398,40 +505,10 @@ public class RouteService {
         analytics.setOverallEfficiency(BigDecimal.ZERO);
         analytics.setAverageDeliveryTime(BigDecimal.ZERO);
 
+        logger.info("Hub {} has {} total routes, {} active routes, {} with boundaries",
+                hubId, totalRoutes, activeRoutes, routesWithBoundaries);
+
         return analytics;
-    }
-
-    // ================================
-    // BOUNDARY OPERATIONS (Simplified)
-    // ================================
-
-    @Transactional(readOnly = true)
-    public List<RouteBoundaryDTO> getRouteBoundaries(Long routeId) {
-        logger.debug("Fetching boundaries for route ID: {}", routeId);
-        return new ArrayList<>();
-    }
-
-    public Optional<RouteBoundaryDTO> updateRouteBoundaries(Long routeId, String boundaryCoordinates) {
-        logger.info("Updating boundaries for route ID: {}", routeId);
-
-        Optional<Route> routeOpt = routeRepository.findById(routeId);
-        if (routeOpt.isPresent()) {
-            Route route = routeOpt.get();
-            route.setBoundaryCoordinates(boundaryCoordinates);
-            routeRepository.save(route);
-
-            RouteBoundaryDTO boundary = new RouteBoundaryDTO();
-            boundary.setRouteId(routeId);
-            boundary.setCoordinates(boundaryCoordinates);
-            boundary.setBoundaryType("PRIMARY");
-            boundary.setIsActive(true);
-            boundary.setUpdatedAt(LocalDateTime.now());
-            boundary.setRouteName(route.getName());
-
-            return Optional.of(boundary);
-        }
-
-        return Optional.empty();
     }
 
     // ================================
@@ -443,7 +520,6 @@ public class RouteService {
         logger.debug("Fetching available postal codes for hub ID: {}", hubId);
         List<String> postalCodeStrings = routeRepository.getUsedPostalCodesByHub(hubId);
 
-        // Parse comma-separated postal codes into individual codes
         List<String> individualCodes = new ArrayList<>();
         for (String postalCodeString : postalCodeStrings) {
             if (postalCodeString != null && !postalCodeString.trim().isEmpty()) {
@@ -493,7 +569,25 @@ public class RouteService {
         if (routeOpt.isPresent()) {
             Route route = routeOpt.get();
 
-            // Basic optimization suggestions based on route properties
+            // Check if route has boundary coordinates
+            if (route.getBoundaryCoordinates() == null || route.getBoundaryCoordinates().trim().isEmpty()) {
+                RouteOptimizationSuggestionDTO boundaryMetric = new RouteOptimizationSuggestionDTO();
+                boundaryMetric.setRouteId(routeId);
+                boundaryMetric.setRouteName(route.getName());
+                boundaryMetric.setSuggestionType("COVERAGE");
+                boundaryMetric.setTitle("Add Boundary Coordinates");
+                boundaryMetric.setDescription("Route lacks boundary coordinates. Adding them will improve delivery assignment accuracy and route visualization.");
+                boundaryMetric.setPriority("HIGH");
+                boundaryMetric.setPotentialImprovement(25.0);
+                boundaryMetric.setActionItems(List.of(
+                        "Define accurate route boundaries using GPS coordinates",
+                        "Use mapping tools to trace delivery area boundaries",
+                        "Validate boundary coordinates with actual coverage area"
+                ));
+                suggestions.add(boundaryMetric);
+            }
+
+            // Existing suggestions
             if (route.getMaxDailyDeliveries() == null || route.getMaxDailyDeliveries() < 20) {
                 RouteOptimizationSuggestionDTO suggestion = new RouteOptimizationSuggestionDTO();
                 suggestion.setRouteId(routeId);
@@ -511,7 +605,6 @@ public class RouteService {
                 suggestions.add(suggestion);
             }
 
-            // Add agent allocation suggestion
             RouteOptimizationSuggestionDTO agentSuggestion = new RouteOptimizationSuggestionDTO();
             agentSuggestion.setRouteId(routeId);
             agentSuggestion.setRouteName(route.getName());
@@ -547,7 +640,7 @@ public class RouteService {
         dto.setStatus(route.getStatus() != null ? route.getStatus().toString() : null);
         dto.setCenterLatitude(route.getCenterLatitude());
         dto.setCenterLongitude(route.getCenterLongitude());
-        dto.setBoundaryCoordinates(route.getBoundaryCoordinates());
+        dto.setBoundaryCoordinates(route.getBoundaryCoordinates()); // Ensure this is included
         dto.setEstimatedDeliveryTime(route.getEstimatedDeliveryTime());
         dto.setMaxDailyDeliveries(route.getMaxDailyDeliveries());
         dto.setPriorityLevel(route.getPriorityLevel());
@@ -568,6 +661,13 @@ public class RouteService {
         dto.setEfficiency(0.0);
         dto.setAgents(new ArrayList<>());
 
+        // Log boundary coordinate presence for debugging
+        if (route.getBoundaryCoordinates() != null && !route.getBoundaryCoordinates().trim().isEmpty()) {
+            logger.debug("Route {} has boundary coordinates", route.getRouteId());
+        } else {
+            logger.debug("Route {} has NO boundary coordinates", route.getRouteId());
+        }
+
         return dto;
     }
 
@@ -582,11 +682,8 @@ public class RouteService {
         dto.setTrustScore(agent.getTrustScore());
         dto.setDeliveryTime(agent.getDeliveryTime());
         dto.setNumberOfDelivery(agent.getNumberOfDelivery());
-        
-        // Convert Integer phoneNumber to String for RouteDTO.AgentDTO
         dto.setPhoneNumber(agent.getPhoneNumber() != null ? agent.getPhoneNumber().toString() : "");
 
-        // Get user details from AllUsers entity using userId
         try {
             Optional<AllUsers> userOpt = allUsersRepository.findById(agent.getUserId().intValue());
             if (userOpt.isPresent()) {
@@ -594,7 +691,6 @@ public class RouteService {
                 dto.setName(user.getName());
                 dto.setEmail(user.getEmail());
 
-                // Split name into first and last name if possible
                 if (user.getName() != null && !user.getName().trim().isEmpty()) {
                     String[] nameParts = user.getName().trim().split(" ", 2);
                     dto.setFirstName(nameParts[0]);
@@ -604,7 +700,6 @@ public class RouteService {
                     dto.setLastName("");
                 }
             } else {
-                // Set default values if user not found
                 dto.setName("Unknown User");
                 dto.setEmail("");
                 dto.setFirstName("Unknown");
@@ -613,7 +708,6 @@ public class RouteService {
             }
         } catch (Exception e) {
             logger.error("Error fetching user details for agent {}: {}", agent.getAgentId(), e.getMessage());
-            // Set default values in case of error
             dto.setName("Error Loading User");
             dto.setEmail("");
             dto.setFirstName("Error");
@@ -631,7 +725,7 @@ public class RouteService {
         route.setPostalCodes(createDTO.getPostalCodes());
         route.setCenterLatitude(createDTO.getCenterLatitude());
         route.setCenterLongitude(createDTO.getCenterLongitude());
-        route.setBoundaryCoordinates(createDTO.getBoundaryCoordinates());
+        route.setBoundaryCoordinates(createDTO.getBoundaryCoordinates()); // Map boundary coordinates
         route.setEstimatedDeliveryTime(createDTO.getEstimatedDeliveryTime());
         route.setMaxDailyDeliveries(createDTO.getMaxDailyDeliveries());
         route.setPriorityLevel(createDTO.getPriorityLevel() != null ? createDTO.getPriorityLevel() : 3);
@@ -658,6 +752,9 @@ public class RouteService {
                 route.setRouteType(Route.RouteType.MIXED);
             }
         }
+
+        logger.debug("Mapped boundary coordinates to entity: {}",
+                route.getBoundaryCoordinates() != null ? "YES" : "NO");
     }
 
     private void mapUpdateDTOToEntity(RouteUpdateDTO updateDTO, Route route) {
@@ -680,7 +777,8 @@ public class RouteService {
             route.setCenterLongitude(updateDTO.getCenterLongitude());
         }
         if (updateDTO.getBoundaryCoordinates() != null) {
-            route.setBoundaryCoordinates(updateDTO.getBoundaryCoordinates());
+            route.setBoundaryCoordinates(updateDTO.getBoundaryCoordinates()); // Update boundary coordinates
+            logger.debug("Updated boundary coordinates for route {}", route.getRouteId());
         }
         if (updateDTO.getEstimatedDeliveryTime() != null) {
             route.setEstimatedDeliveryTime(updateDTO.getEstimatedDeliveryTime());

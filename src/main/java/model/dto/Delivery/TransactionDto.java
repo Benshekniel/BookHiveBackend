@@ -1,11 +1,13 @@
 package model.dto.Delivery;
 
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class TransactionDto {
+
     @Data
-    public class TransactionCreateDto {
+    public static class TransactionCreateDto {
         private Long bookId;
         private Long borrowerId;
         private Long lenderId;
@@ -16,7 +18,7 @@ public class TransactionDto {
     }
 
     @Data
-    public class TransactionResponseDto {
+    public static class TransactionResponseDto {
         private Long transactionId;
         private Long bookId;
         private String bookTitle;
@@ -32,5 +34,31 @@ public class TransactionDto {
         private LocalDateTime returnDate;
         private String paymentAmount;
         private String paymentStatus;
+    }
+
+    @Data
+    public static class HubRevenueDto {
+        private Long hubId;
+        private String hubName;
+        private BigDecimal totalRevenue;
+        private Long totalTransactions;
+        private Long completedTransactions;
+        private Long pendingTransactions;
+    }
+
+    @Data
+    public static class RevenueSummaryDto {
+        private BigDecimal totalRevenue;
+        private Long totalTransactions;
+        private Long completedTransactions;
+        private Long pendingTransactions;
+        private Long failedTransactions;
+    }
+
+    @Data
+    public static class TransactionStatsDto {
+        private String status;
+        private Long count;
+        private BigDecimal totalAmount;
     }
 }
