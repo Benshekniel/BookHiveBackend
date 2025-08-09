@@ -1,5 +1,6 @@
 package controller.Delivery;
 
+import model.dto.Delivery.DeliverySummaryDto;
 import model.entity.Delivery;
 import model.dto.Delivery.DeliveryDto.*;
 import model.dto.Delivery.AgentDto.AssignAgentDeliveryDto;
@@ -208,5 +209,44 @@ public class DeliveryController {
         error.put("message", message);
         error.put("timestamp", System.currentTimeMillis());
         return error;
+    }
+
+    // Add these methods to the existing DeliveryController class
+
+    @GetMapping("/summary")
+    public ResponseEntity<?> getDeliverySummary() {
+        try {
+            log.info("Fetching delivery summary for optimized dashboard");
+
+            DeliverySummaryDto summary = deliveryService.getDeliverySummary();
+
+            log.info("Successfully retrieved delivery summary with {} total deliveries",
+                    summary.getTotalDeliveries());
+
+            return ResponseEntity.ok(summary);
+
+        } catch (Exception e) {
+            log.error("Error fetching delivery summary: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Failed to load delivery summary"));
+        }
+    }
+
+    @GetMapping("/batch-by-hubs")
+    public ResponseEntity<?> getBatchDeliveryDataByHubs(@RequestParam List<Long> hubIds) {
+        try {
+            log.info("Fetching batch delivery data for {} hubs", hubIds.size());
+
+            Map<String, List<DeliveryResponseDto>> batchData = deliveryService.getBatchDeliveryDataByHubs(hubIds);
+
+            log.info("Successfully retrieved batch delivery data for {} hubs", batchData.size());
+
+            return ResponseEntity.ok(batchData);
+
+        } catch (Exception e) {
+            log.error("Error fetching batch delivery data: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Failed to load batch delivery data"));
+        }
     }
 }
