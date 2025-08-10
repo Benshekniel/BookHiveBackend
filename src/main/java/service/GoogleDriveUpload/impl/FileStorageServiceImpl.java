@@ -11,6 +11,7 @@ import service.GoogleDriveUpload.FileStorageService;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -111,6 +112,48 @@ public class FileStorageServiceImpl implements FileStorageService {
         // Generate random filename with UUID and original extension
         return UUID.randomUUID().toString() + extension;
     }
+
+    @Override
+    public Drive getDriveService() {
+        return driveService;
+    }
+
+    @Override
+    public String getFileWebViewLinkByName(String fileName, String folderName) throws IOException {
+        String folderId = getOrCreateFolder(folderName);
+        String query = String.format("name = '%s' and '%s' in parents and trashed = false", fileName, folderId);
+        FileList fileList = driveService.files().list()
+                .setQ(query)
+                .setSpaces("drive")
+                .setFields("files(webViewLink)")
+                .execute();
+        if (fileList.getFiles() != null && !fileList.getFiles().isEmpty()) {
+            return fileList.getFiles().get(0).getWebViewLink();
+        }
+        throw new IOException("File not found: " + fileName);
+    }
+
+    @Override
+    public String getFileAsBase64(String fileName, String folderName) throws IOException {
+        String folderId = getOrCreateFolder(folderName);
+        String query = String.format("name = '%s' and '%s' in parents and trashed = false", fileName, folderId);
+        FileList fileList = driveService.files().list()
+                .setQ(query)
+                .setSpaces("drive")
+                .setFields("files(id, mimeType)")
+                .execute();
+        if (fileList.getFiles() != null && !fileList.getFiles().isEmpty()) {
+            String fileId = fileList.getFiles().get(0).getId();
+            String mimeType = fileList.getFiles().get(0).getMimeType();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            driveService.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+            byte[] fileBytes = outputStream.toByteArray();
+            String base64String = Base64.getEncoder().encodeToString(fileBytes);
+            return String.format("data:%s;base64,%s", mimeType, base64String);
+        }
+        throw new IOException("File not found: " + fileName);
+    }
+
 }
 //import com.google.api.client.http.InputStreamContent;
 //import com.google.api.services.drive.Drive;
