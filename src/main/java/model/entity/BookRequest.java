@@ -88,8 +88,16 @@ public class BookRequest {
     public String getGradeLevel() { return gradeLevel; }
     public void setGradeLevel(String gradeLevel) { this.gradeLevel = gradeLevel; }
     
+
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public LocalDateTime getDateRequested() { return dateRequested; }
+    public LocalDateTime getDateUpdated() { return dateUpdated; }
+    public String getApprovedBy() { return approvedBy; }
+    public String getRejectionReason() { return rejectionReason; }
+    public String getTrackingNumber() { return trackingNumber; }
+    public LocalDateTime getEstimatedDelivery() { return estimatedDelivery; }
 
     @PrePersist
     protected void onCreate() {

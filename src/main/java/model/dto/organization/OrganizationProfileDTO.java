@@ -16,7 +16,7 @@ public class OrganizationProfileDTO {
     private String contactPersonLastName;
     private String email;
     private String phone;
-    private Integer yearsOperating;
+    private Integer years;
     private String address;
     private String city;
     private String state;

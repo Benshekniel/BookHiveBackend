@@ -14,7 +14,7 @@ public class NotificationDTO {
     private String message;
     private String type; // "info", "success", "warning", "error"
     private boolean isRead;
-    private LocalDateTime createdDate;
+    private LocalDateTime createdAt;
     private String actionUrl;
     private Long relatedEntityId;
     private String relatedEntityType; // "donation", "request", "message"
