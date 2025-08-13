@@ -61,4 +61,49 @@ public class EmailServiceImpl implements EmailService {
             throw new IOException("Error sending email: " + e.getMessage(), e);
         }
     }
+
+
+    @Override
+    public void sendEmailCustom(
+            String to,
+            String subject,
+            String text,
+            String recipientName,
+            MultipartFile attachment,
+            String imageFolder,   // example: "emailImages"
+            String imageName      // example: "approve.png"
+    ) throws IOException {
+        MimeMessage message = mailSender.createMimeMessage();
+
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+
+            // Prepare Thymeleaf context for HTML
+            Context context = new Context();
+            context.setVariable("recipientName", recipientName != null ? recipientName : "User");
+            context.setVariable("message", text);
+            context.setVariable("imageCid", "logo-image"); // CID for inline image
+
+            String htmlContent = templateEngine.process("email-template", context);
+            helper.setText(htmlContent, true);
+
+            // ✅ Dynamically load image from folder & name
+            String imagePath = "static/" + imageFolder + "/" + imageName;
+            ClassPathResource imageResource = new ClassPathResource(imagePath);
+            helper.addInline("logo-image", imageResource);
+
+            // Add attachment if provided
+            if (attachment != null && !attachment.isEmpty()) {
+                helper.addAttachment(attachment.getOriginalFilename(), attachment);
+            }
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new IOException("Error sending email: " + e.getMessage(), e);
+        }
+    }
+
 }
