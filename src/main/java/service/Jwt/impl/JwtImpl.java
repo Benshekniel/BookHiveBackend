@@ -34,9 +34,10 @@ public class JwtImpl implements JwtService {
     }
 
     @Override
-    public String generateToken(String email,String role) {
+    public String generateToken(String email,String role,Integer User_id) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role); // ✅ Add role to claims
+        claims.put("User_id", User_id);
         return Jwts.builder()
                 .claims()
                 .add(claims)

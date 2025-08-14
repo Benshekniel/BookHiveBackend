@@ -37,7 +37,7 @@ public class LoginImpl implements LoginService {
                 Optional<AllUsers> allUsers1 = allUsersRepo.findOneByEmailAndPassword(loginDTO.getEmail(), encodedPassword);
                 if (allUsers1.isPresent()) {
 
-                    String token = jwtService.generateToken(allUsers.getEmail(),allUsers.getRole()); // Assuming this method exists
+                    String token = jwtService.generateToken(allUsers.getEmail(),allUsers.getRole(),allUsers.getUser_id()); // Assuming this method exists
                     String userRole = allUsers.getRole();
                     return new LoginResponse("Login Success", true,userRole,token);
                 } else {
