@@ -1,11 +1,11 @@
 package model.dto;
 
+import model.entity.AllUsers;
 import org.springframework.web.multipart.MultipartFile;
 
 public class OrgDTO {
     private String type;
     private String reg_no;
-    private String status;
     private String fname;
     private String lname;
     private String email;
@@ -19,10 +19,9 @@ public class OrgDTO {
     private String imageFileName;
     private String fileType;
 
-    public OrgDTO(String type, String reg_no, String status, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
+    public OrgDTO(String type, String reg_no, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
         this.type = type;
         this.reg_no = reg_no;
-        this.status = status;
         this.fname = fname;
         this.lname = lname;
         this.email = email;
@@ -37,10 +36,9 @@ public class OrgDTO {
         this.fileType = fileType;
     }
 
-    public OrgDTO(String type, String reg_no, String status, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip) {
+    public OrgDTO(String type, String reg_no,  String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip) {
         this.type = type;
         this.reg_no = reg_no;
-        this.status = status;
         this.fname = fname;
         this.lname = lname;
         this.email = email;
@@ -62,10 +60,6 @@ public class OrgDTO {
 
     public String getReg_no() {
         return reg_no;
-    }
-
-    public String getStatus() {
-        return status;
     }
 
     public String getFname() {
@@ -124,10 +118,6 @@ public class OrgDTO {
         this.reg_no = reg_no;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public void setFname(String fname) {
         this.fname = fname;
     }
@@ -181,7 +171,6 @@ public class OrgDTO {
         return "OrgDTO{" +
                 "type='" + type + '\'' +
                 ", reg_no='" + reg_no + '\'' +
-                ", status='" + status + '\'' +
                 ", fname='" + fname + '\'' +
                 ", lname='" + lname + '\'' +
                 ", email='" + email + '\'' +

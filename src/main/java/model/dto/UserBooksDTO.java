@@ -22,7 +22,10 @@ public class UserBooksDTO {
     private String isbn;
     private String language;
     private List<String> hashtags;     // from hashtags array
+    private String bookImage;
 
+
+    //Without book image
     public UserBooksDTO(String userEmail, String title, List<String> authors, List<String> genres, String condition, Boolean forSale, Double price, Boolean forLend, Double lendingAmount, String lendingPeriod, Boolean forExchange, String exchangePeriod, String description, String location, String publishYear, String isbn, String language, List<String> hashtags) {
         this.userEmail = userEmail;
         this.title = title;
@@ -42,6 +45,29 @@ public class UserBooksDTO {
         this.isbn = isbn;
         this.language = language;
         this.hashtags = hashtags;
+    }
+
+    //With book image
+    public UserBooksDTO(String userEmail, String title, List<String> authors, List<String> genres, String condition, Boolean forSale, Double price, Boolean forLend, Double lendingAmount, String lendingPeriod, Boolean forExchange, String exchangePeriod, String description, String location, String publishYear, String isbn, String language, List<String> hashtags, String bookImage) {
+        this.userEmail = userEmail;
+        this.title = title;
+        this.authors = authors;
+        this.genres = genres;
+        this.condition = condition;
+        this.forSale = forSale;
+        this.price = price;
+        this.forLend = forLend;
+        this.lendingAmount = lendingAmount;
+        this.lendingPeriod = lendingPeriod;
+        this.forExchange = forExchange;
+        this.exchangePeriod = exchangePeriod;
+        this.description = description;
+        this.location = location;
+        this.publishYear = publishYear;
+        this.isbn = isbn;
+        this.language = language;
+        this.hashtags = hashtags;
+        this.bookImage = bookImage;
     }
 
     public UserBooksDTO() {
@@ -119,6 +145,10 @@ public class UserBooksDTO {
         return hashtags;
     }
 
+    public String getBookImage() {
+        return bookImage;
+    }
+
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
     }
@@ -189,6 +219,10 @@ public class UserBooksDTO {
 
     public void setHashtags(List<String> hashtags) {
         this.hashtags = hashtags;
+    }
+
+    public void setBookImage(String bookImage) {
+        this.bookImage = bookImage;
     }
 
     @Override

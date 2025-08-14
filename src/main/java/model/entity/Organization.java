@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 public class Organization {
 
     @Id
-    @Column(name="org_id", length = 15)
+    @Column(name="org_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orgId;
 
@@ -17,9 +17,6 @@ public class Organization {
 
     @Column(name="reg_no", length = 255)
     private String regNo;
-
-    @Column(name="status", length = 255)
-    private String status;
 
     @Column(name="fname", length = 255)
     private String fname;
@@ -57,10 +54,9 @@ public class Organization {
     @Column(name="fileType", length = 255)
     private String fileType;
 
-    public Organization(String type, String regNo, String status, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
+    public Organization(String type, String regNo, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
         this.type = type;
         this.regNo = regNo;
-        this.status = status;
         this.fname = fname;
         this.lname = lname;
         this.email = email;
@@ -88,10 +84,6 @@ public class Organization {
 
     public String getRegNo() {
         return regNo;
-    }
-
-    public String getStatus() {
-        return status;
     }
 
     public String getFname() {
@@ -154,10 +146,6 @@ public class Organization {
         this.regNo = regNo;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public void setFname(String fname) {
         this.fname = fname;
     }
@@ -212,7 +200,6 @@ public class Organization {
                 "orgId=" + orgId +
                 ", type='" + type + '\'' +
                 ", regNo='" + regNo + '\'' +
-                ", status='" + status + '\'' +
                 ", fname='" + fname + '\'' +
                 ", lname='" + lname + '\'' +
                 ", email='" + email + '\'' +
