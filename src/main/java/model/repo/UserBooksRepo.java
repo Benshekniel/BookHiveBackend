@@ -1,6 +1,6 @@
 package model.repo;
 
-import model.entity.Books;
+//import model.entity.Books;
 import model.entity.UserBooks;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
