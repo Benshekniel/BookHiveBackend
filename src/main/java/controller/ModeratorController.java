@@ -33,4 +33,22 @@ public class ModeratorController {
         List<Map<String, Object>> pendings = moderatorService.getAllPending();
         return ResponseEntity.ok(pendings);
     }
+
+
+    @GetMapping("/approveUser")
+    public ResponseEntity<Map<String, String>> approveUser(
+            @RequestParam("email") String email,
+            @RequestParam("name") String name){
+        String result = moderatorService.approveUserStatus(email,name);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    @GetMapping("/rejectUser")
+    public ResponseEntity<Map<String, String>> rejectUser(
+            @RequestParam("email") String email,
+            @RequestParam("name") String name,
+            @RequestParam("reason") String reason ){
+        String result = moderatorService.rejectUserStatus(email,name,reason);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
 }

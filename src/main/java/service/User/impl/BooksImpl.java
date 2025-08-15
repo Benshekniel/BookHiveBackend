@@ -48,7 +48,8 @@ public class BooksImpl  implements BooksService {
                 userBooksDTO.getPublishYear(),       // publishYear
                 userBooksDTO.getIsbn(),              // isbn
                 userBooksDTO.getLanguage(),          // language
-                userBooksDTO.getHashtags()           // hashtags
+                userBooksDTO.getHashtags(),           // hashtags
+                userBooksDTO.getBookImage()
         );
 
         userBooksRepo.save(userBooks);
@@ -76,7 +77,8 @@ public class BooksImpl  implements BooksService {
                         book.getPublishYear(),
                         book.getIsbn(),
                         book.getLanguage(),
-                        book.getHashtags()
+                        book.getHashtags(),
+                        book.getBookImage()
                 ))
                 .collect(Collectors.toList());
     }
