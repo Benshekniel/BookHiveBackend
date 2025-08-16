@@ -1,10 +1,10 @@
 package service.BookStore;
 
-import model.dto.BookDTOs.RegisterBookDTO;
-import model.dto.BookDTOs.UpdateBookDTO;
-import model.dto.BookDTOs.ViewBookDTO;
-import model.entity.Book;
-import model.repo.BookRepo;
+import model.dto.BSBookDTOs.RegisterBookDTO;
+import model.dto.BSBookDTOs.UpdateBookDTO;
+import model.dto.BSBookDTOs.ViewBookDTO;
+import model.entity.BSBook;
+import model.repo.BSBookRepo;
 
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
@@ -18,19 +18,19 @@ import org.modelmapper.convention.MatchingStrategies;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class BookService {
+public class BSBookService {
 
-    private final BookRepo bookRepo;
+    private final BSBookRepo bookRepo;
 
     // Common mapper resource for the entire service class:
     private static final ModelMapper modelMapper = new ModelMapper();
 
-    public ResponseEntity<String> registerBook (RegisterBookDTO bookDTO, Integer ownerId) {
+    public ResponseEntity<String> registerBook (RegisterBookDTO bookDTO, Integer storeId) {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-        Book book = modelMapper.map(bookDTO, Book.class);
-             book.setOwnerId(ownerId);
+        BSBook book = modelMapper.map(bookDTO, BSBook.class);
+             book.setStoreId(storeId);
         bookRepo.save(book);
         return ResponseEntity.ok("Book registered successfully");
     }

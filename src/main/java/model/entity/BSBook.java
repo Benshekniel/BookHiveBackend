@@ -15,10 +15,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Entity for books owned by BookStore users.
+ */
 @Entity
-@Table(name = "books")
+@Table(name = "bookstore_books")
 @Data @NoArgsConstructor @AllArgsConstructor
-public class Book {
+public class BSBook {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -96,9 +99,13 @@ public class Book {
 //    @JoinColumn(name = "owner_id", nullable = false)
 //    private AllUsers ownerID;
 
-    /** OwnerId integer foreign key connecting 'AllUsers' table userId */
+//    /** OwnerId integer foreign key connecting 'AllUsers' table userId */
+//    @Column(nullable = false)
+//    private Integer ownerId;
+
+    /** StoreId integer foreign key connecting 'BookStores' table storeId */
     @Column(nullable = false)
-    private Integer ownerId;
+    private Integer storeId;
 
     @PrePersist
     protected void onCreate() {
