@@ -80,6 +80,9 @@ public class UserBooks {
     @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name="bookImage", length = 255)
+    private String bookImage;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -113,6 +116,28 @@ public class UserBooks {
     }
 
     public UserBooks() {
+    }
+
+    public UserBooks(String userEmail, String title, List<String> authors, List<String> genres, String condition, Boolean forSale, Double price, Boolean forLend, Double lendingAmount, String lendingPeriod, Boolean forExchange, String exchangePeriod, String description, String location, String publishYear, String isbn, String language, List<String> hashtags, String bookImage) {
+        this.userEmail = userEmail;
+        this.title = title;
+        this.authors = authors;
+        this.genres = genres;
+        this.condition = condition;
+        this.forSale = forSale;
+        this.price = price;
+        this.forLend = forLend;
+        this.lendingAmount = lendingAmount;
+        this.lendingPeriod = lendingPeriod;
+        this.forExchange = forExchange;
+        this.exchangePeriod = exchangePeriod;
+        this.description = description;
+        this.location = location;
+        this.publishYear = publishYear;
+        this.isbn = isbn;
+        this.language = language;
+        this.hashtags = hashtags;
+        this.bookImage = bookImage;
     }
 
     public Long getBookId() {
@@ -199,6 +224,10 @@ public class UserBooks {
         return updatedAt;
     }
 
+    public String getBookImage() {
+        return bookImage;
+    }
+
     public void setBookId(Long bookId) {
         this.bookId = bookId;
     }
@@ -269,6 +298,10 @@ public class UserBooks {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public void setBookImage(String bookImage) {
+        this.bookImage = bookImage;
     }
 
     public void setHashtags(List<String> hashtags) {

@@ -34,11 +34,8 @@ public class Delivery {
 
     private String trackingNumber;
 
-    @Column(name = "hub_id")
-    private Long hubId;
-
-    @Column(name = "agent_id")
-    private Long agentId;
+    @Column(name = "route_id")
+    private Long routeId;
 
     @Column(name = "transaction_id")
     private Long transactionId;

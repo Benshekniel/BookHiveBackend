@@ -43,7 +43,6 @@ public class Org_RegisterImpl implements Register_OrgAccount {
         Organization organization = new Organization(
                 orgDTO.getType(),
                 orgDTO.getReg_no(),
-                orgDTO.getStatus(),
                 orgDTO.getFname(),
                 orgDTO.getLname(),
                 orgDTO.getEmail(),

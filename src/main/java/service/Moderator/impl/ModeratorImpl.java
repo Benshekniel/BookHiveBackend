@@ -1,65 +1,80 @@
-//package service.Moderator.impl;
-//
-//import model.dto.LoginDto;
-//import model.dto.ModeratorDto;
-//import model.entity.Moderator;
-//import model.messageResponse.LoginResponse;
-//import model.repo.ModeratorRepo;
-//import service.Moderator.ModeratorService;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.Optional;
-//
-//@Service
-//public class ModeratorImpl implements ModeratorService {
-//
-//    @Autowired
-//    private ModeratorRepo moderatorRepo;
-//
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
-//
-//
-//    @Override
-//    public String addAccount(ModeratorDto moderatorDto) {
-//
-//        Moderator moderator = new Moderator(
-//                moderatorDto.getEmployeeid(),
-//                moderatorDto.getEmployeename(),
-//                moderatorDto.getEmail(),
-//                this.passwordEncoder.encode(moderatorDto.getPassword()),
-//                moderatorDto.getAddress()
-//        );
-//
-//        moderatorRepo.save(moderator);
-//
-//
-//        return moderator.getEmployeename();
-//
-//    }
-//
-//    @Override
-//    public LoginResponse loginEmployee(LoginDto loginDTO) {
-//        String msg = "";
-//        Moderator moderator1 = moderatorRepo.findByEmail(loginDTO.getEmail());
-//        if (moderator1 != null) {
-//            String password = loginDTO.getPassword();
-//            String encodedPassword = moderator1.getPassword();
-//            Boolean isPwdRight = passwordEncoder.matches(password, encodedPassword);
-//            if (isPwdRight) {
-//                Optional<Moderator> employee = moderatorRepo.findOneByEmailAndPassword(loginDTO.getEmail(), encodedPassword);
-//                if (employee.isPresent()) {
-//                    return new LoginResponse("Login Success", true);
-//                } else {
-//                    return new LoginResponse("Login Failed", false);
-//                }
-//            } else {
-//                return new LoginResponse("password Not Match", false);
-//            }
-//        }else {
-//            return new LoginResponse("Email not exits", false);
-//        }
-//    }
-//}
+package service.Moderator.impl;
+
+import model.dto.AllUsersDTO;
+import model.entity.AllUsers;
+import model.repo.AllUsersRepo;
+import model.repo.ModeratorRepo;
+import org.springframework.http.ResponseEntity;
+import service.Email.EmailService;
+import service.Moderator.ModeratorService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class ModeratorImpl implements ModeratorService {
+
+    @Autowired
+    private ModeratorRepo moderatorRepo;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
+
+
+    public List<Map<String, Object>> getAllPending() {
+        return moderatorRepo.findAllPending();
+    }
+
+    @Override
+    public String approveUserStatus(String email,String name) {
+
+        int updatedRows = moderatorRepo.approveUserByEmail(email);
+        String response = updatedRows > 0 ? "Approved" : "No user found to approve";
+
+        if("Approved".equals(response)){
+            String to=email;
+            String subject="You account status has been changed";
+            String text = "Congratulations! Your account has been approved and is now active.";
+            String recipientName = name;
+            try {
+                emailService.sendEmailCustom(to, subject, text, recipientName, null,"email","approve.png");
+            } catch (IOException e) {
+                response= "Error sending email: ";
+            }
+        }
+
+        return response;
+    }
+
+    @Override
+    public String rejectUserStatus(String email,String name,String reason) {
+
+        int updatedRows = moderatorRepo.rejectUserByEmail(email);
+        String response = updatedRows > 0 ? "Rejected" : "No user found to approve";
+
+        if("Rejected".equals(response)){
+            String to=email;
+            String subject="You account status has been changed";
+            String text = reason;
+            String recipientName = name;
+            try {
+                emailService.sendEmailCustom(to, subject, text, recipientName, null,"email","reject.png");
+            } catch (IOException e) {
+                response= "Error sending email: ";
+            }
+        }
+
+        return response;
+    }
+
+
+}
