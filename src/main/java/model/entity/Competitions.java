@@ -74,13 +74,17 @@ public class Competitions {
     @Column(name = "description", columnDefinition = "text")
     private String description;
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     // Default constructor
     public Competitions() {
     }
 
     // Parameterized constructor
-    public Competitions(String competitionId, boolean activeStatus, String createdBy, LocalDateTime createdAt,
-                       LocalDateTime activatedAt, String title, Integer entryTrustScore, Integer prizeTrustScore,
+    public Competitions(String competitionId, boolean activeStatus, String createdBy, String title, Integer entryTrustScore, Integer prizeTrustScore,
                        LocalDateTime startDateTime, LocalDateTime endDateTime, LocalDateTime votingStartDateTime,
                        LocalDateTime votingEndDateTime, Integer maxParticipants, Integer currentParticipants,
                        List<String> participantEmails, String theme, List<String> rules, List<String> judgingCriteria,
@@ -88,8 +92,6 @@ public class Competitions {
         this.competitionId = competitionId;
         this.activeStatus = activeStatus;
         this.createdBy = createdBy;
-        this.createdAt = createdAt;
-        this.activatedAt = activatedAt;
         this.title = title;
         this.entryTrustScore = entryTrustScore;
         this.prizeTrustScore = prizeTrustScore;
