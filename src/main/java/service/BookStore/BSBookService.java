@@ -25,12 +25,12 @@ public class BSBookService {
     // Common mapper resource for the entire service class:
     private static final ModelMapper modelMapper = new ModelMapper();
 
-    public ResponseEntity<String> registerBook (RegisterBookDTO bookDTO, Integer ownerId) {
+    public ResponseEntity<String> registerBook (RegisterBookDTO bookDTO, Integer storeId) {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         BSBook book = modelMapper.map(bookDTO, BSBook.class);
-             book.setOwnerId(ownerId);
+             book.setStoreId(storeId);
         bookRepo.save(book);
         return ResponseEntity.ok("Book registered successfully");
     }
