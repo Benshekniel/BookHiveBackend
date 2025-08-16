@@ -1,6 +1,6 @@
 package model.dto;
 
-import model.entity.Book;
+import model.entity.BSBook;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-public class BookDTOs {
+public class BSBookDTOs {
 
     @Data @NoArgsConstructor @AllArgsConstructor
     public static class RegisterBookDTO {
@@ -18,14 +18,14 @@ public class BookDTOs {
         private List<String> authors;
         private List<String> genres;
         private String description;
-        private Book.BookCondition condition;
+        private BSBook.BookCondition condition;
 
         private List<String> imageUrls;
         private List<String> tags;
 
-        private Book.BookStatus status;
+        private BSBook.BookStatus status;
 
-        private Book.ListingType listingType;
+        private BSBook.ListingType listingType;
         private Map<String, BigDecimal> pricing;
 
         private String terms;
@@ -45,14 +45,14 @@ public class BookDTOs {
         private List<String> authors;
         private List<String> genres;
         private String description;
-        private Book.BookCondition condition;
+        private BSBook.BookCondition condition;
 
         private List<String> imageUrls;
         private List<String> tags;
 
-        private Book.BookStatus status;
+        private BSBook.BookStatus status;
 
-        private Book.ListingType listingType;
+        private BSBook.ListingType listingType;
         private Map<String, BigDecimal> pricing;
 
         private String terms;
@@ -81,11 +81,11 @@ public class BookDTOs {
 //private List<String> genres;
 //private List<String> imageUrls;
 //private List<String> tags;
-//private Book.BookCondition condition;
+//private BSBook.BookCondition condition;
 //private String description;
-//private Book.BookStatus status;
-//private Book.BookAvailability availability;
-//private Book.ListingType listingType;
+//private BSBook.BookStatus status;
+//private BSBook.BookAvailability availability;
+//private BSBook.ListingType listingType;
 //private Map<String, BigDecimal> pricing;
 //private String terms;
 //private String isbn;

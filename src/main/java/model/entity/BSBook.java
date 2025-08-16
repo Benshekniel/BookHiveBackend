@@ -15,10 +15,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Entity for books owned by BookStore users.
+ */
 @Entity
-@Table(name = "books")
+@Table(name = "bookstore_books")
 @Data @NoArgsConstructor @AllArgsConstructor
-public class Book {
+public class BSBook {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

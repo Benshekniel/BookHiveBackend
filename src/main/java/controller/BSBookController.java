@@ -1,9 +1,9 @@
 package controller;
 
-import model.dto.BookDTOs.RegisterBookDTO;
-import model.dto.BookDTOs.UpdateBookDTO;
-import model.dto.BookDTOs.ViewBookDTO;
-import service.BookStore.BookService;
+import model.dto.BSBookDTOs.RegisterBookDTO;
+import model.dto.BSBookDTOs.UpdateBookDTO;
+import model.dto.BSBookDTOs.ViewBookDTO;
+import service.BookStore.BSBookService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +13,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/bookstore")
 @CrossOrigin(origins = "http://localhost:9999")
 @RequiredArgsConstructor
-public class BookController {
+public class BSBookController {
 
-    private final BookService bookService;
+    private final BSBookService bookService;
 
     @PostMapping
     public ResponseEntity<String> registerBook (
