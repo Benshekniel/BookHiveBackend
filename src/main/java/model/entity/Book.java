@@ -54,9 +54,6 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private BookStatus status;
 
-//    @Enumerated(EnumType.STRING)
-//    private BookAvailability availability;
-
     @Enumerated(EnumType.STRING)
     private ListingType listingType;
 
@@ -114,16 +111,13 @@ public class Book {
         updatedAt = LocalDateTime.now();
     }
 
-    // Enums
     public enum BookCondition {
         NEW, USED, FAIR
     }
     public enum BookStatus {
-        UNAVAILABLE, AVAILABLE, SOLD, LENT, DONATED, AUCTION
+        UNAVAILABLE, AVAILABLE,
+        SOLD, LENT, DONATED, AUCTION
     }
-//    public enum BookAvailability {
-//        UNAVAILABLE, AVAILABLE, RESERVED
-//    }
     public enum ListingType {
         SELL_ONLY,
         LEND_ONLY,
