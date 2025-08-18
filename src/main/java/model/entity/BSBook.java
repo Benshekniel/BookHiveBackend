@@ -41,7 +41,7 @@ public class BSBook {
 
     @Type(StringArrayType.class)
     @Column(columnDefinition = "text[]")
-    private List<String> imageUrls;
+    private List<String> images;
 
     @Type(StringArrayType.class)
     @Column(columnDefinition = "text[]")
