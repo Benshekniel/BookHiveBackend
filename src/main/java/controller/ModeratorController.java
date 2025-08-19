@@ -3,6 +3,7 @@ package controller;
 import model.dto.AllUsersDTO;
 import model.dto.CompetitionDTO;
 import model.dto.UserBooksDTO;
+import model.entity.Competitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -81,5 +82,11 @@ public class ModeratorController {
             Map<String, String> Result = fileStorageService.uploadFile(bannerImageFile, "competitions", bannerImageName);
         }
         return ResponseEntity.ok(Map.of("message", response));
+    }
+
+    @GetMapping("/getAllCompetitions")
+    public ResponseEntity<List<Map<String, Object>>> getAllCompetitions() {
+        List<Map<String, Object>> competitions = competitionService.getAllCompetitionsMapped();
+        return ResponseEntity.ok(competitions);
     }
 }
