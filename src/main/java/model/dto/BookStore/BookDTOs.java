@@ -1,4 +1,3 @@
-package model.dto.BookStore;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

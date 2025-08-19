@@ -9,6 +9,7 @@ import model.entity.AllUsers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import service.FileUpload.UploadService;
+import service.GoogleDriveUpload.FileStorageService;
 import service.Register.RegisterAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,9 @@ public class RegisterController {
 
     @Autowired
     private UploadService uploadService;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @PostMapping("/register")
     public String addAccount(@RequestBody AllUsersDTO allUsersDTO) {
@@ -81,44 +85,44 @@ public class RegisterController {
         return ResponseEntity.ok(Map.of("message", response));
     }
 
-    @PostMapping("/registerUser")
-    public ResponseEntity<Map<String, String>> registerUser(
-            @RequestPart("idFront") MultipartFile idFront,
-            @RequestPart("idBack") MultipartFile idBack,
-            @RequestPart("billImage") MultipartFile billImage,
-            @RequestPart("userData") UsersDto usersDto) throws IOException {
-
-        // Save the file
-        String idFrontName = uploadService.getFileName(idFront);
-        String idBackName = uploadService.getFileName(idBack);
-        String billImageName = uploadService.getFileName(billImage);
-
-        // Attach file info to DTO
-        usersDto.setIdFront(idFrontName);
-        usersDto.setIdBack(idBackName);
-        usersDto.setBillImage(billImageName);
-
-
-        // Save org logic
-        String response = registerUserAccount.createUser(usersDto);
-        if ("success".equals(response)) {
-
-            //saving the file to Back-End
-            uploadService.upload(idFront,idFrontName);
-            uploadService.upload(idBack,idBackName);
-            uploadService.upload(billImage,billImageName);
-
-            AllUsersDTO allUsersDTO = new AllUsersDTO();
-            allUsersDTO.setEmail(usersDto.getEmail());
-            allUsersDTO.setPassword(usersDto.getPassword());
-            allUsersDTO.setRole("user");
-            allUsersDTO.setName(usersDto.getFname() + " " + usersDto.getLname());
-            allUsersDTO.setStatus(AllUsers.Status.pending);
-            response = registerAccount.createAccount(allUsersDTO);
-        }
-
-        return ResponseEntity.ok(Map.of("message", response));
-    }
+//    @PostMapping("/registerUser")
+//    public ResponseEntity<Map<String, String>> registerUser(
+//            @RequestPart("idFront") MultipartFile idFront,
+//            @RequestPart("idBack") MultipartFile idBack,
+//            @RequestPart("billImage") MultipartFile billImage,
+//            @RequestPart("userData") UsersDto usersDto) throws IOException {
+//
+//        // Save the file
+//        String idFrontName = uploadService.getFileName(idFront);
+//        String idBackName = uploadService.getFileName(idBack);
+//        String billImageName = uploadService.getFileName(billImage);
+//
+//        // Attach file info to DTO
+//        usersDto.setIdFront(idFrontName);
+//        usersDto.setIdBack(idBackName);
+//        usersDto.setBillImage(billImageName);
+//
+//
+//        // Save org logic
+//        String response = registerUserAccount.createUser(usersDto);
+//        if ("success".equals(response)) {
+//
+//            //saving the file to Back-End
+//            uploadService.upload(idFront,idFrontName);
+//            uploadService.upload(idBack,idBackName);
+//            uploadService.upload(billImage,billImageName);
+//
+//            AllUsersDTO allUsersDTO = new AllUsersDTO();
+//            allUsersDTO.setEmail(usersDto.getEmail());
+//            allUsersDTO.setPassword(usersDto.getPassword());
+//            allUsersDTO.setRole("user");
+//            allUsersDTO.setName(usersDto.getFname() + " " + usersDto.getLname());
+//            allUsersDTO.setStatus(AllUsers.Status.pending);
+//            response = registerAccount.createAccount(allUsersDTO);
+//        }
+//
+//        return ResponseEntity.ok(Map.of("message", response));
+//    }
 
     @PostMapping("/registerModerator")
     public ResponseEntity<Map<String, String>> registerModerator(@RequestBody ModeratorDto moderatorDto) {
@@ -139,4 +143,43 @@ public class RegisterController {
         return ResponseEntity.ok(Map.of("message", response));
     }
 
+    @PostMapping("/registerUser")
+    public ResponseEntity<Map<String, String>> registerUser(
+            @RequestPart("idFront") MultipartFile idFront,
+            @RequestPart("idBack") MultipartFile idBack,
+            @RequestPart("billImage") MultipartFile billImage,
+            @RequestPart("userData") UsersDto usersDto) throws IOException {
+
+        // Generate random filenames before user creation
+        String idFrontRandomName = fileStorageService.generateRandomFilename(idFront);
+        String idBackRandomName = fileStorageService.generateRandomFilename(idBack);
+        String billImageRandomName = fileStorageService.generateRandomFilename(billImage);
+
+        // Assign random filenames to DTO
+        usersDto.setIdFront(idFrontRandomName);
+        usersDto.setIdBack(idBackRandomName);
+        usersDto.setBillImage(billImageRandomName);
+
+        // Save user logic
+        String response = registerUserAccount.createUser(usersDto);
+        if ("success".equals(response)) {
+            // Create account in AllUsersDTO
+            AllUsersDTO allUsersDTO = new AllUsersDTO();
+            allUsersDTO.setEmail(usersDto.getEmail());
+            allUsersDTO.setPassword(usersDto.getPassword());
+            allUsersDTO.setRole("user");
+            allUsersDTO.setName(usersDto.getFname() + " " + usersDto.getLname());
+            allUsersDTO.setStatus(AllUsers.Status.pending);
+            response = registerAccount.createAccount(allUsersDTO);
+
+            if ("success&pending".equals(response)){
+                // Upload files to Google Drive only if user creation is successful
+                Map<String, String> idFrontResult = fileStorageService.uploadFile(idFront, "idFront", idFrontRandomName);
+                Map<String, String> idBackResult = fileStorageService.uploadFile(idBack, "idBack", idBackRandomName);
+                Map<String, String> billImageResult = fileStorageService.uploadFile(billImage, "billImage", billImageRandomName);
+            }
+        }
+
+        return ResponseEntity.ok(Map.of("message", response));
+    }
 }
