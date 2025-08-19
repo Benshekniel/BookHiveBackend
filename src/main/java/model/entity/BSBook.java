@@ -15,9 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Entity for books owned by BookStore users.
- */
+/** Entity for books owned by BookStore users. */
 @Entity
 @Table(name = "bookstore_books")
 @Data @NoArgsConstructor @AllArgsConstructor
@@ -41,7 +39,7 @@ public class BSBook {
 
     @Type(StringArrayType.class)
     @Column(columnDefinition = "text[]")
-    private List<String> imageUrls;
+    private List<String> images;
 
     @Type(StringArrayType.class)
     @Column(columnDefinition = "text[]")
