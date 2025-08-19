@@ -14,8 +14,8 @@ public interface BSBookRepo extends JpaRepository<BSBook, Integer> {
 
     Optional <BSBook> findByBookId(Integer bookId);
 
-    Optional <List<BSBook>> findByStoreId(Integer storeId);
+    Optional <List<BSBook>> findByBookStore_StoreId(Integer storeId);
 
-    Integer countBSBooksByStoreId(Integer storeId);
+    Integer countBSBooksByBookStore_StoreId(Integer storeId);
 
 }

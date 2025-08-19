@@ -58,11 +58,11 @@ public class BSBook {
     @Enumerated(EnumType.STRING)
     private ListingType listingType;
 
-    /** Pricing as JSON object */
+    /** Pricing as JSON object Containing: sellingPrice, lendingPrice */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, BigDecimal> pricing;
-    // {"sellingPrice": 25.99, "lendingPrice": 5.00, "depositAmount": 15.00}
+    // {"sellingPrice": 25.99, "lendingPrice": 5.00}
 
     /** Just a short description to market the book */
     @Column(columnDefinition = "TEXT")
@@ -80,9 +80,9 @@ public class BSBook {
     private Integer lendingPeriod;
 
     private Integer bookCount;          // mainly for bookstore when multiple books are from the same bookstore
-    private Integer favouritesCount;    // how many people have marked favourite this book
+    private Integer favouritesCount;    // how many people have marked this book as favourite
 
-    /** Series info as a separate JSON object */
+    /** Series info as a separate JSON object Containing: series, seriesNumber, totalBooks */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, String> seriesInfo;
@@ -92,18 +92,18 @@ public class BSBook {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-//    /** Foreign Key connecting the owner - user_id column from AllUsers table - many books, one owner */
-//    @ManyToOne
-//    @JoinColumn(name = "owner_id", nullable = false)
-//    private AllUsers ownerID;
+    /** Once again, connecting the bookStore fk properly */
+    @ManyToOne
+    @JoinColumn(name = "store_id", nullable = false)
+    private BookStore bookStore;
 
 //    /** OwnerId integer foreign key connecting 'AllUsers' table userId */
 //    @Column(nullable = false)
 //    private Integer ownerId;
 
-    /** StoreId integer foreign key connecting 'BookStores' table storeId */
-    @Column(nullable = false)
-    private Integer storeId;
+//    /** StoreId integer foreign key connecting 'BookStores' table storeId */
+//    @Column(nullable = false)
+//    private Integer storeId;
 
     @PrePersist
     protected void onCreate() {
