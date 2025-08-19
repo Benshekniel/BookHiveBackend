@@ -1,7 +1,7 @@
 package controller;
 
-import model.dto.BookStoreDTOs.RegisterBookStoreDTO;
-import model.dto.BookStoreDTOs.ProfileBookStoreDTO;
+import model.dto.BookStore.BookStoreDTOs.RegisterBookStoreDTO;
+import model.dto.BookStore.BookStoreDTOs.ProfileBookStoreDTO;
 import service.BookStore.BookStoreService;
 
 import org.springframework.http.ResponseEntity;

@@ -97,10 +97,6 @@ public class BSBook {
     @JoinColumn(name = "store_id", nullable = false)
     private BookStore bookStore;
 
-//    /** OwnerId integer foreign key connecting 'AllUsers' table userId */
-//    @Column(nullable = false)
-//    private Integer ownerId;
-
 //    /** StoreId integer foreign key connecting 'BookStores' table storeId */
 //    @Column(nullable = false)
 //    private Integer storeId;

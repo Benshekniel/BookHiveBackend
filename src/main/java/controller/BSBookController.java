@@ -1,8 +1,8 @@
 package controller;
 
-import model.dto.BSBookDTOs.RegisterBookDTO;
-import model.dto.BSBookDTOs.UpdateBookDTO;
-import model.dto.BSBookDTOs.ViewBookDTO;
+import model.dto.BookStore.BSBookDTOs.RegisterBookDTO;
+import model.dto.BookStore.BSBookDTOs.UpdateBookDTO;
+import model.dto.BookStore.BSBookDTOs.ViewBookDTO;
 import service.BookStore.BSBookService;
 
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ public class BSBookController {
 
     @PostMapping
     public ResponseEntity<String> registerBook (
-            @RequestBody RegisterBookDTO bookDTO) {
+            @RequestBody RegisterBookDTO bookDTO ) {
         // ownerId will need to be taken from the logged in user's userId
         Integer ownerID = 603;
         return bookService.registerBook(bookDTO, ownerID);
@@ -27,14 +27,14 @@ public class BSBookController {
 
     @GetMapping("/{bookId}")
     public ResponseEntity<ViewBookDTO> getBook (
-            @PathVariable("bookId") Integer bookId) {
+            @PathVariable("bookId") Integer bookId ) {
         return bookService.getBookById(bookId);
     }
 
     @PutMapping("/{bookId}")
     public ResponseEntity<String> updateBook (
             @PathVariable("bookId") Integer bookId,
-            @RequestBody UpdateBookDTO bookDTO) {
+            @RequestBody UpdateBookDTO bookDTO ) {
 
         return bookService.updateBook(bookId, bookDTO);
     }

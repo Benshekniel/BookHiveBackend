@@ -1,4 +1,4 @@
-package model.dto;
+package model.dto.BookStore;
 
 import model.entity.BookStore;
 

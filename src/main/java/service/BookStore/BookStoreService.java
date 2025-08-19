@@ -1,7 +1,7 @@
 package service.BookStore;
 
-import model.dto.BookStoreDTOs.RegisterBookStoreDTO;
-import model.dto.BookStoreDTOs.ProfileBookStoreDTO;
+import model.dto.BookStore.BookStoreDTOs.RegisterBookStoreDTO;
+import model.dto.BookStore.BookStoreDTOs.ProfileBookStoreDTO;
 import model.entity.BookStore;
 import model.repo.BookStoreRepo;
 

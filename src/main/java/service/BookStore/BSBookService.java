@@ -1,8 +1,8 @@
 package service.BookStore;
 
-import model.dto.BSBookDTOs.RegisterBookDTO;
-import model.dto.BSBookDTOs.UpdateBookDTO;
-import model.dto.BSBookDTOs.ViewBookDTO;
+import model.dto.BookStore.BSBookDTOs.RegisterBookDTO;
+import model.dto.BookStore.BSBookDTOs.UpdateBookDTO;
+import model.dto.BookStore.BSBookDTOs.ViewBookDTO;
 import model.entity.BSBook;
 import model.repo.BSBookRepo;
 

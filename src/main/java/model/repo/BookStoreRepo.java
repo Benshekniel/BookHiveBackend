@@ -11,4 +11,6 @@ public interface BookStoreRepo extends JpaRepository<BookStore, Integer> {
 
     Optional <BookStore> findByStoreId(Integer storeId);
 
+    Optional <BookStore> findByAllUser_Name(String user_id);
+
 }

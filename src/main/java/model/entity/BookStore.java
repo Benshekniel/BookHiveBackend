@@ -71,9 +71,9 @@ public class BookStore {
     private String approvalNote;
 
     // One-to-One relationship with AllUsers table
-//    @OneToOne
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private AllUsers userId;
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private AllUsers allUser;
 
     @Column(nullable = false)
     private Integer userId;
