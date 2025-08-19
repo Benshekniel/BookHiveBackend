@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/bookstore")
+@RequestMapping("/api/bsbook")
 @CrossOrigin(origins = "http://localhost:9999")
 @RequiredArgsConstructor
 public class BSBookController {
