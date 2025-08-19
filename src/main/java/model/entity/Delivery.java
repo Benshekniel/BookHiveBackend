@@ -64,7 +64,18 @@ public class Delivery {
 
 
     public enum DeliveryStatus {
-        PENDING, ASSIGNED, PICKED_UP, IN_TRANSIT, DELIVERED, FAILED, CANCELLED, DELAYED
+        PLACED,          // Order has been created by the customer
+        IN_TRANSIT_TO_MAIN_HUB, // Order is being transferred to the main hub
+        AT_MAIN_HUB,     // Order has arrived at the main hub
+        IN_TRANSIT_TO_LOCAL_HUB, // Order is being transferred to the respective local hub
+        PENDING,         // Order is at the local hub, awaiting automatic agent assignment
+        ASSIGNED,        // Order has been automatically assigned to an agent
+        PICKED_UP,       // Agent has picked up the order from the local hub
+        IN_TRANSIT,      // Order is en route to the customer
+        DELIVERED,       // Order has been successfully delivered
+        FAILED,          // Delivery attempt failed (e.g., customer unavailable)
+        CANCELLED,       // Order was cancelled by the customer or system
+        DELAYED          // Order is delayed due to unforeseen issues
     }
 
     public enum PaymentMethod {
