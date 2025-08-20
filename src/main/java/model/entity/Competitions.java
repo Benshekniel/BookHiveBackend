@@ -53,8 +53,8 @@ public class Competitions {
     @Column(name = "current_participants", nullable = false)
     private Integer currentParticipants;
 
-    @ElementCollection
-    @Column(name = "participant_emails")
+    @Type(JsonBinaryType.class)
+    @Column(name = "participant_emails", columnDefinition = "jsonb", nullable = true)
     private List<String> participantEmails;
 
     @Column(name = "theme")
