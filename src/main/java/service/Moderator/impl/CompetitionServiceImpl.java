@@ -1,5 +1,6 @@
 package service.Moderator.impl;
 
+import jakarta.transaction.Transactional;
 import model.dto.CompetitionDTO;
 import model.entity.Competitions;
 import model.repo.AllUsersRepo;
@@ -55,5 +56,35 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     public List<Map<String, Object>> getAllCompetitionsMapped() {
         return competitionRepo.findAllCompetitionsMapped();
+    }
+
+    @Transactional
+    public String makeActive(String competitionId, String email) {
+        int updated = competitionRepo.activateCompetition(competitionId, email);
+        return updated > 0 ? "success" : "competition not found or email mismatch";
+    }
+
+    @Transactional
+    public String make_ReActive(String competitionId, String email) {
+        int updated = competitionRepo.re_activateCompetition(competitionId, email);
+        return updated > 0 ? "success" : "competition not found or email mismatch";
+    }
+
+    @Transactional
+    public String stopActive(String competitionId, String email) {
+        int updated = competitionRepo.deactivateCompetition(competitionId, email);
+        return updated > 0 ? "success" : "competition not found or email mismatch";
+    }
+
+    @Transactional
+    public String makePause(String competitionId, String email) {
+        int updated = competitionRepo.pauseCompetition(competitionId, email);
+        return updated > 0 ? "success" : "competition not found or email mismatch";
+    }
+
+    @Transactional
+    public String makeResume(String competitionId, String email) {
+        int updated = competitionRepo.unpauseCompetition(competitionId, email);
+        return updated > 0 ? "success" : "competition not found or email mismatch";
     }
 }

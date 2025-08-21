@@ -3,8 +3,10 @@ package model.repo;
 import model.entity.Books;
 import model.entity.Competitions;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,6 +23,7 @@ public interface CompetitionRepo extends JpaRepository<Competitions, String> {
     SELECT 
         c.competition_id AS competitionId,
         c.active_status AS activeStatus,
+        c.pause_status AS pauseStatus,
         c.created_by AS createdBy,
         c.created_at AS createdAt,
         c.activated_at AS activatedAt,
@@ -43,6 +46,33 @@ public interface CompetitionRepo extends JpaRepository<Competitions, String> {
     """,
             nativeQuery = true)
     List<Map<String, Object>> findAllCompetitionsMapped();
+
+    // ✅ Activate competition
+    @Modifying
+    @Query("UPDATE Competitions c " +
+            "SET c.activeStatus = true, c.activatedAt = CURRENT_TIMESTAMP " +
+            "WHERE c.competitionId = :competitionId AND c.createdBy = :email")
+    int activateCompetition(@Param("competitionId") String competitionId, @Param("email") String email);
+
+    // ✅ Pause competition
+    @Modifying
+    @Query("UPDATE Competitions c SET c.pauseStatus = true WHERE c.competitionId = :competitionId AND c.createdBy = :email")
+    int pauseCompetition(@Param("competitionId") String competitionId, @Param("email") String email);
+
+    //  Reactivate competition (activeStatus = false, don't touch activatedAt)
+    @Modifying
+    @Query("UPDATE Competitions c SET c.activeStatus = true WHERE c.competitionId = :competitionId AND c.createdBy = :email")
+    int re_activateCompetition(@Param("competitionId") String competitionId, @Param("email") String email);
+
+    // ❌ Deactivate competition (activeStatus = false, don't touch activatedAt)
+    @Modifying
+    @Query("UPDATE Competitions c SET c.activeStatus = false WHERE c.competitionId = :competitionId AND c.createdBy = :email")
+    int deactivateCompetition(@Param("competitionId") String competitionId, @Param("email") String email);
+
+    // ❌ Unpause competition (pauseStatus = false)
+    @Modifying
+    @Query("UPDATE Competitions c SET c.pauseStatus = false WHERE c.competitionId = :competitionId AND c.createdBy = :email")
+    int unpauseCompetition(@Param("competitionId") String competitionId, @Param("email") String email);
 
 
     // ✅ Fetch only active competitions

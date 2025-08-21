@@ -12,4 +12,15 @@ public interface CompetitionService {
 
     public List<Map<String, Object>> getAllCompetitionsMapped();
 
+    public String makeActive(String competitionId,String email);
+
+    public String make_ReActive(String competitionId,String email);
+
+    public String stopActive(String competitionId,String email);
+
+    public String makePause(String competitionId,String email);
+
+    public String makeResume(String competitionId,String email);
+
+
 }

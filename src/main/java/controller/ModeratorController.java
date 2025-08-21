@@ -89,4 +89,49 @@ public class ModeratorController {
         List<Map<String, Object>> competitions = competitionService.getAllCompetitionsMapped();
         return ResponseEntity.ok(competitions);
     }
+
+    @GetMapping("/goLiveCompetition")
+    public ResponseEntity<Map<String, String>> goLiveCompetition (
+            @RequestParam("competitionId") String competitionId,
+            @RequestParam("email") String email
+           ){
+        String result = competitionService.makeActive(competitionId,email);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    @GetMapping("/reLiveCompetition")
+    public ResponseEntity<Map<String, String>> reLiveCompetition (
+            @RequestParam("competitionId") String competitionId,
+            @RequestParam("email") String email
+    ){
+        String result = competitionService.make_ReActive(competitionId,email);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    @GetMapping("/stopLiveCompetition")
+    public ResponseEntity<Map<String, String>> stopLiveCompetition (
+            @RequestParam("competitionId") String competitionId,
+            @RequestParam("email") String email
+    ){
+        String result = competitionService.stopActive(competitionId,email);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    @GetMapping("/pauseCompetition")
+    public ResponseEntity<Map<String, String>> pauseCompetition (
+            @RequestParam("competitionId") String competitionId,
+            @RequestParam("email") String email
+    ){
+        String result = competitionService.makePause(competitionId,email);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    @GetMapping("/resumeCompetition")
+    public ResponseEntity<Map<String, String>> resumeCompetition (
+            @RequestParam("competitionId") String competitionId,
+            @RequestParam("email") String email
+    ){
+        String result = competitionService.makeResume(competitionId,email);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
 }

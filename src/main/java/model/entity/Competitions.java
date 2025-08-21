@@ -14,8 +14,11 @@ public class Competitions {
     @Column(name = "competition_id", nullable = false)
     private String competitionId;
 
-    @Column(name = "active_status", nullable = false)
+    @Column(name = "active_status", nullable = true)
     private boolean activeStatus;
+
+    @Column(name = "pause_status", nullable = true)
+    private boolean pauseStatus;
 
     @Column(name = "created_by", nullable = false)
     private String createdBy;
