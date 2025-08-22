@@ -1,0 +1,90 @@
+package service.Moderator.impl;
+
+import jakarta.transaction.Transactional;
+import model.dto.CompetitionDTO;
+import model.entity.Competitions;
+import model.repo.AllUsersRepo;
+import model.repo.CompetitionRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import service.Moderator.CompetitionService;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+@Service
+public class CompetitionServiceImpl implements CompetitionService {
+
+    @Autowired
+    private CompetitionRepo competitionRepo;
+
+
+    @Override
+    public String createCompetition(CompetitionDTO competitionDTO,String email,String bannerImageName) {
+
+        String uniqueId = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+
+        competitionDTO.setCompetitionId(uniqueId);
+        competitionDTO.setBannerImage(bannerImageName);
+        competitionDTO.setCreatedBy(email);
+
+        Competitions competition = new Competitions(
+                competitionDTO.getCompetitionId(),
+                false,
+                competitionDTO.getCreatedBy(),
+                competitionDTO.getTitle(),
+                competitionDTO.getEntryTrustScore(),
+                competitionDTO.getPrizeTrustScore(),
+                competitionDTO.getStartDateTime(),
+                competitionDTO.getEndDateTime(),
+                competitionDTO.getVotingStartDateTime(),
+                competitionDTO.getVotingEndDateTime(),
+                competitionDTO.getMaxParticipants(),
+                0,
+                null,
+                competitionDTO.getTheme(),
+                competitionDTO.getRules(),
+                competitionDTO.getJudgingCriteria(),
+                competitionDTO.getBannerImage(),
+                competitionDTO.getDescription()
+
+        );
+        competitionRepo.save(competition);
+        return "success";
+    }
+
+    public List<Map<String, Object>> getAllCompetitionsMapped() {
+        return competitionRepo.findAllCompetitionsMapped();
+    }
+
+    @Transactional
+    public String makeActive(String competitionId, String email) {
+        int updated = competitionRepo.activateCompetition(competitionId, email);
+        return updated > 0 ? "success" : "competition not found or email mismatch";
+    }
+
+    @Transactional
+    public String make_ReActive(String competitionId, String email) {
+        int updated = competitionRepo.re_activateCompetition(competitionId, email);
+        return updated > 0 ? "success" : "competition not found or email mismatch";
+    }
+
+    @Transactional
+    public String stopActive(String competitionId, String email) {
+        int updated = competitionRepo.deactivateCompetition(competitionId, email);
+        return updated > 0 ? "success" : "competition not found or email mismatch";
+    }
+
+    @Transactional
+    public String makePause(String competitionId, String email) {
+        int updated = competitionRepo.pauseCompetition(competitionId, email);
+        return updated > 0 ? "success" : "competition not found or email mismatch";
+    }
+
+    @Transactional
+    public String makeResume(String competitionId, String email) {
+        int updated = competitionRepo.unpauseCompetition(competitionId, email);
+        return updated > 0 ? "success" : "competition not found or email mismatch";
+    }
+}

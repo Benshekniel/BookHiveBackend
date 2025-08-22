@@ -15,14 +15,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+/** Entity for books owned by BookStore users. */
 @Entity
-@Table(name = "books")
+@Table(name = "bookstore_books")
 @Data @NoArgsConstructor @AllArgsConstructor
-public class Book {
+public class BSBook {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="book_Id")
     private Integer bookId;
 
     @Column(nullable = false)
@@ -39,7 +39,7 @@ public class Book {
 
     @Type(StringArrayType.class)
     @Column(columnDefinition = "text[]")
-    private List<String> imageUrls;
+    private List<String> images;
 
     @Type(StringArrayType.class)
     @Column(columnDefinition = "text[]")
@@ -48,27 +48,25 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private BookCondition condition;
 
+    /** Actual description of book's content like a summary */
     @Column(columnDefinition = "TEXT")
-    private String description;         // actual description of book's content like a summary
+    private String description;
 
     @Enumerated(EnumType.STRING)
     private BookStatus status;
 
     @Enumerated(EnumType.STRING)
-    private BookAvailability availability;
-
-    // Enhanced listing types
-    @Enumerated(EnumType.STRING)
     private ListingType listingType;
 
-    // Pricing as JSON object
+    /** Pricing as JSON object */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, BigDecimal> pricing;
     // {"sellingPrice": 25.99, "lendingPrice": 5.00, "depositAmount": 15.00}
 
+    /** Just a short description to market the book */
     @Column(columnDefinition = "TEXT")
-    private String lendingTerms;        // just a short description to market the lending conditions.
+    private String terms;
 
     // Essential book info:
     @Column(length = 13)
@@ -84,7 +82,7 @@ public class Book {
     private Integer bookCount;          // mainly for bookstore when multiple books are from the same bookstore
     private Integer favouritesCount;    // how many people have marked favourite this book
 
-    // Series info as separate JSON object
+    /** Series info as a separate JSON object */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, String> seriesInfo;
@@ -94,13 +92,18 @@ public class Book {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Foreign Key connecting the owner - user_id column from AllUsers table - many books, one owner
+//    /** Foreign Key connecting the owner - user_id column from AllUsers table - many books, one owner */
 //    @ManyToOne
 //    @JoinColumn(name = "owner_id", nullable = false)
 //    private AllUsers ownerID;
 
+//    /** OwnerId integer foreign key connecting 'AllUsers' table userId */
+//    @Column(nullable = false)
+//    private Integer ownerId;
+
+    /** StoreId integer foreign key connecting 'BookStores' table storeId */
     @Column(nullable = false)
-    private Integer ownerID;
+    private Integer storeId;
 
     @PrePersist
     protected void onCreate() {
@@ -113,20 +116,18 @@ public class Book {
         updatedAt = LocalDateTime.now();
     }
 
-    // Enums
     public enum BookCondition {
         NEW, USED, FAIR
     }
-
     public enum BookStatus {
-        UNAVAILABLE, AVAILABLE, SOLD, LENT, DONATED, AUCTION
+        UNAVAILABLE, AVAILABLE,
+        SOLD, LENT, DONATED, AUCTION
     }
-
-    public enum BookAvailability {
-        UNAVAILABLE, AVAILABLE, RESERVED
-    }
-
     public enum ListingType {
-        SELL_ONLY, LEND_ONLY, EXCHANGE, DONATE, SELL_AND_LEND
+        SELL_ONLY,
+        LEND_ONLY,
+        SELL_AND_LEND,
+        EXCHANGE,
+        DONATE
     }
 }
