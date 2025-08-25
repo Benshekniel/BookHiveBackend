@@ -15,6 +15,8 @@ public class BSBookDTOs {
 
     @Data @NoArgsConstructor @AllArgsConstructor
     public static class RegisterBookDTO {
+        private Integer userId;
+
         private String title;
         private List<String> authors;
         private List<String> genres;
