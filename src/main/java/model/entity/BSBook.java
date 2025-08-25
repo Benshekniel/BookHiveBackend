@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
-import io.hypersistence.utils.hibernate.type.array.StringArrayType;
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
@@ -29,19 +29,23 @@ public class BSBook {
     private String title;
 
     // Things stored as arrays:
-    @Type(StringArrayType.class)
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> authors;
 
-    @Type(StringArrayType.class)
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> genres;
 
-    @Type(StringArrayType.class)
+    /** Single image - cover page of book, preferably png from the internet itself */
+    private String coverImage;
+
+    /** Multiple images, max 3 - photos of the book to showcase its condition */
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> images;
 
-    @Type(StringArrayType.class)
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> tags;          // ["bestseller", "classic", "award-winner"]
 
@@ -115,15 +119,19 @@ public class BSBook {
     public enum BookCondition {
         NEW, USED, FAIR
     }
+    /** UNAVAILABLE, AVAILABLE, SOLD, LENT, DONATED, AUCTION */
     public enum BookStatus {
-        UNAVAILABLE, AVAILABLE,
-        SOLD, LENT, DONATED, AUCTION
-    }
+        AVAILABLE,
+        UNAVAILABLE, SOLD, LENT, AUCTION
+        }
+//        DONATED,
+
+    /** SELL_ONLY, LEND_ONLY, SELL_AND_LEND */
     public enum ListingType {
         SELL_ONLY,
         LEND_ONLY,
         SELL_AND_LEND,
-        EXCHANGE,
-        DONATE
     }
+//        EXCHANGE,
+//        DONATE
 }
