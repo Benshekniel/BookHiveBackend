@@ -70,18 +70,22 @@ public class BookStore {
 
     private String approvalNote;
 
-    // One-to-One relationship with AllUsers table
+    /** One-to-One relationship with AllUsers table */
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private AllUsers allUser;
 
-    @Column(nullable = false)
-    private Integer userId;
+//    /** Since AllUsers table user_id has a "_" in the middle we'll get it into a column by itself.
+//     * So create new AllUsers objects and use that in service */
+//    @Column(nullable = false)
+//    private Integer userId;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         isApproved = Approval.PENDING;
+
+//        userId = getAllUser().getUser_id();
     }
     @PreUpdate
     protected void onUpdate() {
