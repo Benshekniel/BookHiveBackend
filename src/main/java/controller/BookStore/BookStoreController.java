@@ -1,7 +1,8 @@
-package controller;
+package controller.BookStore;
 
 import model.dto.BookStore.BookStoreDTOs.RegisterBookStoreDTO;
 import model.dto.BookStore.BookStoreDTOs.ProfileBookStoreDTO;
+import org.springframework.http.HttpStatus;
 import service.BookStore.BookStoreService;
 
 import org.springframework.http.ResponseEntity;
@@ -19,20 +20,21 @@ public class BookStoreController {
     @PostMapping
     public ResponseEntity<String> registerBookStore (
             @RequestBody RegisterBookStoreDTO bookStoreDTO) {
-        return bookStoreService.registerBookStore(bookStoreDTO);
+        boolean saved = bookStoreService.registerBookStore(bookStoreDTO);
+
+        if (saved) return ResponseEntity.ok("Book store registered successfully");
+        else
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Book store could not be registered");
     }
 
-    @GetMapping("/{storeId}")
-    public ResponseEntity<ProfileBookStoreDTO> getBookStore (
-            @PathVariable("storeId") Integer storeId) {
-        return bookStoreService.getBookStoreById(storeId);
-    }
-
-    @PutMapping("/{storeId}")
+    @PutMapping("/{userId}")
     public ResponseEntity<String> updateBookStore (
-            @PathVariable("storeId") Integer storeId,
+            @PathVariable("userId") Integer userId,
             @RequestBody ProfileBookStoreDTO bookStoreDTO) {
+        boolean updated = bookStoreService.updateBookStore(userId, bookStoreDTO);
 
-        return bookStoreService.updateBookStore(storeId, bookStoreDTO);
+        if (updated) return ResponseEntity.ok("BookStore updated successfully");
+        else
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("BookStore Not found!");
     }
 }
