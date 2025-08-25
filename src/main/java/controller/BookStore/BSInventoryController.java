@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/api/bs-inventory")
 @CrossOrigin(origins = "http://localhost:9999")
 @RequiredArgsConstructor
-public class InventoryController {
+public class BSInventoryController {
 
     private final BookStoreService bookStoreService;
     private final BSBookService bookService;

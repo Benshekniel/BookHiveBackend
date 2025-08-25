@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/bs-dashboard")
 @CrossOrigin(origins = "http://localhost:9999")
 @RequiredArgsConstructor
-public class DashboardController {
+public class BSDashboardController {
 
     private final BookStoreService bookStoreService;
     private final BSBookService bookService;
