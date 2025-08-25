@@ -66,7 +66,7 @@ public class BSBook {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, BigDecimal> pricing;
-    // {"sellingPrice": 25.99, "lendingPrice": 5.00}
+    // {"sellPrice": 25.99, "lendPrice": 5.00}
 
     /** Just a short description to market the book */
     @Column(columnDefinition = "TEXT")
