@@ -1,5 +1,6 @@
 package model.repo;
 
+import model.entity.AllUsers;
 import model.entity.BookStore;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +13,8 @@ public interface BookStoreRepo extends JpaRepository<BookStore, Integer> {
     Optional <BookStore> findByStoreId(Integer storeId);
 
     Optional <BookStore> findByAllUser_Name(String user_id);
+
+    BookStore findByAllUser(AllUsers allUser);
+
 
 }
