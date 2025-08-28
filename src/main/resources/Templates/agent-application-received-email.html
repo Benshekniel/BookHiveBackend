@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Received</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .info-box { background: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; }
+        .timeline-box { background: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img th:src="'cid:' + ${imageCid}" alt="Application Received" style="width: 80px; height: 80px; margin-bottom: 20px;">
+        <h1>✅ Application Received!</h1>
+        <h2>Thank You for Applying</h2>
+    </div>
+
+    <div class="content">
+        <p>Dear <strong th:text="${applicantName}">Applicant</strong>,</p>
+
+        <p>Thank you for submitting your delivery agent application! We have successfully received your application and it is now under review.</p>
+
+        <div class="info-box">
+            <h3>📋 Application Summary</h3>
+            <ul>
+                <li><strong>Application ID:</strong> <span th:text="${applicationId}">APP001</span></li>
+                <li><strong>Vehicle Type:</strong> <span th:text="${vehicleType}">Motorcycle</span></li>
+                <li><strong>Submitted:</strong> <span th:text="${submittedDate}">January 15, 2025</span></li>
+                <li><strong>Status:</strong> Under Review</li>
+            </ul>
+        </div>
+
+        <div class="timeline-box">
+            <h3>⏱️ What Happens Next?</h3>
+            <ol>
+                <li><strong>Document Review</strong> - We'll verify all submitted documents</li>
+                <li><strong>Background Check</strong> - Standard verification process</li>
+                <li><strong>Final Review</strong> - Our team will make the final decision</li>
+                <li><strong>Notification</strong> - You'll receive an email with the outcome</li>
+            </ol>
+            <p><strong>Estimated Processing Time:</strong> <span th:text="${estimatedProcessingTime}">2-3 business days</span></p>
+        </div>
+
+        <h3>📞 Important Notes</h3>
+        <ul>
+            <li>Please keep your application ID for reference: <strong th:text="${applicationId}">APP001</strong></li>
+            <li>Ensure your phone and email are accessible for any communication</li>
+            <li>Do not submit duplicate applications as this may delay processing</li>
+            <li>Contact us if you need to update any information</li>
+        </ul>
+
+        <p>We appreciate your interest in joining our delivery team. You'll hear from us soon!</p>
+
+        <p>Best regards,<br>
+            The <span th:text="${companyName}">DeliveryHub</span> Recruitment Team</p>
+    </div>
+
+    <div class="footer">
+        <p>&copy; <span th:text="${currentYear}">2025</span> <span th:text="${companyName}">DeliveryHub</span>. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>

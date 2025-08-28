@@ -60,4 +60,14 @@ public interface AgentRepository extends JpaRepository<Agent, Long> {
             "LEFT JOIN Hub h ON a.hubId = h.hubId " +
             "WHERE a.hubId = :hubId")
     List<Object[]> findAgentsByHubWithDetails(@Param("hubId") Long hubId);
+
+    // Additional methods for application approval process
+    Optional<Agent> findByApplicationId(Long applicationId);
+
+    boolean existsByApplicationId(Long applicationId);
+
+    List<Agent> findByPhoneNumber(String phoneNumber);
+
+    @Query("SELECT a FROM Agent a WHERE a.applicationId = :applicationId")
+    Optional<Agent> findByApplicationIdWithQuery(@Param("applicationId") Long applicationId);
 }
