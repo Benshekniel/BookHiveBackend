@@ -23,13 +23,13 @@ public class BookStoreController {
     }
 
     @GetMapping("/{storeId}")
-    public ResponseEntity<ProfileBookStoreDTO> getBookStore(
+    public ResponseEntity<ProfileBookStoreDTO> getBookStore (
             @PathVariable("storeId") Integer storeId) {
         return bookStoreService.getBookStoreById(storeId);
     }
 
     @PutMapping("/{storeId}")
-    public ResponseEntity<String> updateBookStore(
+    public ResponseEntity<String> updateBookStore (
             @PathVariable("storeId") Integer storeId,
             @RequestBody ProfileBookStoreDTO bookStoreDTO) {
 

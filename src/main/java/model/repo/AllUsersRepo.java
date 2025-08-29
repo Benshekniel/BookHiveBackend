@@ -1,6 +1,5 @@
 package model.repo;
 
-
 import model.entity.AllUsers;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,5 +21,10 @@ public interface AllUsersRepo extends JpaRepository<AllUsers, Integer> {
 //    @Query("SELECT u.name AS name, u.email AS email, u.role AS role FROM AllUsers u WHERE u.status = 'pending'")
 //    List<Map<String, Object>> findAllPending();
 
+    // Additional methods for application approval process
+    List<AllUsers> findByEmailIgnoreCase(String email);
 
+    boolean existsByEmail(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
 }

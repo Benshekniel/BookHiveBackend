@@ -24,7 +24,7 @@ public class BookStoreService {
     // Common mapper resource for the entire service class:
     private static final ModelMapper modelMapper = new ModelMapper();
 
-    public ResponseEntity<String> registerBookStore(RegisterBookStoreDTO bookStoreDTO) {
+    public ResponseEntity<String> registerBookStore (RegisterBookStoreDTO bookStoreDTO) {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
@@ -33,7 +33,7 @@ public class BookStoreService {
         return ResponseEntity.ok("Book store registered successfully");
     }
 
-    public ResponseEntity<ProfileBookStoreDTO> getBookStoreById(Integer id) {
+    public ResponseEntity<ProfileBookStoreDTO> getBookStoreById (Integer id) {
         return bookStoreRepo.findByStoreId(id)
                 .map(existingBookStore -> {
                     modelMapper.getConfiguration().setSkipNullEnabled(true);
@@ -45,7 +45,7 @@ public class BookStoreService {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    public ResponseEntity<String> updateBookStore(Integer id, ProfileBookStoreDTO bookStoreDTO) {
+    public ResponseEntity<String> updateBookStore (Integer id, ProfileBookStoreDTO bookStoreDTO) {
         return bookStoreRepo.findByStoreId(id)
                 .map(existingBookStore -> {
                     modelMapper.getConfiguration().setSkipNullEnabled(true);

@@ -2,7 +2,7 @@ package model.repo.Admin;
 
 
 import model.entity.AllUsers;
-import model.entity.Book;
+import model.entity.UserBooks;
 import model.entity.Transaction;
 import model.entity.Delivery;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,10 +32,10 @@ public interface DashboardRepository extends JpaRepository<AllUsers, Integer> {
     Long getActiveModerators();
 
     // Book Statistics
-    @Query("SELECT COUNT(b) FROM Book b WHERE b.status = 'AVAILABLE'")
+    @Query("SELECT COUNT(b) FROM UserBooks b WHERE b.status = 'AVAILABLE'")
     Long getActiveListings();
 
-    @Query("SELECT COUNT(b) FROM Book b WHERE b.createdAt >= :startDate AND b.status = 'AVAILABLE'")
+    @Query("SELECT COUNT(b) FROM UserBooks b WHERE b.createdAt >= :startDate AND b.status = 'AVAILABLE'")
     Long getActiveListingsCreatedAfter(@Param("startDate") LocalDateTime startDate);
 
     // Transaction Statistics
@@ -87,7 +87,7 @@ public interface DashboardRepository extends JpaRepository<AllUsers, Integer> {
     List<Map<String, Object>> getRecentTransactionActivities(@Param("since") LocalDateTime since);
 
     // Quick Action Counts
-    @Query("SELECT COUNT(b) FROM Book b WHERE b.status = 'PENDING'")
+    @Query("SELECT COUNT(b) FROM UserBooks b WHERE b.status = 'PENDING'")
     Long getReportedItems();
 
     @Query("SELECT COUNT(t) FROM Transaction t WHERE t.status = 'OVERDUE'")

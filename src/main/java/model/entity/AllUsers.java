@@ -24,7 +24,7 @@ public class AllUsers {
     private Status status;
 
     public enum Status {
-        active, pending, banned, disabled
+        active, pending, banned, disabled, rejected
     }
 
     //Without status

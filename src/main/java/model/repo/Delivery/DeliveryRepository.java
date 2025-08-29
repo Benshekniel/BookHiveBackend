@@ -104,7 +104,7 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     @Query("SELECT AVG(1.0) FROM Delivery d WHERE d.routeId = :routeId")
     Double getAverageDeliveryTimeByHub(@Param("routeId") Long routeId);
 
-    @Query("SELECT d, h.name, au.name, au.email, a.phoneNumber, t.transactionId, b.title, cu.name, cu.email " +
+    @Query("SELECT d, h.name, au.name, au.email, a.phoneNumber, t.transactionId,b.title, cu.name, cu.email " +
             "FROM Delivery d " +
             "LEFT JOIN Route r ON d.routeId = r.routeId " +
             "LEFT JOIN Hub h ON r.hubId = h.hubId " +
@@ -112,7 +112,7 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
             "LEFT JOIN Agent a ON ra.agentId = a.agentId " +
             "LEFT JOIN AllUsers au ON a.userId = au.user_id " +
             "LEFT JOIN Transaction t ON d.transactionId = t.transactionId " +
-            "LEFT JOIN Book b ON t.bookId = b.bookId " +
+            "LEFT JOIN UserBooks b ON t.bookId = b.bookId " +
             "LEFT JOIN AllUsers cu ON d.userId = cu.user_id")
     List<Object[]> findAllDeliveriesWithAllDetails();
 

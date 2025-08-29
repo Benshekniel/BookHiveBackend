@@ -37,6 +37,9 @@ public class UserBooks {
     @Column(name="for_sale")
     private Boolean forSale;
 
+    @Column(name="status", length = 255)
+    private String status;
+
     @Column(name="price")
     private Double price;
 
