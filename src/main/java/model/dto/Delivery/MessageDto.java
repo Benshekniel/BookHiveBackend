@@ -3,6 +3,8 @@ package model.dto.Delivery;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import model.entity.AllUsers;
+
 import java.time.LocalDateTime;
 
 public class MessageDto {
@@ -26,10 +28,23 @@ public class MessageDto {
         private String senderName;
         private String receiverName;
         private String content;
-        private boolean isRead;
+        private boolean Read; // Keeping your naming convention
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private LocalDateTime sentAt;
+
+        // Convenience methods for compatibility
+        public boolean isRead() {
+            return Read;
+        }
+
+        public void setRead(boolean read) {
+            this.Read = read;
+        }
+
+        public void setIsRead(boolean read) {
+            this.Read = read;
+        }
     }
 
     @Data
@@ -102,5 +117,45 @@ public class MessageDto {
         private LocalDateTime startDate;
         private LocalDateTime endDate;
         private boolean unreadOnly;
+    }
+
+    // Additional DTOs for enhanced messaging functionality
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ContactDto {
+        private Integer userId;
+        private String name;
+        private String email;
+        private String role;
+        private AllUsers.Status status;
+        private boolean isOnline;
+        private LocalDateTime lastSeen;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ConversationListDto {
+        private Long partnerId;
+        private String partnerName;
+        private String partnerRole;
+        private String lastMessage;
+        private LocalDateTime lastMessageTime;
+        private long unreadCount;
+        private boolean isOnline;
+        private String avatar; // For UI display
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MessageNotificationDto {
+        private Long messageId;
+        private Long senderId;
+        private String senderName;
+        private String content;
+        private LocalDateTime sentAt;
+        private boolean isRead;
     }
 }
