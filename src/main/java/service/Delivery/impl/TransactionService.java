@@ -226,10 +226,10 @@ public class TransactionService {
         Transaction transaction = new Transaction();
 
         transaction.setBookId(createDto.getBookId());
-        transaction.setBorrowerId(createDto.getBorrowerId());
+        transaction.setUserId(createDto.getBorrowerId());
 
         if (createDto.getLenderId() != null) {
-            transaction.setBorrowerId(createDto.getLenderId()); // Note: Your entity might need a lenderId field
+            transaction.setUserId(createDto.getLenderId()); // Note: Your entity might need a lenderId field
         }
 
         transaction.setType(Transaction.TransactionType.valueOf(createDto.getType().toUpperCase()));
@@ -255,7 +255,7 @@ public class TransactionService {
 
         dto.setTransactionId(transaction.getTransactionId());
         dto.setBookId(transaction.getBookId());
-        dto.setBorrowerId(transaction.getBorrowerId());
+        dto.setBorrowerId(transaction.getUserId());
         dto.setType(transaction.getType().name());
         dto.setStatus(transaction.getStatus().name());
         dto.setPaymentStatus(transaction.getPaymentStatus().name());
@@ -272,8 +272,8 @@ public class TransactionService {
 //        }
 
         // Get borrower details
-        if (transaction.getBorrowerId() != null) {
-            allUsersRepo.findById(transaction.getBorrowerId().intValue())
+        if (transaction.getUserId() != null) {
+            allUsersRepo.findById(transaction.getUserId().intValue())
                     .ifPresent(user -> dto.setBorrowerName(user.getName()));
         }
 
