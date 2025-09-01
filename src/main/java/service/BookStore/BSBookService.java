@@ -60,18 +60,16 @@ public class BSBookService {
                 .orElse(false);
     }
 
-//    public ResponseEntity<ViewBookDTO> getBookById (Integer bookId) {
-//        return bookRepo.findByBookId(bookId)
-//                .map(existingBook -> {
-//                    modelMapper.getConfiguration().setSkipNullEnabled(true);
-//                    modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-//
-//                    ViewBookDTO bookView = modelMapper.map(existingBook, ViewBookDTO.class);
-//                    return ResponseEntity.ok(bookView);
-//                })
-//                .orElse(ResponseEntity.notFound().build());
-//    }
-//
+    public ViewBookDTO getBookById (Integer bookId) {
+        Optional<BSBook> bookOpt = bookRepo.findByBookId(bookId);
+        if (bookOpt.isEmpty())
+            return null;
+        else {
+            BSBook book = bookOpt.get();
+            return modelMapper.map(book, ViewBookDTO.class);
+        }
+    }
+
 //    public List<BSBookDTOs.BookListingDTO> getBooksByStore (Integer storeId) {
 //        modelMapper.getConfiguration().setSkipNullEnabled(true);
 //        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
