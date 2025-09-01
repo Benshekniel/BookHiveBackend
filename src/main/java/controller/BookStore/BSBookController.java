@@ -43,12 +43,15 @@ public class BSBookController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book Not found!");
     }
 
-//    @GetMapping("/book/{bookId}")
-//    public ResponseEntity<ViewBookDTO> getBook (
-//            @PathVariable("bookId") Integer bookId ) {
-//        return bookService.getBookById(bookId);
-//    }
-//
+    @GetMapping("/book/{bookId}")
+    public ResponseEntity<ViewBookDTO> getBook ( @PathVariable("bookId") Integer bookId ) {
+
+        ViewBookDTO formattedBook = bookService.getBookById(bookId);
+        if (formattedBook == null)
+            return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(formattedBook);
+    }
+
 //    @GetMapping("/store/{storeId}")
 //    public ResponseEntity<List<ViewBookDTO>> getBooksByStoreId (
 //            @PathVariable("storeId") Integer storeId ) {
