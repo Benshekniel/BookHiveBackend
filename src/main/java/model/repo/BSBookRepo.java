@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface BSBookRepo extends JpaRepository<BSBook, Integer> {
 
-    Optional <BSBook> findByBookId(Integer bookId);
+    Optional<BSBook> findByBookId(Integer bookId);
 
     List<BSBook> findByBookStore_StoreId(Integer storeId);
 

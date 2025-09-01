@@ -41,6 +41,7 @@ public class BSBookDTOs {
 
         private Integer bookCount;
     }
+
     @Data @NoArgsConstructor @AllArgsConstructor
     public static class UpdateBookDTO {
         private String title;
@@ -72,6 +73,7 @@ public class BSBookDTOs {
         private Integer bookCount;
 
     }
+
     @Data @NoArgsConstructor @AllArgsConstructor
     public static class ViewBookDTO {
         private String title;
