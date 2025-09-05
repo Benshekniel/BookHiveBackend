@@ -34,12 +34,12 @@ public class BSInventoryController {
         return ResponseEntity.ok(books);
     }
 
-    @GetMapping("/getBookListingLending/{userId}")
-    public ResponseEntity<List<BSBookDTOs.BookListingDTO>> getBookListingLending (
+    @GetMapping("/getBookListingLend/{userId}")
+    public ResponseEntity<List<BSBookDTOs.BookListingDTO>> getBookListingLend (
             @PathVariable("userId") Integer userId) {
         Integer storeId = bookStoreService.getStoreIdByUserId(userId);
 
-        List<BSBookDTOs.BookListingDTO> books = inventoryService.getBookListingLending(storeId);
+        List<BSBookDTOs.BookListingDTO> books = inventoryService.getBookListingLend(storeId);
         if (books.isEmpty())
             return ResponseEntity.noContent().build();
         return ResponseEntity.ok(books);
