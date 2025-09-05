@@ -5,6 +5,7 @@ import model.dto.AllUsersDTO;
 import model.dto.LoginDto;
 import model.dto.UserBooksDTO;
 import model.messageResponse.LoginResponse;
+import model.entity.Competitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,8 @@ import service.FileUpload.UploadService;
 import service.GoogleDriveUpload.FileStorageService;
 import service.Login.LoginService;
 import service.User.BooksService;
+import service.User.UserCompetitionService;
+import model.dto.CompetitionDTO;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,6 +35,9 @@ public class UserController {
 
     @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    private UserCompetitionService userCompetitionService;
 
 
 
@@ -58,6 +64,13 @@ public class UserController {
     public ResponseEntity<List<UserBooksDTO>> getAllBooks() {
         List<UserBooksDTO> books = booksService.getAllBooks();
         return ResponseEntity.ok(books);
+    }
+
+
+    @GetMapping("/getAllCompetitions")
+    public ResponseEntity<List<Map<String, Object>>> getAllCompetitions() {
+        List<Map<String, Object>> competitions = userCompetitionService.getAllUserCompetitionsMapped();
+        return ResponseEntity.ok(competitions);
     }
 
 }
