@@ -41,7 +41,7 @@ public class BSInventoryService {
                 .toList();
     }
 
-    public List<BSBookDTOs.BookListingDTO> getBookListingLending (Integer storeId) {
+    public List<BSBookDTOs.BookListingDTO> getBookListingLend (Integer storeId) {
         List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndListingTypeIn(storeId,
                 List.of(BSBook.ListingType.LEND_ONLY, BSBook.ListingType.SELL_AND_LEND));
 
