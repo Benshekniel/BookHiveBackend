@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
-import io.hypersistence.utils.hibernate.type.array.StringArrayType;
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
@@ -29,19 +29,24 @@ public class BSBook {
     private String title;
 
     // Things stored as arrays:
-    @Type(StringArrayType.class)
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> authors;
 
-    @Type(StringArrayType.class)
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> genres;
 
-    @Type(StringArrayType.class)
+    /** Single image - cover page of book, preferably png from the internet itself.
+     * It is the name of the image file name only, stored in folder BSBook/coverImage/ */
+    private String coverImage;
+
+    /** Multiple images, max 3 - photos of the book to showcase its condition */
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> images;
 
-    @Type(StringArrayType.class)
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> tags;          // ["bestseller", "classic", "award-winner"]
 
@@ -58,11 +63,11 @@ public class BSBook {
     @Enumerated(EnumType.STRING)
     private ListingType listingType;
 
-    /** Pricing as JSON object */
+    /** Pricing as JSON object Containing: sellingPrice, lendingPrice */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, BigDecimal> pricing;
-    // {"sellingPrice": 25.99, "lendingPrice": 5.00, "depositAmount": 15.00}
+    // {"sellPrice": 25.99, "lendPrice": 5.00}
 
     /** Just a short description to market the book */
     @Column(columnDefinition = "TEXT")
@@ -80,9 +85,9 @@ public class BSBook {
     private Integer lendingPeriod;
 
     private Integer bookCount;          // mainly for bookstore when multiple books are from the same bookstore
-    private Integer favouritesCount;    // how many people have marked favourite this book
+    private Integer favouritesCount;    // how many people have marked this book as favourite
 
-    /** Series info as a separate JSON object */
+    /** Series info as a separate JSON object Containing: series, seriesNumber, totalBooks */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, String> seriesInfo;
@@ -92,18 +97,14 @@ public class BSBook {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-//    /** Foreign Key connecting the owner - user_id column from AllUsers table - many books, one owner */
-//    @ManyToOne
-//    @JoinColumn(name = "owner_id", nullable = false)
-//    private AllUsers ownerID;
+    /** Once again, connecting the bookStore fk properly */
+    @ManyToOne
+    @JoinColumn(name = "store_id", nullable = false)
+    private BookStore bookStore;
 
-//    /** OwnerId integer foreign key connecting 'AllUsers' table userId */
+//    /** StoreId integer foreign key connecting 'BookStores' table storeId */
 //    @Column(nullable = false)
-//    private Integer ownerId;
-
-    /** StoreId integer foreign key connecting 'BookStores' table storeId */
-    @Column(nullable = false)
-    private Integer storeId;
+//    private Integer storeId;
 
     @PrePersist
     protected void onCreate() {
@@ -119,15 +120,19 @@ public class BSBook {
     public enum BookCondition {
         NEW, USED, FAIR
     }
+    /** UNAVAILABLE, AVAILABLE, SOLD, LENT, DONATED, AUCTION */
     public enum BookStatus {
-        UNAVAILABLE, AVAILABLE,
-        SOLD, LENT, DONATED, AUCTION
-    }
+        AVAILABLE,
+        UNAVAILABLE, SOLD, LENT, AUCTION
+        }
+//        DONATED,
+
+    /** SELL_ONLY, LEND_ONLY, SELL_AND_LEND */
     public enum ListingType {
         SELL_ONLY,
         LEND_ONLY,
         SELL_AND_LEND,
-        EXCHANGE,
-        DONATE
     }
+//        EXCHANGE,
+//        DONATE
 }

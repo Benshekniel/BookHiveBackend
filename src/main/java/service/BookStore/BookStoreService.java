@@ -1,7 +1,8 @@
 package service.BookStore;
 
-import model.dto.BookStoreDTOs.RegisterBookStoreDTO;
-import model.dto.BookStoreDTOs.ProfileBookStoreDTO;
+import model.dto.BookStore.BookStoreDTOs.RegisterBookStoreDTO;
+import model.dto.BookStore.BookStoreDTOs.ProfileBookStoreDTO;
+import model.entity.AllUsers;
 import model.entity.BookStore;
 import model.repo.BookStoreRepo;
 
@@ -24,39 +25,57 @@ public class BookStoreService {
     // Common mapper resource for the entire service class:
     private static final ModelMapper modelMapper = new ModelMapper();
 
-    public ResponseEntity<String> registerBookStore (RegisterBookStoreDTO bookStoreDTO) {
+    /**
+     * @param userId  an AllUsers entity user_id
+     * @return storeId - the corresponding bookstore's id
+     */
+    public Integer getStoreIdByUserId(Integer userId) {
+        AllUsers bsUser = new AllUsers();
+        bsUser.setUser_id(userId);
+
+        BookStore bookStore = bookStoreRepo.findByAllUser(bsUser);
+        return bookStore.getStoreId();
+    }
+
+    public boolean registerBookStore (RegisterBookStoreDTO bookStoreDTO) {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         BookStore bookStore = modelMapper.map(bookStoreDTO, BookStore.class);
+            AllUsers user = new AllUsers();
+            user.setUser_id(bookStoreDTO.getUserId());
+            bookStore.setAllUser(user);
+
         bookStoreRepo.save(bookStore);
-        return ResponseEntity.ok("Book store registered successfully");
+        return true;
     }
 
-    public ResponseEntity<ProfileBookStoreDTO> getBookStoreById (Integer id) {
-        return bookStoreRepo.findByStoreId(id)
-                .map(existingBookStore -> {
-                    modelMapper.getConfiguration().setSkipNullEnabled(true);
-                    modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-                    ProfileBookStoreDTO bookStoreProfile = modelMapper.map(existingBookStore, ProfileBookStoreDTO.class);
-                    return ResponseEntity.ok(bookStoreProfile);
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    public ResponseEntity<String> updateBookStore (Integer id, ProfileBookStoreDTO bookStoreDTO) {
-        return bookStoreRepo.findByStoreId(id)
+    public boolean updateBookStore (Integer userId, ProfileBookStoreDTO bookStoreDTO) {
+        Integer storeId = getStoreIdByUserId(userId);
+        return bookStoreRepo.findByStoreId(storeId)
                 .map(existingBookStore -> {
                     modelMapper.getConfiguration().setSkipNullEnabled(true);
                     modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
                     modelMapper.map(bookStoreDTO, existingBookStore);
-
                     bookStoreRepo.save(existingBookStore);
-                    return ResponseEntity.ok("BookStore updated successfully");
+
+                    return true;
                 })
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("BookStore Not found!"));
+                .orElse(false);
     }
+
+//    public ResponseEntity<ProfileBookStoreDTO> getBookStoreById (Integer id) {
+//        return bookStoreRepo.findByStoreId(id)
+//                .map(existingBookStore -> {
+//                    modelMapper.getConfiguration().setSkipNullEnabled(true);
+//                    modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+//
+//                    ProfileBookStoreDTO bookStoreProfile = modelMapper.map(existingBookStore, ProfileBookStoreDTO.class);
+//                    return ResponseEntity.ok(bookStoreProfile);
+//                })
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+
 
 }
