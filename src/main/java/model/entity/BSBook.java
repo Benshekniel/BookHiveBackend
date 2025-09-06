@@ -37,7 +37,8 @@ public class BSBook {
     @Column(columnDefinition = "text[]")
     private List<String> genres;
 
-    /** Single image - cover page of book, preferably png from the internet itself */
+    /** Single image - cover page of book, preferably png from the internet itself.
+     * It is the name of the image file name only, stored in folder BSBook/coverImage/ */
     private String coverImage;
 
     /** Multiple images, max 3 - photos of the book to showcase its condition */

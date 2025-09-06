@@ -3,13 +3,19 @@ package controller.BookStore;
 import model.dto.BookStore.BSBookDTOs;
 import model.dto.BookStore.BSBookDTOs.RegisterBookDTO;
 import model.dto.BookStore.BSBookDTOs.BookDetailsDTO;
-import org.springframework.http.HttpStatus;
 import service.BookStore.BSBookService;
+import service.BookStore.BookStoreService;
 
+import service.GoogleDriveUpload.FileStorageService;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
-import service.BookStore.BookStoreService;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/bs-book")
@@ -18,12 +24,24 @@ import service.BookStore.BookStoreService;
 public class BSBookController {
 
     private final BSBookService bookService;
+    private final FileStorageService fileStorageService;
     private final BookStoreService bookStoreService;
 
-    @PostMapping
-    public ResponseEntity<String> registerBook ( @RequestBody RegisterBookDTO regBookDTO ) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> registerBook (
+            @RequestPart("bookData") RegisterBookDTO regBookDTO,
+            @RequestPart("coverImage") MultipartFile coverImage ) throws IOException {
+
+        if (coverImage == null || coverImage.isEmpty())
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cover image is required.");
+
         Integer userId = regBookDTO.getUserId();
         Integer storeId = bookStoreService.getStoreIdByUserId(userId);
+
+        String coverImageRandName = fileStorageService.generateRandomFilename(coverImage);
+        fileStorageService.uploadFile(coverImage, "BSBook/coverImage", coverImageRandName);
+
+        regBookDTO.setCoverImage(coverImageRandName);
 
         boolean saved = bookService.registerBook(regBookDTO, storeId);
 
