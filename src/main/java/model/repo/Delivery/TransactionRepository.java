@@ -52,17 +52,21 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Object[]> getTransactionStatsByStatus();
 
     // Find transactions by hub through delivery relationship
-    @Query("SELECT t, u.name " +
+    @Query("SELECT t, b.title, u.name " +
             "FROM Transaction t " +
-            "LEFT JOIN AllUsers u ON t.borrowerId = u.user_id " +
+
+            "LEFT JOIN UserBooks b ON t.bookId = b.bookId " +
+            "LEFT JOIN AllUsers u ON t.userId = u.user_id " +
             "INNER JOIN Delivery d ON t.transactionId = d.transactionId " +
             "INNER JOIN Route r ON d.routeId = r.routeId " +
             "WHERE r.hubId = :hubId")
     List<Object[]> findTransactionsByHub(@Param("hubId") Long hubId);
 
-    @Query("SELECT t, u.name " +
+    @Query("SELECT t, b.title, u.name " +
             "FROM Transaction t " +
-            "LEFT JOIN AllUsers u ON t.borrowerId = u.user_id")
+
+            "LEFT JOIN UserBooks b ON t.bookId = b.bookId " +
+            "LEFT JOIN AllUsers u ON t.userId = u.user_id")
     List<Object[]> findAllTransactionsWithDetails();
 
     // Performance queries

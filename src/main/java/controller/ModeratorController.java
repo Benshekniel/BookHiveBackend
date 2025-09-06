@@ -3,6 +3,7 @@ package controller;
 import model.dto.AllUsersDTO;
 import model.dto.CompetitionDTO;
 import model.dto.UserBooksDTO;
+import model.entity.Competitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -81,5 +82,56 @@ public class ModeratorController {
             Map<String, String> Result = fileStorageService.uploadFile(bannerImageFile, "competitions", bannerImageName);
         }
         return ResponseEntity.ok(Map.of("message", response));
+    }
+
+    @GetMapping("/getAllCompetitions")
+    public ResponseEntity<List<Map<String, Object>>> getAllCompetitions() {
+        List<Map<String, Object>> competitions = competitionService.getAllCompetitionsMapped();
+        return ResponseEntity.ok(competitions);
+    }
+
+    @GetMapping("/goLiveCompetition")
+    public ResponseEntity<Map<String, String>> goLiveCompetition (
+            @RequestParam("competitionId") String competitionId,
+            @RequestParam("email") String email
+           ){
+        String result = competitionService.makeActive(competitionId,email);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    @GetMapping("/reLiveCompetition")
+    public ResponseEntity<Map<String, String>> reLiveCompetition (
+            @RequestParam("competitionId") String competitionId,
+            @RequestParam("email") String email
+    ){
+        String result = competitionService.make_ReActive(competitionId,email);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    @GetMapping("/stopLiveCompetition")
+    public ResponseEntity<Map<String, String>> stopLiveCompetition (
+            @RequestParam("competitionId") String competitionId,
+            @RequestParam("email") String email
+    ){
+        String result = competitionService.stopActive(competitionId,email);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    @GetMapping("/pauseCompetition")
+    public ResponseEntity<Map<String, String>> pauseCompetition (
+            @RequestParam("competitionId") String competitionId,
+            @RequestParam("email") String email
+    ){
+        String result = competitionService.makePause(competitionId,email);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    @GetMapping("/resumeCompetition")
+    public ResponseEntity<Map<String, String>> resumeCompetition (
+            @RequestParam("competitionId") String competitionId,
+            @RequestParam("email") String email
+    ){
+        String result = competitionService.makeResume(competitionId,email);
+        return ResponseEntity.ok(Map.of("message", result));
     }
 }
