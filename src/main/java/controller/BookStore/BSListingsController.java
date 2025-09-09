@@ -2,7 +2,7 @@ package controller.BookStore;
 
 import model.dto.BookStore.*;
 import service.BookStore.BSBookService;
-import service.BookStore.BSInventoryService;
+import service.BookStore.BSListingsService;
 import service.BookStore.BookStoreService;
 
 import org.springframework.http.ResponseEntity;
@@ -11,14 +11,14 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/bs-inventory")
+@RequestMapping("/api/bs-listings")
 @CrossOrigin(origins = "http://localhost:9999")
 @RequiredArgsConstructor
-public class BSInventoryController {
+public class BSListingsController {
 
     private final BookStoreService bookStoreService;
     private final BSBookService bookService;
-    private final BSInventoryService inventoryService;
+    private final BSListingsService listingsService;
 
     // sale details
     // lending details
@@ -28,7 +28,7 @@ public class BSInventoryController {
             @PathVariable("userId") Integer userId) {
         Integer storeId = bookStoreService.getStoreIdByUserId(userId);
 
-        List<BSBookDTOs.BookListingDTO> books = inventoryService.getBookListingSale(storeId);
+        List<BSBookDTOs.BookListingDTO> books = listingsService.getBookListingSale(storeId);
         if (books.isEmpty())
             return ResponseEntity.noContent().build();
         return ResponseEntity.ok(books);
@@ -39,7 +39,7 @@ public class BSInventoryController {
             @PathVariable("userId") Integer userId) {
         Integer storeId = bookStoreService.getStoreIdByUserId(userId);
 
-        List<BSBookDTOs.BookListingDTO> books = inventoryService.getBookListingLend(storeId);
+        List<BSBookDTOs.BookListingDTO> books = listingsService.getBookListingLend(storeId);
         if (books.isEmpty())
             return ResponseEntity.noContent().build();
         return ResponseEntity.ok(books);
