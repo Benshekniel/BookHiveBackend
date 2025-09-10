@@ -60,6 +60,7 @@ public class BooksImpl  implements BooksService {
     public List<UserBooksDTO> getAllBooks() {
         return userBooksRepo.findAll().stream()
                 .map(book -> new UserBooksDTO(
+                        book.getBookId(),
                         book.getUserEmail(),
                         book.getTitle(),
                         book.getAuthors(),
@@ -81,5 +82,68 @@ public class BooksImpl  implements BooksService {
                         book.getBookImage()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserBooksDTO getBookById(Long id) {
+        return userBooksRepo.findById(id)
+                .map(book -> new UserBooksDTO(
+                        book.getBookId(),
+                        book.getUserEmail(),
+                        book.getTitle(),
+                        book.getAuthors(),
+                        book.getGenres(),
+                        book.getCondition(),
+                        book.getForSale(),
+                        book.getPrice(),
+                        book.getForLend(),
+                        book.getLendingAmount(),
+                        book.getLendingPeriod(),
+                        book.getForExchange(),
+                        book.getExchangePeriod(),
+                        book.getDescription(),
+                        book.getLocation(),
+                        book.getPublishYear(),
+                        book.getIsbn(),
+                        book.getLanguage(),
+                        book.getHashtags(),
+                        book.getBookImage()
+                ))
+                .orElse(null);
+    }
+
+    @Override
+    public String updateBook(Long id, UserBooksDTO userBooksDTO) {
+        return userBooksRepo.findById(id).map(book -> {
+            book.setTitle(userBooksDTO.getTitle());
+            book.setAuthors(userBooksDTO.getAuthors());
+            book.setGenres(userBooksDTO.getGenres());
+            book.setCondition(userBooksDTO.getCondition());
+            book.setForSale(userBooksDTO.getForSale());
+            book.setPrice(userBooksDTO.getPrice());
+            book.setForLend(userBooksDTO.getForLend());
+            book.setLendingAmount(userBooksDTO.getLendingAmount());
+            book.setLendingPeriod(userBooksDTO.getLendingPeriod());
+            book.setForExchange(userBooksDTO.getForExchange());
+            book.setExchangePeriod(userBooksDTO.getExchangePeriod());
+            book.setDescription(userBooksDTO.getDescription());
+            book.setLocation(userBooksDTO.getLocation());
+            book.setPublishYear(userBooksDTO.getPublishYear());
+            book.setIsbn(userBooksDTO.getIsbn());
+            book.setLanguage(userBooksDTO.getLanguage());
+            book.setHashtags(userBooksDTO.getHashtags());
+            book.setBookImage(userBooksDTO.getBookImage());
+            userBooksRepo.save(book);
+            return "success";
+        }).orElse("book not found");
+    }
+
+    @Override
+    public String deleteBook(Long id) {
+        if (userBooksRepo.existsById(id)) {
+            userBooksRepo.deleteById(id);
+            return "success";
+        }
+        return "book not found";
     }
 }

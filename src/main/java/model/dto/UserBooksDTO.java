@@ -4,6 +4,7 @@ import java.util.List;
 
 public class UserBooksDTO {
 
+    private Long bookId;
     private String userEmail;             // assuming String (or Integer if numeric)
     private String title;
     private List<String> authors;      // from author string split by commas
@@ -70,8 +71,36 @@ public class UserBooksDTO {
         this.bookImage = bookImage;
     }
 
+    // 2. Constructor with bookId (for fetch/update)
+    public UserBooksDTO(Long bookId, String userEmail, String title, List<String> authors, List<String> genres, String condition, Boolean forSale, Double price, Boolean forLend, Double lendingAmount, String lendingPeriod, Boolean forExchange, String exchangePeriod, String description, String location, String publishYear, String isbn, String language, List<String> hashtags, String bookImage) {
+        this.bookId = bookId;
+        this.userEmail = userEmail;
+        this.title = title;
+        this.authors = authors;
+        this.genres = genres;
+        this.condition = condition;
+        this.forSale = forSale;
+        this.price = price;
+        this.forLend = forLend;
+        this.lendingAmount = lendingAmount;
+        this.lendingPeriod = lendingPeriod;
+        this.forExchange = forExchange;
+        this.exchangePeriod = exchangePeriod;
+        this.description = description;
+        this.location = location;
+        this.publishYear = publishYear;
+        this.isbn = isbn;
+        this.language = language;
+        this.hashtags = hashtags;
+        this.bookImage = bookImage;
+    }
+
     public UserBooksDTO() {
     }
+
+    public Long getBookId() { return bookId; }
+
+    public void setBookId(Long bookId) { this.bookId = bookId; }
 
     public String getUserEmail() {
         return userEmail;
@@ -228,6 +257,7 @@ public class UserBooksDTO {
     @Override
     public String toString() {
         return "UserBooksDTO{" +
+                "bookId=" + bookId +
                 "userEmail='" + userEmail + '\'' +
                 ", title='" + title + '\'' +
                 ", authors=" + authors +
