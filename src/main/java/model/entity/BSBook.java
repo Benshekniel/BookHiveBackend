@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Type;
 import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import org.hibernate.type.SqlTypes;
@@ -18,6 +19,7 @@ import java.util.Map;
 /** Entity for books owned by BookStore users. */
 @Entity
 @Table(name = "bookstore_books")
+@SQLRestriction("status <> 'DELETED'")
 @Data @NoArgsConstructor @AllArgsConstructor
 public class BSBook {
 
@@ -75,9 +77,9 @@ public class BSBook {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> lendingTerms;
-    // {lendingPeriod int,
-    // lateFee double,
-    // minScore double}
+    // {"lendingPeriod" int,
+    // "lateFee" double,
+    // "minScore" double}
 
 //    private Integer lendingPeriod;
 
@@ -112,6 +114,7 @@ public class BSBook {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         status = BookStatus.INVENTORY;
+        listingType = ListingType.NOT_SET;
         favouritesCount = 0;
     }
 
@@ -126,12 +129,16 @@ public class BSBook {
 
     /** INVENTORY, AVAILABLE, SOLD, LENT, DONATED, AUCTION */
     public enum BookStatus {
-        AVAILABLE,
         INVENTORY,
-        SOLD, LENT, AUCTION
+        AVAILABLE,
+        DONATED, SOLD,
+        LENT,
+        AUCTION,
+        DELETED
     }
-    /** SELL_ONLY, LEND_ONLY, SELL_AND_LEND */
+    /** SELL_ONLY, LEND_ONLY, SELL_AND_LEND, DONATE */
     public enum ListingType {
+        NOT_SET,
         SELL_ONLY,
         LEND_ONLY,
         SELL_AND_LEND,
