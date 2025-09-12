@@ -86,6 +86,7 @@ public class BSBook {
     // Essential book info:
     @Column(length = 13)
     private String isbn;
+
     private String publisher;
     private Integer publishedYear;
     private String language;
