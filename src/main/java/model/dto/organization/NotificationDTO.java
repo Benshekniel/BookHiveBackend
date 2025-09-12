@@ -1,24 +1,35 @@
-package model.dto.organization;
+// NotificationDto.java
+package model.dto.Organization;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
-public class NotificationDTO {
-	private Long id;
-	private Long organizationId;
-	private String message;
-	private boolean read;
-	private LocalDateTime createdAt;
-
-	public NotificationDTO() {}
-
-	public Long getId() { return id; }
-	public void setId(Long id) { this.id = id; }
-	public Long getOrganizationId() { return organizationId; }
-	public void setOrganizationId(Long organizationId) { this.organizationId = organizationId; }
-	public String getMessage() { return message; }
-	public void setMessage(String message) { this.message = message; }
-	public boolean isRead() { return read; }
-	public void setRead(boolean read) { this.read = read; }
-	public LocalDateTime getCreatedAt() { return createdAt; }
-	public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+public class NotificationDto {
+    
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NotificationResponseDto {
+        private Long id;
+        private Long organizationId;
+        private String type;
+        private String message;
+        private Boolean read;
+        private LocalDateTime createdAt;
+        private String title;
+        private String action;
+        private Long referenceId;
+        private String referenceType;
+    }
+    
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MarkAllReadResponseDto {
+        private Integer count;
+        private Boolean success;
+        private String message;
+    }
 }

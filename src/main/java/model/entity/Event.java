@@ -1,4 +1,4 @@
-// BookRequest.java
+// Event.java
 package model.entity;
 
 import jakarta.persistence.*;
@@ -6,14 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
-@Table(name = "book_requests")
+@Table(name = "events")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookRequest {
+public class Event {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,26 +28,16 @@ public class BookRequest {
     private String description;
     
     @Column(nullable = false)
-    private String status;  // PENDING, ACTIVE, COMPLETED, REJECTED
+    private LocalDateTime eventDate;
     
-    @Column(nullable = false)
-    private Integer quantity;
+    private String location;
     
-    @ElementCollection
-    @CollectionTable(name = "book_request_categories", joinColumns = @JoinColumn(name = "request_id"))
-    @Column(name = "category")
-    private List<String> categories;
-    
-    private String priority;  // HIGH, MEDIUM, LOW
-    
-    private String notes;
+    private String eventType;  // BOOK_DRIVE, WORKSHOP, DONATION_CAMPAIGN
     
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;
-    
-    private LocalDateTime fulfilledAt;
     
     @PrePersist
     protected void onCreate() {

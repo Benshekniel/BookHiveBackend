@@ -1,9 +1,10 @@
+// Notification.java
 package model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,33 +13,36 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Notification {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long notificationId;
-
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
+    private Long id;
+    
+    private Long organizationId;  // Can be null for system notifications
+    
     @Column(nullable = false)
     private String title;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
+    
+    @Column(nullable = false, length = 1000)
     private String message;
-
-    @Enumerated(EnumType.STRING)
-    private NotificationType type;
-
-    private boolean isRead = false;
-
+    
+    @Column(nullable = false)
+    private String type;  // BOOK_REQUEST, DONATION, FEEDBACK, SYSTEM
+    
+    private boolean read;
+    
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
+    
+    private String action;  // URL or action to take when notification is clicked
+    
+    private Long referenceId;  // ID of the related entity (book request, donation, etc.)
+    
+    private String referenceType;  // Type of the reference (BOOK_REQUEST, DONATION, etc.)
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-    }
-
-    public enum NotificationType {
-        DELIVERY_UPDATE, SYSTEM_ALERT, PROMOTION, GENERAL
+        read = false;
     }
 }

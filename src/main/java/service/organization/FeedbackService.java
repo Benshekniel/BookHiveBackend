@@ -1,10 +1,13 @@
 package service.organization;
 
-import model.dto.organization.FeedbackCreateDTO;
-import model.dto.organization.FeedbackResponseDTO;
+import model.dto.Organization.FeedbackDto.*;
 import java.util.List;
 
 public interface FeedbackService {
-    FeedbackResponseDTO createFeedback(FeedbackCreateDTO dto);
-    List<FeedbackResponseDTO> getFeedbacksByOrganization(Long orgId);
+    
+    // Create feedback
+    FeedbackResponseDto createFeedback(FeedbackCreateDto feedbackData);
+    
+    // Get all feedback for an organization
+    List<FeedbackResponseDto> getFeedbackByOrganization(Long orgId);
 }
