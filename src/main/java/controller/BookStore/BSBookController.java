@@ -60,6 +60,16 @@ public class BSBookController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book Not found!");
     }
 
+    @DeleteMapping("/{bookId}")
+    public ResponseEntity<String> deleteBook (
+            @PathVariable("bookId") Integer bookId ) {
+
+        boolean updated = bookService.deleteBook(bookId);
+        if (updated) return ResponseEntity.ok("Book deleted successfully");
+        else
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book Not found!");
+    }
+
     @GetMapping("/book/{bookId}")
     public ResponseEntity<BSBookDTOs.BookDetailsDTO> getBook (@PathVariable("bookId") Integer bookId ) {
 
