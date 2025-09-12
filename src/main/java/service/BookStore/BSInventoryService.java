@@ -26,13 +26,13 @@ public class BSInventoryService {
     /** Common mapper resource for the entire service class: */
     private static final ModelMapper modelMapper = new ModelMapper();
 
-    // get lists of books - 1.for sale, 2.for lending
+    // get lists of books - all with bookStatus == inventory, listingTypeNotIn donate, others default
     // sales overview - total, active listings
     // lending overview - total, on loan, avg price, avg duration
 
-    public List<BSBookDTOs.BookListingDTO> getBookListingSale (Integer storeId) {
-        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndListingTypeIn(storeId,
-                List.of(BSBook.ListingType.SELL_ONLY, BSBook.ListingType.SELL_AND_LEND));
+    public List<BSBookDTOs.BookListingDTO> getRegularInventory (Integer storeId) {
+        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndStatusAndListingTypeNot (
+                storeId, BSBook.BookStatus.INVENTORY, BSBook.ListingType.DONATE);
 
         if (bookList.isEmpty())
             return Collections.emptyList();
@@ -41,9 +41,9 @@ public class BSInventoryService {
                 .toList();
     }
 
-    public List<BSBookDTOs.BookListingDTO> getBookListingLend (Integer storeId) {
-        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndListingTypeIn(storeId,
-                List.of(BSBook.ListingType.LEND_ONLY, BSBook.ListingType.SELL_AND_LEND));
+    public List<BSBookDTOs.BookListingDTO> getDonationInventory (Integer storeId) {
+        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndStatusAndListingType (
+                storeId, BSBook.BookStatus.INVENTORY, BSBook.ListingType.DONATE);
 
         if (bookList.isEmpty())
             return Collections.emptyList();
@@ -51,14 +51,4 @@ public class BSInventoryService {
                 .map(book -> modelMapper.map(book, BSBookDTOs.BookListingDTO.class))
                 .toList();
     }
-
-    public BSStatDTOs.SaleStatDTO getSaleStats (Integer storeId) {
-        List<BSBook.ListingType> listingTypes = List.of(BSBook.ListingType.LEND_ONLY, BSBook.ListingType.SELL_AND_LEND);
-        BSStatDTOs.SaleStatDTO statDTO = new BSStatDTOs.SaleStatDTO();
-
-        statDTO.setTotalBooks(bookRepo.countByBookStore_StoreIdAndListingTypeIn(storeId, listingTypes));
-        statDTO.setActiveListings(bookRepo.countByBookStore_StoreIdAndStatusAndListingTypeIn(storeId, BSBook.BookStatus.AVAILABLE, listingTypes));
-        return statDTO;
-    }
-
 }
