@@ -1,6 +1,5 @@
 package service.BookStore;
 
-import model.dto.BookStore.BSStatDTOs;
 import model.dto.BookStore.BSBookDTOs;
 import model.entity.BSBook;
 import model.repo.BSBookRepo;
@@ -31,8 +30,9 @@ public class BSListingsService {
     // lending overview - total, on loan, avg price, avg duration
 
     public List<BSBookDTOs.BookListingDTO> getBookListingSale (Integer storeId) {
-        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndListingTypeIn(storeId,
-                List.of(BSBook.ListingType.SELL_ONLY, BSBook.ListingType.SELL_AND_LEND));
+        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndListingTypeInAndStatusNot(storeId,
+                List.of(BSBook.ListingType.SELL_ONLY, BSBook.ListingType.SELL_AND_LEND),
+                BSBook.BookStatus.INVENTORY);
 
         if (bookList.isEmpty())
             return Collections.emptyList();
@@ -42,7 +42,8 @@ public class BSListingsService {
     }
 
     public List<BSBookDTOs.BookListingDTO> getBookListingLend (Integer storeId) {
-        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndListingTypeIn(storeId,
+        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndStatusInAndListingTypeIn(storeId,
+                List.of(BSBook.BookStatus.AVAILABLE, BSBook.BookStatus.LENT),
                 List.of(BSBook.ListingType.LEND_ONLY, BSBook.ListingType.SELL_AND_LEND));
 
         if (bookList.isEmpty())
@@ -52,13 +53,15 @@ public class BSListingsService {
                 .toList();
     }
 
-    public BSStatDTOs.SaleStatDTO getSaleStats (Integer storeId) {
-        List<BSBook.ListingType> listingTypes = List.of(BSBook.ListingType.LEND_ONLY, BSBook.ListingType.SELL_AND_LEND);
-        BSStatDTOs.SaleStatDTO statDTO = new BSStatDTOs.SaleStatDTO();
+    public boolean inventoryItem (Integer bookId) {
+        return bookRepo.findByBookId(bookId)
+                .map(existingBook -> {
+                    existingBook.setStatus(BSBook.BookStatus.INVENTORY);
+                    bookRepo.save(existingBook);
 
-        statDTO.setTotalBooks(bookRepo.countByBookStore_StoreIdAndListingTypeIn(storeId, listingTypes));
-        statDTO.setActiveListings(bookRepo.countByBookStore_StoreIdAndStatusAndListingTypeIn(storeId, BSBook.BookStatus.AVAILABLE, listingTypes));
-        return statDTO;
+                    return true;
+                })
+                .orElse(false);
     }
 
 }
