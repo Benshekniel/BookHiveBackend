@@ -1,6 +1,5 @@
 package model.repo.Admin;
 
-
 import model.entity.AllUsers;
 import model.entity.UserBooks;
 import model.entity.Transaction;
@@ -45,31 +44,25 @@ public interface DashboardRepository extends JpaRepository<AllUsers, Integer> {
     @Query("SELECT COALESCE(SUM(t.paymentAmount), 0) FROM Transaction t WHERE t.createdAt >= :startDate AND t.createdAt < :endDate AND t.paymentStatus = 'COMPLETED'")
     BigDecimal getRevenueForPeriod(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
-    // Recent Activities - Users
-    @Query(value = "SELECT u.user_id as id, 'user' as type, " +
+    // Recent Activities - Users (Using JPQL instead of native query)
+    @Query("SELECT u.userId as id, 'user' as type, " +
             "CONCAT('New user registration: ', u.name) as message, " +
-            "u.created_at as timestamp " +
-            "FROM users u " +
-            "WHERE u.created_at >= :since " +
-            "ORDER BY u.created_at DESC " +
-            "LIMIT 3", nativeQuery = true)
+            "u.createdAt as timestamp " +
+            "FROM Users u " +
+            "WHERE u.createdAt >= :since " +
+            "ORDER BY u.createdAt DESC")
     List<Map<String, Object>> getRecentUserActivities(@Param("since") LocalDateTime since);
 
-    // Recent Activities - Books
-    @Query(value = "SELECT b.book_id as id, 'book' as type,\n" +
-            "       CASE\n" +
-            "           WHEN b.status = 'AVAILABLE' THEN CONCAT('Book listing approved: \\\"', b.title, '\\\" by ', COALESCE((\n" +
-            "               SELECT STRING_AGG(author, ', ')\n" +
-            "               FROM jsonb_array_elements_text(b.authors) AS author\n" +
-            "           ), 'Unknown Author'))\n" +
-            "           ELSE CONCAT('Book listing rejected: \\\"', b.title, '\\\"')\n" +
-            "       END as message,\n" +
-            "       b.updated_at as timestamp\n" +
-            "FROM books b\n" +
-            "WHERE b.updated_at >= :since\n" +
-            "GROUP BY b.book_id, b.title, b.status, b.updated_at\n" +
-            "ORDER BY b.updated_at DESC\n" +
-            "LIMIT 3;", nativeQuery = true)
+    // Recent Activities - Books (Using JPQL)
+    @Query("SELECT b.bookId as id, 'book' as type, " +
+            "CASE " +
+            "WHEN b.status = 'AVAILABLE' THEN CONCAT('Book listing approved: \"', b.title, '\"') " +
+            "ELSE CONCAT('Book listing rejected: \"', b.title, '\"') " +
+            "END as message, " +
+            "b.updatedAt as timestamp " +
+            "FROM UserBooks b " +
+            "WHERE b.updatedAt >= :since " +
+            "ORDER BY b.updatedAt DESC")
     List<Map<String, Object>> getRecentBookActivities(@Param("since") LocalDateTime since);
 
     // Recent Activities - Transactions/Disputes
@@ -93,7 +86,7 @@ public interface DashboardRepository extends JpaRepository<AllUsers, Integer> {
     @Query("SELECT COUNT(t) FROM Transaction t WHERE t.status = 'OVERDUE'")
     Long getActiveDisputes();
 
-    // Trust Score Calculation (mock implementation - adjust based on your trust score logic)
+    // Trust Score Calculation
     @Query("SELECT AVG(CASE WHEN u.status = 'active' THEN 5.0 WHEN u.status = 'pending' THEN 3.0 ELSE 2.0 END) FROM AllUsers u")
     Double getAverageTrustScore();
 
