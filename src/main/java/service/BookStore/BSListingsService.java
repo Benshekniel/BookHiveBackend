@@ -1,6 +1,5 @@
 package service.BookStore;
 
-import model.dto.BookStore.BSStatDTOs;
 import model.dto.BookStore.BSBookDTOs;
 import model.entity.BSBook;
 import model.repo.BSBookRepo;
@@ -18,7 +17,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class BSInventoryService {
+public class BSListingsService {
 
     private final BookStoreRepo bookStoreRepo;
     private final BSBookRepo bookRepo;
@@ -26,13 +25,14 @@ public class BSInventoryService {
     /** Common mapper resource for the entire service class: */
     private static final ModelMapper modelMapper = new ModelMapper();
 
-    // get lists of books - all with bookStatus == inventory, listingTypeNotIn donate, others default
+    // get lists of books - 1.for sale, 2.for lending
     // sales overview - total, active listings
     // lending overview - total, on loan, avg price, avg duration
 
-    public List<BSBookDTOs.BookListingDTO> getRegularInventory (Integer storeId) {
-        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndStatusAndListingTypeNot (
-                storeId, BSBook.BookStatus.INVENTORY, BSBook.ListingType.DONATE);
+    public List<BSBookDTOs.BookListingDTO> getBookListingSale (Integer storeId) {
+        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndListingTypeInAndStatusNot(storeId,
+                List.of(BSBook.ListingType.SELL_ONLY, BSBook.ListingType.SELL_AND_LEND),
+                BSBook.BookStatus.INVENTORY);
 
         if (bookList.isEmpty())
             return Collections.emptyList();
@@ -41,9 +41,10 @@ public class BSInventoryService {
                 .toList();
     }
 
-    public List<BSBookDTOs.BookListingDTO> getDonationInventory (Integer storeId) {
-        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndStatusAndListingType (
-                storeId, BSBook.BookStatus.INVENTORY, BSBook.ListingType.DONATE);
+    public List<BSBookDTOs.BookListingDTO> getBookListingLend (Integer storeId) {
+        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndStatusInAndListingTypeIn(storeId,
+                List.of(BSBook.BookStatus.AVAILABLE, BSBook.BookStatus.LENT),
+                List.of(BSBook.ListingType.LEND_ONLY, BSBook.ListingType.SELL_AND_LEND));
 
         if (bookList.isEmpty())
             return Collections.emptyList();
@@ -51,4 +52,16 @@ public class BSInventoryService {
                 .map(book -> modelMapper.map(book, BSBookDTOs.BookListingDTO.class))
                 .toList();
     }
+
+    public boolean inventoryItem (Integer bookId) {
+        return bookRepo.findByBookId(bookId)
+                .map(existingBook -> {
+                    existingBook.setStatus(BSBook.BookStatus.INVENTORY);
+                    bookRepo.save(existingBook);
+
+                    return true;
+                })
+                .orElse(false);
+    }
+
 }

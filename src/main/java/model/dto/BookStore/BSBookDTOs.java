@@ -33,7 +33,7 @@ public class BSBookDTOs {
         private BSBook.BookStatus status;
 
         private String terms;
-        private Integer lendingPeriod;
+        private Map<String, Object> lendingTerms;
 
         private String isbn;
         private String publisher;
@@ -66,7 +66,7 @@ public class BSBookDTOs {
         private Map<String, BigDecimal> pricing;
 
         private String terms;
-        private Integer lendingPeriod;
+        private Map<String, Object> lendingTerms;
 
         private String isbn;
         private String publisher;
@@ -97,6 +97,7 @@ public class BSBookDTOs {
         private BSBook.ListingType listingType;
 
         private Map<String, BigDecimal> pricing;
+        private Map<String, Object> lendingTerms;   // is needed for lendingLists
 
         private String coverImage;
         private LocalDateTime createdAt;
