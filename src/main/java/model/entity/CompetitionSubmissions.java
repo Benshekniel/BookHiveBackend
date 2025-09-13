@@ -22,14 +22,17 @@ public class CompetitionSubmissions {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(name = "submission_name", nullable = false)
-    private String submissionName;
+    @Column(name = "title", columnDefinition = "TEXT")
+    private String title;
 
-    @Column(name = "vote_count", nullable = false)
+    @Column(name = "content", columnDefinition = "TEXT")
+    private String content;
+
+    @Column(name = "vote_count", nullable = true)
     private Integer voteCount;
 
     @Type(JsonBinaryType.class)
-    @Column(name = "votes", columnDefinition = "jsonb")
+    @Column(name = "votes", columnDefinition = "jsonb" ,nullable = true)
     private Map<String, Integer> votes;
     //email:score structure
 
@@ -40,20 +43,31 @@ public class CompetitionSubmissions {
     public CompetitionSubmissions() {
     }
 
-    // Parameterized constructor
-    public CompetitionSubmissions(String submissionId, String competitionId, String email, String userId,
-                                 String submissionName, Integer voteCount, Map<String, Integer> votes, Boolean flag) {
+    //user Submissions
+
+
+    public CompetitionSubmissions(String submissionId, String competitionId, String email, String userId, String title, String content) {
         this.submissionId = submissionId;
         this.competitionId = competitionId;
         this.email = email;
         this.userId = userId;
-        this.submissionName = submissionName;
+        this.title = title;
+        this.content = content;
+    }
+
+    // Parameterized constructor
+    public CompetitionSubmissions(String submissionId, String competitionId, String email, String userId,
+                                 Integer voteCount, Map<String, Integer> votes, Boolean flag) {
+        this.submissionId = submissionId;
+        this.competitionId = competitionId;
+        this.email = email;
+        this.userId = userId;
         this.voteCount = voteCount;
         this.votes = votes;
         this.flag = flag;
     }
 
-    // Getters and Setters
+
     public String getSubmissionId() {
         return submissionId;
     }
@@ -86,12 +100,20 @@ public class CompetitionSubmissions {
         this.userId = userId;
     }
 
-    public String getSubmissionName() {
-        return submissionName;
+    public String getTitle() {
+        return title;
     }
 
-    public void setSubmissionName(String submissionName) {
-        this.submissionName = submissionName;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public Integer getVoteCount() {
@@ -116,5 +138,20 @@ public class CompetitionSubmissions {
 
     public void setFlag(Boolean flag) {
         this.flag = flag;
+    }
+
+    @Override
+    public String toString() {
+        return "CompetitionSubmissions{" +
+                "submissionId='" + submissionId + '\'' +
+                ", competitionId='" + competitionId + '\'' +
+                ", email='" + email + '\'' +
+                ", userId='" + userId + '\'' +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", voteCount=" + voteCount +
+                ", votes=" + votes +
+                ", flag=" + flag +
+                '}';
     }
 }
