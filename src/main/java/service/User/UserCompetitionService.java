@@ -1,6 +1,7 @@
 package service.User;
 
 import model.dto.CompetitionDTO;
+import model.dto.CompetitionSubmissionsDTO;
 import model.entity.Competitions;
 
 import java.util.List;
@@ -14,4 +15,9 @@ public interface UserCompetitionService {
      */
     public List<Map<String, Object>> getAllUserCompetitionsMapped();
 
+    String saveSubmitStory(CompetitionSubmissionsDTO competitionSubmissionsDTO);
+
+    CompetitionSubmissionsDTO getDraftSubmission(String competitionId, String email);
+
+//    CompetitionSubmissionsDTO getDraftSubmission(String competitionId, String userId);
 }
