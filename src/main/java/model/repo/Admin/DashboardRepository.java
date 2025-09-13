@@ -2,9 +2,6 @@ package model.repo.Admin;
 
 
 import model.entity.AllUsers;
-import model.entity.UserBooks;
-import model.entity.Transaction;
-import model.entity.Delivery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

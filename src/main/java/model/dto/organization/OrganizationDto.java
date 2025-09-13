@@ -6,8 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
-import java.util.List;
-
 import org.hibernate.validator.constraints.URL;
 
 public class OrganizationDto {

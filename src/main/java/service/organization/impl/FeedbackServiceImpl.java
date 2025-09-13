@@ -3,8 +3,6 @@ package service.organization.impl;
 
 import model.dto.Organization.FeedbackDto.*;
 import model.entity.Feedback;
-import model.entity.Donation;
-import model.entity.Organization;
 import model.repo.organization.FeedbackRepository;
 import model.repo.organization.DonationRepository;
 import model.repo.organization.OrganizationRepository;

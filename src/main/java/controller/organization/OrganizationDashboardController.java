@@ -1,8 +1,10 @@
 // 2. OrganizationDashboardController.java
 package controller.organization;
 
-import model.dto.Organization.DashboardDto.*;
-import service.organization.impl.DashboardServiceImpl;
+import model.dto.Organization.DashboardDto.DashboardStatsDto;
+import model.dto.Organization.DashboardDto.RecentRequestsResponseDto;
+import model.dto.Organization.DashboardDto.UpcomingEventsResponseDto;
+import service.organization.OrganizationDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,26 +14,32 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class OrganizationDashboardController {
 
-    private final DashboardServiceImpl dashboardService;
+    private final OrganizationDashboardService dashboardService;
 
     @GetMapping("/stats/{orgId}")
     public ResponseEntity<DashboardStatsDto> getStats(@PathVariable Long orgId) {
-        return dashboardService.getStats(orgId)
-                .map(stats -> ResponseEntity.ok(stats))
-                .orElse(ResponseEntity.notFound().build());
+        DashboardStatsDto stats = dashboardService.getStats(orgId);
+        if (stats != null) {
+            return ResponseEntity.ok(stats);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/recent-requests/{orgId}")
     public ResponseEntity<RecentRequestsResponseDto> getRecentRequests(@PathVariable Long orgId) {
-        return dashboardService.getRecentRequests(orgId)
-                .map(requests -> ResponseEntity.ok(requests))
-                .orElse(ResponseEntity.notFound().build());
+        RecentRequestsResponseDto requests = dashboardService.getRecentRequests(orgId);
+        if (requests != null) {
+            return ResponseEntity.ok(requests);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/upcoming-events/{orgId}")
     public ResponseEntity<UpcomingEventsResponseDto> getUpcomingEvents(@PathVariable Long orgId) {
-        return dashboardService.getUpcomingEvents(orgId)
-                .map(events -> ResponseEntity.ok(events))
-                .orElse(ResponseEntity.notFound().build());
+        UpcomingEventsResponseDto events = dashboardService.getUpcomingEvents(orgId);
+        if (events != null) {
+            return ResponseEntity.ok(events);
+        }
+        return ResponseEntity.notFound().build();
     }
 }

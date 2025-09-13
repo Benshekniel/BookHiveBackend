@@ -3,7 +3,6 @@ package service.organization.impl;
 
 import model.dto.Organization.NotificationDto.*;
 import model.entity.Notification;
-import model.entity.Organization;
 import model.repo.organization.NotificationRepository;
 import model.repo.organization.OrganizationRepository;
 import service.organization.NotificationService;
@@ -12,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
