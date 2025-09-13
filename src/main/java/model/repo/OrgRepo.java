@@ -1,6 +1,5 @@
 package model.repo;
 
-import model.entity.Moderator;
 import model.entity.Organization;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
