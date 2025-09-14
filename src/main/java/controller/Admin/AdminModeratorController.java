@@ -21,6 +21,29 @@ public class AdminModeratorController {
 
     // ==================== CREATE OPERATIONS ====================
 
+    // Create moderator
+    @PostMapping("/moderators")
+    public ResponseEntity<MessageResponse> createModerator(@RequestBody ModeratorDto moderatorDto) {
+        try {
+            // Validate DTO for creation
+            if (!moderatorDto.isValidForCreation()) {
+                return ResponseEntity.badRequest()
+                        .body(MessageResponse.error("Invalid moderator data for creation"));
+            }
+
+            Moderator moderator = moderatorService.createModerator(moderatorDto);
+            ModeratorDto responseDto = moderatorService.convertToDto(moderator);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(MessageResponse.success("Moderator created successfully", responseDto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(MessageResponse.error("Failed to create moderator: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(MessageResponse.error("Internal server error: " + e.getMessage()));
+        }
+    }
+
     // ==================== READ OPERATIONS ====================
 
     // Get moderator by ID
@@ -50,7 +73,6 @@ public class AdminModeratorController {
         }
     }
 
-
     // Get moderator by email
     @GetMapping("/moderators/email/{email}")
     public ResponseEntity<MessageResponse> getModeratorByEmail(@PathVariable String email) {
@@ -67,7 +89,7 @@ public class AdminModeratorController {
     }
 
     // Search moderators by name or email
-    //@GetMapping("/moderators/search")
+    @GetMapping("/moderators/search")
     public ResponseEntity<MessageResponse> searchModerators(
             @RequestParam(required = false) String searchTerm) {
         try {
@@ -177,6 +199,18 @@ public class AdminModeratorController {
             @PathVariable Long id,
             @RequestBody ModeratorDto moderatorDto) {
         try {
+            // Basic null check
+            if (moderatorDto == null) {
+                return ResponseEntity.badRequest()
+                        .body(MessageResponse.error("Request body cannot be null"));
+            }
+
+            // Validate DTO for update
+            if (!moderatorDto.isValidForUpdate()) {
+                return ResponseEntity.badRequest()
+                        .body(MessageResponse.error("Invalid moderator data for update"));
+            }
+
             Moderator moderator = moderatorService.updateModerator(id, moderatorDto);
             ModeratorDto responseDto = moderatorService.convertToDto(moderator);
             return ResponseEntity.ok(MessageResponse.success("Moderator updated successfully", responseDto));
@@ -257,7 +291,7 @@ public class AdminModeratorController {
         }
     }
 
-    // Soft delete moderator (placeholder for future implementation)
+    // Soft delete moderator
     @PatchMapping("/moderators/{id}/soft-delete")
     public ResponseEntity<MessageResponse> softDeleteModerator(@PathVariable Long id) {
         try {

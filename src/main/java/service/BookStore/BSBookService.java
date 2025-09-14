@@ -53,6 +53,17 @@ public class BSBookService {
                 .orElse(false);
     }
 
+    public boolean deleteBook (Integer bookId) {
+        return bookRepo.findByBookId(bookId)
+                .map(existingBook -> {
+                    existingBook.setStatus(BSBook.BookStatus.DELETED);
+                    bookRepo.save(existingBook);
+
+                    return true;
+                })
+                .orElse(false);
+    }
+
     public BookDetailsDTO getBookById (Integer bookId) {
         Optional<BSBook> bookOpt = bookRepo.findByBookId(bookId);
         if (bookOpt.isEmpty())

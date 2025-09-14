@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Type;
 import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import org.hibernate.type.SqlTypes;
@@ -18,6 +19,7 @@ import java.util.Map;
 /** Entity for books owned by BookStore users. */
 @Entity
 @Table(name = "bookstore_books")
+@SQLRestriction("status <> 'DELETED'")
 @Data @NoArgsConstructor @AllArgsConstructor
 public class BSBook {
 
@@ -48,7 +50,7 @@ public class BSBook {
 
     @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
-    private List<String> tags;          // ["bestseller", "classic", "award-winner"]
+    private List<String> tags;          // eg: ["bestseller", "classic", "award-winner"]
 
     @Enumerated(EnumType.STRING)
     private BookCondition condition;
@@ -66,12 +68,20 @@ public class BSBook {
     /** Pricing as JSON object Containing: sellingPrice, lendingPrice */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private Map<String, BigDecimal> pricing;
-    // {"sellPrice": 25.99, "lendPrice": 5.00}
+    private Map<String, BigDecimal> pricing;    // eg: {"sellPrice": 25.99, "lendPrice": 5.00}
 
-    /** Just a short description to market the book */
+    /** Just a short description to market the book whether selling or lending*/
     @Column(columnDefinition = "TEXT")
     private String terms;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> lendingTerms;
+    // {"lendingPeriod" int,
+    // "lateFee" double,
+    // "minScore" double}
+
+//    private Integer lendingPeriod;
 
     // Essential book info:
     @Column(length = 13)
@@ -82,9 +92,7 @@ public class BSBook {
     private String language;
     private Integer pageCount;
 
-    private Integer lendingPeriod;
-
-    private Integer bookCount;          // mainly for bookstore when multiple books are from the same bookstore
+    private Integer bookCount;          // when multiple books are in the INVENTORY and otherwise in SELL_ONLY
     private Integer favouritesCount;    // how many people have marked this book as favourite
 
     /** Series info as a separate JSON object Containing: series, seriesNumber, totalBooks */
@@ -102,14 +110,13 @@ public class BSBook {
     @JoinColumn(name = "store_id", nullable = false)
     private BookStore bookStore;
 
-//    /** StoreId integer foreign key connecting 'BookStores' table storeId */
-//    @Column(nullable = false)
-//    private Integer storeId;
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        status = BookStatus.INVENTORY;
+        listingType = ListingType.NOT_SET;
+        favouritesCount = 0;
     }
 
     @PreUpdate
@@ -120,19 +127,22 @@ public class BSBook {
     public enum BookCondition {
         NEW, USED, FAIR
     }
-    /** UNAVAILABLE, AVAILABLE, SOLD, LENT, DONATED, AUCTION */
-    public enum BookStatus {
-        AVAILABLE,
-        UNAVAILABLE, SOLD, LENT, AUCTION
-        }
-//        DONATED,
 
-    /** SELL_ONLY, LEND_ONLY, SELL_AND_LEND */
+    /** INVENTORY, AVAILABLE, SOLD, LENT, DONATED, AUCTION */
+    public enum BookStatus {
+        INVENTORY,
+        AVAILABLE,
+        DONATED, SOLD,
+        LENT,
+        AUCTION,
+        DELETED
+    }
+    /** SELL_ONLY, LEND_ONLY, SELL_AND_LEND, DONATE */
     public enum ListingType {
+        NOT_SET,
         SELL_ONLY,
         LEND_ONLY,
         SELL_AND_LEND,
+        DONATE
     }
-//        EXCHANGE,
-//        DONATE
 }

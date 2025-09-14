@@ -1,7 +1,6 @@
 package controller.BookStore;
 
 import model.dto.BookStore.*;
-import service.BookStore.BSBookService;
 import service.BookStore.BSInventoryService;
 import service.BookStore.BookStoreService;
 
@@ -17,32 +16,30 @@ import java.util.List;
 public class BSInventoryController {
 
     private final BookStoreService bookStoreService;
-    private final BSBookService bookService;
     private final BSInventoryService inventoryService;
 
-    // sale details
-    // lending details
+    // regular book inventory details
+    // donation book inventory details
 
-    @GetMapping("/getBookListingSale/{userId}")
-    public ResponseEntity<List<BSBookDTOs.BookListingDTO>> getBookListingSale (
+    @GetMapping("/getRegularInventory/{userId}")
+    public ResponseEntity<List<BSBookDTOs.BookListingDTO>> getRegularInventory (
             @PathVariable("userId") Integer userId) {
         Integer storeId = bookStoreService.getStoreIdByUserId(userId);
 
-        List<BSBookDTOs.BookListingDTO> books = inventoryService.getBookListingSale(storeId);
+        List<BSBookDTOs.BookListingDTO> books = inventoryService.getRegularInventory(storeId);
         if (books.isEmpty())
             return ResponseEntity.noContent().build();
         return ResponseEntity.ok(books);
     }
 
-    @GetMapping("/getBookListingLend/{userId}")
-    public ResponseEntity<List<BSBookDTOs.BookListingDTO>> getBookListingLend (
+    @GetMapping("/getDonationInventory/{userId}")
+    public ResponseEntity<List<BSBookDTOs.BookListingDTO>> getDonationInventory (
             @PathVariable("userId") Integer userId) {
         Integer storeId = bookStoreService.getStoreIdByUserId(userId);
 
-        List<BSBookDTOs.BookListingDTO> books = inventoryService.getBookListingLend(storeId);
+        List<BSBookDTOs.BookListingDTO> books = inventoryService.getDonationInventory(storeId);
         if (books.isEmpty())
             return ResponseEntity.noContent().build();
         return ResponseEntity.ok(books);
     }
-
 }
