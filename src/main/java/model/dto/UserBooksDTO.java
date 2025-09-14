@@ -1,5 +1,6 @@
 package model.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserBooksDTO {
@@ -13,6 +14,10 @@ public class UserBooksDTO {
     private Boolean forSale;
     private Double price;
     private Boolean forLend;
+    private Boolean forBidding;
+    private LocalDateTime biddingStartDate;
+    private LocalDateTime biddingEndDate;
+    private Double initialBidPrice;
     private Double lendingAmount;
     private String lendingPeriod;
     private Boolean forExchange;
@@ -25,54 +30,8 @@ public class UserBooksDTO {
     private List<String> hashtags;     // from hashtags array
     private String bookImage;
 
-
-    //Without book image
-    public UserBooksDTO(String userEmail, String title, List<String> authors, List<String> genres, String condition, Boolean forSale, Double price, Boolean forLend, Double lendingAmount, String lendingPeriod, Boolean forExchange, String exchangePeriod, String description, String location, String publishYear, String isbn, String language, List<String> hashtags) {
-        this.userEmail = userEmail;
-        this.title = title;
-        this.authors = authors;
-        this.genres = genres;
-        this.condition = condition;
-        this.forSale = forSale;
-        this.price = price;
-        this.forLend = forLend;
-        this.lendingAmount = lendingAmount;
-        this.lendingPeriod = lendingPeriod;
-        this.forExchange = forExchange;
-        this.exchangePeriod = exchangePeriod;
-        this.description = description;
-        this.location = location;
-        this.publishYear = publishYear;
-        this.isbn = isbn;
-        this.language = language;
-        this.hashtags = hashtags;
-    }
-
-    //With book image
-    public UserBooksDTO(String userEmail, String title, List<String> authors, List<String> genres, String condition, Boolean forSale, Double price, Boolean forLend, Double lendingAmount, String lendingPeriod, Boolean forExchange, String exchangePeriod, String description, String location, String publishYear, String isbn, String language, List<String> hashtags, String bookImage) {
-        this.userEmail = userEmail;
-        this.title = title;
-        this.authors = authors;
-        this.genres = genres;
-        this.condition = condition;
-        this.forSale = forSale;
-        this.price = price;
-        this.forLend = forLend;
-        this.lendingAmount = lendingAmount;
-        this.lendingPeriod = lendingPeriod;
-        this.forExchange = forExchange;
-        this.exchangePeriod = exchangePeriod;
-        this.description = description;
-        this.location = location;
-        this.publishYear = publishYear;
-        this.isbn = isbn;
-        this.language = language;
-        this.hashtags = hashtags;
-        this.bookImage = bookImage;
-    }
-
     // 2. Constructor with bookId (for fetch/update)
-    public UserBooksDTO(Long bookId, String userEmail, String title, List<String> authors, List<String> genres, String condition, Boolean forSale, Double price, Boolean forLend, Double lendingAmount, String lendingPeriod, Boolean forExchange, String exchangePeriod, String description, String location, String publishYear, String isbn, String language, List<String> hashtags, String bookImage) {
+    public UserBooksDTO(Long bookId, String userEmail, String title, List<String> authors, List<String> genres, String condition, Boolean forSale, Double price, Boolean forLend,Boolean forBidding,LocalDateTime biddingStartDate,LocalDateTime biddingEndDate,Double initialBidPrice ,Double lendingAmount, String lendingPeriod, Boolean forExchange, String exchangePeriod, String description, String location, String publishYear, String isbn, String language, List<String> hashtags, String bookImage) {
         this.bookId = bookId;
         this.userEmail = userEmail;
         this.title = title;
@@ -82,6 +41,10 @@ public class UserBooksDTO {
         this.forSale = forSale;
         this.price = price;
         this.forLend = forLend;
+        this.forBidding = forBidding;
+        this.biddingStartDate = biddingStartDate;
+        this.biddingEndDate = biddingEndDate;
+        this.initialBidPrice = initialBidPrice;
         this.lendingAmount = lendingAmount;
         this.lendingPeriod = lendingPeriod;
         this.forExchange = forExchange;
@@ -97,6 +60,8 @@ public class UserBooksDTO {
 
     public UserBooksDTO() {
     }
+
+    //getter and setters
 
     public Long getBookId() { return bookId; }
 
@@ -133,6 +98,14 @@ public class UserBooksDTO {
     public Boolean getForLend() {
         return forLend;
     }
+
+    public Boolean getForBidding() { return forBidding; }
+
+    public LocalDateTime getBiddingStartDate() { return biddingStartDate; }
+
+    public LocalDateTime getBiddingEndDate() { return biddingEndDate; }
+
+    public Double getInitialBidPrice() { return initialBidPrice; }
 
     public Double getLendingAmount() {
         return lendingAmount;
@@ -210,6 +183,14 @@ public class UserBooksDTO {
         this.forLend = forLend;
     }
 
+    public void setForBidding(Boolean forBidding) { this.forBidding = forBidding; }
+
+    public void setBiddingStartDate(LocalDateTime biddingStartDate) { this.biddingStartDate = biddingStartDate; }
+
+    public void setBiddingEndDate(LocalDateTime biddingEndDate) { this.biddingEndDate = biddingEndDate; }
+
+    public void setInitialBidPrice(Double initialBidPrice) { this.initialBidPrice = initialBidPrice; }
+
     public void setLendingAmount(Double lendingAmount) {
         this.lendingAmount = lendingAmount;
     }
@@ -258,7 +239,7 @@ public class UserBooksDTO {
     public String toString() {
         return "UserBooksDTO{" +
                 "bookId=" + bookId +
-                "userEmail='" + userEmail + '\'' +
+                ", userEmail='" + userEmail + '\'' +
                 ", title='" + title + '\'' +
                 ", authors=" + authors +
                 ", genres=" + genres +
@@ -266,6 +247,10 @@ public class UserBooksDTO {
                 ", forSale=" + forSale +
                 ", price=" + price +
                 ", forLend=" + forLend +
+                ", forBidding=" + forBidding +
+                ", biddingStartDate=" + biddingStartDate +
+                ", biddingEndDate=" + biddingEndDate +
+                ", initialBidPrice=" + initialBidPrice +
                 ", lendingAmount=" + lendingAmount +
                 ", lendingPeriod='" + lendingPeriod + '\'' +
                 ", forExchange=" + forExchange +
@@ -276,6 +261,7 @@ public class UserBooksDTO {
                 ", isbn='" + isbn + '\'' +
                 ", language='" + language + '\'' +
                 ", hashtags=" + hashtags +
+                ", bookImage='" + bookImage + '\'' +
                 '}';
     }
 }
