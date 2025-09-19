@@ -1,4 +1,4 @@
-package model.repo;
+package model.repo.BookStore;
 
 import model.entity.AllUsers;
 import model.entity.BookStore;
@@ -11,8 +11,6 @@ import java.util.Optional;
 public interface BookStoreRepo extends JpaRepository<BookStore, Integer> {
 
     Optional <BookStore> findByStoreId(Integer storeId);
-
     BookStore findByAllUser(AllUsers allUser);
-
 
 }

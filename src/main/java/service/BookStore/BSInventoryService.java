@@ -1,54 +1,21 @@
 package service.BookStore;
 
-import model.dto.BookStore.BSStatDTOs;
-import model.dto.BookStore.BSBookDTOs;
-import model.entity.BSBook;
-import model.repo.BSBookRepo;
-import model.repo.BookStoreRepo;
+import model.dto.BookStore.BSInventoryDTOs;
 
-import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
-import jakarta.transaction.Transactional;
-
-import org.modelmapper.ModelMapper;
-
-import java.util.Collections;
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-@Transactional
-public class BSInventoryService {
+public interface BSInventoryService {
+    boolean                                 createInventory(BSInventoryDTOs.RegisterDTO registerDTO, Integer storeId);
+    boolean                                 editInventoryItem(BSInventoryDTOs.EditDTO editDTO);
 
-    private final BookStoreRepo bookStoreRepo;
-    private final BSBookRepo bookRepo;
+    List<BSInventoryDTOs.ConciseRegularDTO> getRegularInventory(Integer storeId);
+    List<BSInventoryDTOs.ConciseDonationDTO> getDonationInventory(Integer storeId);
 
-    /** Common mapper resource for the entire service class: */
-    private static final ModelMapper modelMapper = new ModelMapper();
+    BSInventoryDTOs.FullInventoryDTO        getInventoryItem(Integer inventoryId);
 
-    // get lists of books - all with bookStatus == inventory, listingTypeNotIn donate, others default
-    // sales overview - total, active listings
-    // lending overview - total, on loan, avg price, avg duration
+    BSInventoryDTOs.UpdateCountDTO          getStockUpdateItem(Integer inventoryId);
+    boolean                                 adjustStockChange(Integer inventoryId, Integer stockChange);
+    boolean                                 adjustStock (BSInventoryDTOs.UpdateCountDTO updateCountDTO);
+    boolean                                 deleteItem(Integer inventoryId);
 
-    public List<BSBookDTOs.BookListingDTO> getRegularInventory (Integer storeId) {
-        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndStatusAndListingTypeNot (
-                storeId, BSBook.BookStatus.INVENTORY, BSBook.ListingType.DONATE);
-
-        if (bookList.isEmpty())
-            return Collections.emptyList();
-        return bookList.stream()
-                .map(book -> modelMapper.map(book, BSBookDTOs.BookListingDTO.class))
-                .toList();
-    }
-
-    public List<BSBookDTOs.BookListingDTO> getDonationInventory (Integer storeId) {
-        List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndStatusAndListingType (
-                storeId, BSBook.BookStatus.INVENTORY, BSBook.ListingType.DONATE);
-
-        if (bookList.isEmpty())
-            return Collections.emptyList();
-        return bookList.stream()
-                .map(book -> modelMapper.map(book, BSBookDTOs.BookListingDTO.class))
-                .toList();
-    }
 }
