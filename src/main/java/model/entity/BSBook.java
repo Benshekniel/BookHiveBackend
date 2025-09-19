@@ -6,8 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Type;
-import io.hypersistence.utils.hibernate.type.array.StringArrayType;
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import java.util.Map;
 /** Entity for books owned by BookStore users. */
 @Entity
 @Table(name = "bookstore_books")
+@SQLRestriction("status <> 'DELETED'")
 @Data @NoArgsConstructor @AllArgsConstructor
 public class BSBook {
 
@@ -29,21 +31,26 @@ public class BSBook {
     private String title;
 
     // Things stored as arrays:
-    @Type(StringArrayType.class)
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> authors;
 
-    @Type(StringArrayType.class)
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> genres;
 
-    @Type(StringArrayType.class)
+    /** Single image - cover page of book, preferably png from the internet itself.
+     * It is the name of the image file name only, stored in folder BSBook/coverImage/ */
+    private String coverImage;
+
+    /** Multiple images, max 3 - photos of the book to showcase its condition */
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
     private List<String> images;
 
-    @Type(StringArrayType.class)
+    @Type(ListArrayType.class)
     @Column(columnDefinition = "text[]")
-    private List<String> tags;          // ["bestseller", "classic", "award-winner"]
+    private List<String> tags;          // eg: ["bestseller", "classic", "award-winner"]
 
     @Enumerated(EnumType.STRING)
     private BookCondition condition;
@@ -58,15 +65,23 @@ public class BSBook {
     @Enumerated(EnumType.STRING)
     private ListingType listingType;
 
-    /** Pricing as JSON object */
+    /** Pricing as JSON object Containing: sellingPrice, lendingPrice */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private Map<String, BigDecimal> pricing;
-    // {"sellingPrice": 25.99, "lendingPrice": 5.00, "depositAmount": 15.00}
+    private Map<String, BigDecimal> pricing;    // eg: {"sellPrice": 25.99, "lendPrice": 5.00}
 
-    /** Just a short description to market the book */
+    /** Just a short description to market the book whether selling or lending*/
     @Column(columnDefinition = "TEXT")
     private String terms;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> lendingTerms;
+    // {"lendingPeriod" int,
+    // "lateFee" double,
+    // "minScore" double}
+
+//    private Integer lendingPeriod;
 
     // Essential book info:
     @Column(length = 13)
@@ -77,12 +92,10 @@ public class BSBook {
     private String language;
     private Integer pageCount;
 
-    private Integer lendingPeriod;
+    private Integer bookCount;          // when multiple books are in the INVENTORY and otherwise in SELL_ONLY
+    private Integer favouritesCount;    // how many people have marked this book as favourite
 
-    private Integer bookCount;          // mainly for bookstore when multiple books are from the same bookstore
-    private Integer favouritesCount;    // how many people have marked favourite this book
-
-    /** Series info as a separate JSON object */
+    /** Series info as a separate JSON object Containing: series, seriesNumber, totalBooks */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, String> seriesInfo;
@@ -92,23 +105,18 @@ public class BSBook {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-//    /** Foreign Key connecting the owner - user_id column from AllUsers table - many books, one owner */
-//    @ManyToOne
-//    @JoinColumn(name = "owner_id", nullable = false)
-//    private AllUsers ownerID;
-
-//    /** OwnerId integer foreign key connecting 'AllUsers' table userId */
-//    @Column(nullable = false)
-//    private Integer ownerId;
-
-    /** StoreId integer foreign key connecting 'BookStores' table storeId */
-    @Column(nullable = false)
-    private Integer storeId;
+    /** Once again, connecting the bookStore fk properly */
+    @ManyToOne
+    @JoinColumn(name = "store_id", nullable = false)
+    private BookStore bookStore;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        status = BookStatus.INVENTORY;
+        listingType = ListingType.NOT_SET;
+        favouritesCount = 0;
     }
 
     @PreUpdate
@@ -119,15 +127,22 @@ public class BSBook {
     public enum BookCondition {
         NEW, USED, FAIR
     }
+
+    /** INVENTORY, AVAILABLE, SOLD, LENT, DONATED, AUCTION */
     public enum BookStatus {
-        UNAVAILABLE, AVAILABLE,
-        SOLD, LENT, DONATED, AUCTION
+        INVENTORY,
+        AVAILABLE,
+        DONATED, SOLD,
+        LENT,
+        AUCTION,
+        DELETED
     }
+    /** SELL_ONLY, LEND_ONLY, SELL_AND_LEND, DONATE */
     public enum ListingType {
+        NOT_SET,
         SELL_ONLY,
         LEND_ONLY,
         SELL_AND_LEND,
-        EXCHANGE,
         DONATE
     }
 }

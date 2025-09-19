@@ -1,64 +1,89 @@
 package service.BookStore;
 
-import model.dto.BSBookDTOs.RegisterBookDTO;
-import model.dto.BSBookDTOs.UpdateBookDTO;
-import model.dto.BSBookDTOs.ViewBookDTO;
+import model.dto.BookStore.BSBookDTOs.RegisterBookDTO;
+import model.dto.BookStore.BSBookDTOs.BookDetailsDTO;
 import model.entity.BSBook;
+import model.entity.BookStore;
 import model.repo.BSBookRepo;
 
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import jakarta.transaction.Transactional;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class BSBookService {
 
-    private final BSBookRepo bookRepo;
-
     // Common mapper resource for the entire service class:
+
+    private final BookStoreService bookStoreService;
+    private final BSBookRepo bookRepo;
     private static final ModelMapper modelMapper = new ModelMapper();
 
-    public ResponseEntity<String> registerBook (RegisterBookDTO bookDTO, Integer storeId) {
+    public boolean registerBook (RegisterBookDTO bookDTO, Integer storeId) {
+
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         BSBook book = modelMapper.map(bookDTO, BSBook.class);
-             book.setStoreId(storeId);
+            BookStore bookStore = new BookStore();
+            bookStore.setStoreId(storeId);
+            book.setBookStore(bookStore);
         bookRepo.save(book);
-        return ResponseEntity.ok("Book registered successfully");
+        return true;
     }
 
-    public ResponseEntity<ViewBookDTO> getBookById (Integer bookId) {
-        return bookRepo.findByBookId(bookId)
-                .map(existingBook -> {
-                    modelMapper.getConfiguration().setSkipNullEnabled(true);
-                    modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-                    ViewBookDTO bookView = modelMapper.map(existingBook, ViewBookDTO.class);
-                    return ResponseEntity.ok(bookView);
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    public ResponseEntity<String> updateBook (Integer bookId, UpdateBookDTO bookDTO) {
+    public boolean updateBook (Integer bookId, BookDetailsDTO bookDTO) {
         return bookRepo.findByBookId(bookId)
                 .map(existingBook -> {
                     modelMapper.getConfiguration().setSkipNullEnabled(true);
                     modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
                     modelMapper.map(bookDTO, existingBook);
-
                     bookRepo.save(existingBook);
-                    return ResponseEntity.ok("Book updated successfully");
+
+                    return true;
                 })
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book Not found!"));
+                .orElse(false);
     }
+
+    public boolean deleteBook (Integer bookId) {
+        return bookRepo.findByBookId(bookId)
+                .map(existingBook -> {
+                    existingBook.setStatus(BSBook.BookStatus.DELETED);
+                    bookRepo.save(existingBook);
+
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    public BookDetailsDTO getBookById (Integer bookId) {
+        Optional<BSBook> bookOpt = bookRepo.findByBookId(bookId);
+        if (bookOpt.isEmpty())
+            return null;
+        else {
+            BSBook book = bookOpt.get();
+            return modelMapper.map(book, BookDetailsDTO.class);
+        }
+    }
+
+//    public List<BSBookDTOs.BookListingDTO> getBooksByStore (Integer storeId) {
+//        modelMapper.getConfiguration().setSkipNullEnabled(true);
+//        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+//
+//        List<BSBook> bookList =  bookRepo.findByBookStore_StoreId(storeId);
+//        if (bookList.isEmpty())
+//            return Collections.emptyList();
+//        return bookList.stream()
+//                .map(book -> modelMapper.map(book, BSBookDTOs.BookListingDTO.class))
+//                .toList();
+//    }
 
 }
