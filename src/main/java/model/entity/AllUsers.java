@@ -1,7 +1,5 @@
 package model.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
 
 @Entity
@@ -107,35 +105,5 @@ public class AllUsers {
                 ", role='" + role + '\'' +
                 ", status=" + status +
                 '}';
-    }
-
-    public void setUpdatedAt(LocalDateTime now) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setUpdatedAt'");
-    }
-
-    public void setPhone(int phone) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPhone'");
-    }
-
-    public void setAddress(String address) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setAddress'");
-    }
-
-    public void setCity(String city) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setCity'");
-    }
-
-    public void setState(String state) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setState'");
-    }
-
-    public void setZip(String zip) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setZip'");
     }
 }

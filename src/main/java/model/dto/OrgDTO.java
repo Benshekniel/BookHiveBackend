@@ -1,5 +1,8 @@
 package model.dto;
 
+import model.entity.AllUsers;
+import org.springframework.web.multipart.MultipartFile;
+
 public class OrgDTO {
     private String type;
     private String reg_no;
