@@ -1,17 +1,11 @@
 package service.User.impl;
 
-//import model.dto.BooksDTO;
 import model.dto.UserBooksDTO;
-import model.entity.AllUsers;
-//import model.entity.Books;
 import model.entity.UserBooks;
-//import model.repo.BooksRepo;
-import model.repo.OrgRepo;
 import model.repo.UserBooksRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import service.User.BooksService;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +33,10 @@ public class BooksImpl  implements BooksService {
                 userBooksDTO.getForSale(),           // forSale
                 userBooksDTO.getPrice(),             // price
                 userBooksDTO.getForLend(),           // forLend
+                userBooksDTO.getForBidding(),   // startingBidAmount
+                userBooksDTO.getBiddingStartDate(),  // biddingStartDate
+                userBooksDTO.getBiddingEndDate(),    // biddingEndDate
+                userBooksDTO.getInitialBidPrice(),   // initialBidPrice
                 userBooksDTO.getLendingAmount(),     // lendingAmount
                 userBooksDTO.getLendingPeriod(),     // lendingPeriod
                 userBooksDTO.getForExchange(),       // forExchange
@@ -69,6 +67,10 @@ public class BooksImpl  implements BooksService {
                         book.getForSale(),
                         book.getPrice(),
                         book.getForLend(),
+                        book.getForBidding(),
+                        book.getBiddingStartDate(),
+                        book.getBiddingEndDate(),
+                        book.getInitialBidPrice(),
                         book.getLendingAmount(),
                         book.getLendingPeriod(),
                         book.getForExchange(),
@@ -97,6 +99,10 @@ public class BooksImpl  implements BooksService {
                         book.getForSale(),
                         book.getPrice(),
                         book.getForLend(),
+                        book.getForBidding(),
+                        book.getBiddingStartDate(),
+                        book.getBiddingEndDate(),
+                        book.getInitialBidPrice(),
                         book.getLendingAmount(),
                         book.getLendingPeriod(),
                         book.getForExchange(),
@@ -122,6 +128,10 @@ public class BooksImpl  implements BooksService {
             book.setForSale(userBooksDTO.getForSale());
             book.setPrice(userBooksDTO.getPrice());
             book.setForLend(userBooksDTO.getForLend());
+            book.setForBidding(userBooksDTO.getForBidding());
+            book.setBiddingStartDate(userBooksDTO.getBiddingStartDate());
+            book.setBiddingEndDate(userBooksDTO.getBiddingEndDate());
+            book.setInitialBidPrice(userBooksDTO.getInitialBidPrice());
             book.setLendingAmount(userBooksDTO.getLendingAmount());
             book.setLendingPeriod(userBooksDTO.getLendingPeriod());
             book.setForExchange(userBooksDTO.getForExchange());
