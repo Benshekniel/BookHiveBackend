@@ -1,48 +1,57 @@
 package model.dto.BookStore;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 public class BSStatDTOs {
 
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class RegularInventoryStatDTO {
-        private long totalBooks;
-        private long sellInventory;
-        private long lendInventory;
-        private long notSetInventory;
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class RegularInventoryDTO {
+        private long totalBooks;         // SUM of stockCount
+        private long totalSellable;      // SUM of sellableCount
+        private long newBooks;           // count with condition = NEW
+
+        private long lowStockAlerts;     // count where stockCount < threshold
+        private List<String> lowStockTitles;
+
+        private List<String> topGenres;
     }
 
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class DonationInventoryStatDTO {
-        private long totalBooks;
-        private long donated;
-        private long donationStock;
-        private long impactScore;
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class DonationInventoryDTO {
+        private long totalDonationBooks;
+        private long donatedStock;
+        private long pendingStock;
+
+        private long donatedClients;
+        private BigDecimal impactScore;
     }
 
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class SaleStatDTO {
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class LendOnlyStatDTO {
         private long totalBooks;
-        private long activeListings;
-        private long inInventory;
+        private long currentLent;
+
+        private BigDecimal avgLendFee;
+        private long lendPeriod;
+
+        private List<String> mostCirculated;
+        private List<String> mostFavourite;
+    }
+
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class SaleAlsoStatDTO {
+        private long totalBooks;
+
         private long soldCount;
+        private BigDecimal sumSold;
 
-        private long avgSellPrice;
-    }
-
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class LendStatDTO {
-        private long totalBooks;
-        private long activeListings;
-        private long inInventory;
-        private long onLoanCount;
-
-        private long avgLendPrice;
+        private BigDecimal avgSellPrice;
+        private List<String> topGenres;
     }
 }
