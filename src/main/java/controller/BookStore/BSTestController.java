@@ -3,8 +3,8 @@ package controller.BookStore;
 import model.entity.AllUsers;
 import model.entity.BookStore;
 import model.repo.BookStore.BookStoreRepo;
-import service.BookStore.BSInventoryService;
-import service.BookStore.BookStoreService;
+//import service.BookStore.BSInventoryService;
+//import service.BookStore.BookStoreService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
