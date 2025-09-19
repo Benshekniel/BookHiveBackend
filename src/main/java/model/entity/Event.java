@@ -1,4 +1,4 @@
-// Notification.java
+// Event.java
 package model.entity;
 
 import jakarta.persistence.*;
@@ -8,41 +8,44 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notifications")
+@Table(name = "events")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Notification {
+public class Event {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private Long organizationId;  // Can be null for system notifications
+    @Column(nullable = false)
+    private Long organizationId;
     
     @Column(nullable = false)
     private String title;
     
-    @Column(nullable = false, length = 1000)
-    private String message;
+    @Column(length = 1000)
+    private String description;
     
     @Column(nullable = false)
-    private String type;  // BOOK_REQUEST, DONATION, FEEDBACK, SYSTEM
+    private LocalDateTime eventDate;
     
-    private boolean read;
+    private String location;
+    
+    private String eventType;  // BOOK_DRIVE, WORKSHOP, DONATION_CAMPAIGN
     
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
-    private String action;  // URL or action to take when notification is clicked
-    
-    private Long referenceId;  // ID of the related entity (book request, donation, etc.)
-    
-    private String referenceType;  // Type of the reference (BOOK_REQUEST, DONATION, etc.)
+    private LocalDateTime updatedAt;
     
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        read = false;
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }
