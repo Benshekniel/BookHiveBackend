@@ -74,7 +74,8 @@ public class UserController {
         }
     }
 
-    @PutMapping("/updateBook/{id}")
+    @PostMapping
+            ("/updateBook/{id}")
     public ResponseEntity<?> updateBook(@PathVariable Long id, @RequestBody UserBooksDTO userBooksDTO) {
         String response = booksService.updateBook(id, userBooksDTO);
         return ResponseEntity.ok(Map.of("message", response));
