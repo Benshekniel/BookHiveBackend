@@ -81,6 +81,30 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", response));
     }
 
+    @PutMapping("/updateBookWithImage/{id}")
+    public ResponseEntity<?> updateBookWithImage(
+            @PathVariable Long id,
+            @RequestPart(value = "coverImage", required = false) MultipartFile bookImage,
+            @RequestPart("bookData") UserBooksDTO userBooksDTO) throws IOException {
+
+        // If new image is provided, upload it
+        if (bookImage != null && !bookImage.isEmpty()) {
+            String bookImageName = fileStorageService.generateRandomFilename(bookImage);
+            userBooksDTO.setBookImage(bookImageName);
+
+            String response = booksService.updateBook(id, userBooksDTO);
+            if ("success".equals(response)) {
+                fileStorageService.uploadFile(bookImage, "userBooks", bookImageName);
+                return ResponseEntity.ok(Map.of("message", response));
+            }
+            return ResponseEntity.ok(Map.of("message", response));
+        } else {
+            // Update without new image
+            String response = booksService.updateBook(id, userBooksDTO);
+            return ResponseEntity.ok(Map.of("message", response));
+        }
+    }
+
     @DeleteMapping("/deleteBook/{id}")
     public ResponseEntity<?> deleteBook(@PathVariable Long id) {
         String response = booksService.deleteBook(id);
