@@ -8,7 +8,6 @@ import jakarta.persistence.*;
 public class TrustScore {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "user_id") // Derived from user_id ( users table )
     private Long userId;
 
