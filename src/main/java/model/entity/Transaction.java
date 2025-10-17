@@ -44,8 +44,8 @@ public class Transaction {
     @Column(name = "book_id")
     private Long bookId;
 
-    @Column(name = "borrower_id")
-    private Long borrowerId;
+    @Column(name = "user_id")
+    private Long userId;
 
     @PrePersist
     protected void onCreate() {

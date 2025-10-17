@@ -1,16 +1,16 @@
-// RouteDTO.java - Enhanced with boundary coordinate support and validation
+// RouteDTO.java - Complete Enhanced Version
 package model.dto.Delivery;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Main RouteDTO for route data transfer with enhanced boundary coordinate support
@@ -68,7 +68,7 @@ public class RouteDTO {
     private Integer assignedRiders;
     private Integer totalRiders;
     private Double averageDeliveryTime;
-    private List<AgentDTO> agents;
+    private List<AgentDTO> agents = new ArrayList<>();
     private Double efficiency;
     private String hubName;
     private String createdByName;
@@ -305,7 +305,7 @@ public class RouteDTO {
 
         // Validation status
         private Boolean isValid;
-        private List<String> validationErrors;
+        private List<String> validationErrors = new ArrayList<>();
     }
 
     /**
@@ -404,9 +404,9 @@ public class RouteDTO {
         private BigDecimal totalCoverageArea;
 
         // Performance insights
-        private List<RoutePerformanceDTO> topPerformingRoutes;
-        private List<RoutePerformanceDTO> underPerformingRoutes;
-        private List<RouteBoundaryStatsDTO> boundaryStatistics;
+        private List<RoutePerformanceDTO> topPerformingRoutes = new ArrayList<>();
+        private List<RoutePerformanceDTO> underPerformingRoutes = new ArrayList<>();
+        private List<RouteBoundaryStatsDTO> boundaryStatistics = new ArrayList<>();
 
         // Trends
         private RouteAnalyticsTrends trends;
@@ -430,7 +430,7 @@ public class RouteDTO {
 
         // Validation status
         private Boolean isValidBoundary;
-        private List<String> validationIssues;
+        private List<String> validationIssues = new ArrayList<>();
     }
 
     /**
@@ -466,7 +466,7 @@ public class RouteDTO {
 
         // Assignment preferences
         private String shiftPreference; // MORNING, AFTERNOON, EVENING, NIGHT
-        private List<String> vehicleTypes;
+        private List<String> vehicleTypes = new ArrayList<>();
         private Boolean isTemporary;
         private Integer maxDailyDeliveries;
     }
@@ -481,7 +481,7 @@ public class RouteDTO {
         @NotEmpty(message = "Routes list cannot be empty")
         @Size(max = 50, message = "Cannot create more than 50 routes at once")
         @Valid
-        private List<RouteCreateDTO> routes;
+        private List<RouteCreateDTO> routes = new ArrayList<>();
 
         // Bulk operation settings
         private Boolean validateAllBoundaries = true;
@@ -517,14 +517,14 @@ public class RouteDTO {
         @DecimalMax(value = "100.0", message = "Potential improvement cannot exceed 100%")
         private Double potentialImprovement; // Percentage
 
-        private List<String> actionItems;
+        private List<String> actionItems = new ArrayList<>();
         private Double estimatedCostSaving;
         private Integer estimatedTimeReduction; // in minutes
 
         // Implementation details
         private String implementationComplexity; // EASY, MEDIUM, HARD
         private Integer estimatedImplementationDays;
-        private List<String> requiredResources;
+        private List<String> requiredResources = new ArrayList<>();
 
         // Boundary-specific suggestions
         private Boolean requiresBoundaryUpdate;
@@ -538,9 +538,7 @@ public class RouteDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PostalCodeValidationDTO {
-        @NotBlank(message = "Postal code is required")
         private String postalCode;
-
         private Boolean isValid;
         private Boolean isAvailable; // Not already assigned to another route
         private String existingRouteId;
@@ -622,7 +620,7 @@ public class RouteDTO {
     public static class BulkStatusUpdateRequest {
         @NotEmpty(message = "Route IDs list cannot be empty")
         @Size(max = 100, message = "Cannot update more than 100 routes at once")
-        private List<Long> routeIds;
+        private List<Long> routeIds = new ArrayList<>();
 
         @NotBlank(message = "Status is required")
         @Pattern(regexp = "ACTIVE|INACTIVE|MAINTENANCE|SUSPENDED", message = "Invalid status")
@@ -643,7 +641,7 @@ public class RouteDTO {
     public static class MultipleAgentAssignmentRequest {
         @NotEmpty(message = "Agent IDs list cannot be empty")
         @Size(max = 20, message = "Cannot assign more than 20 agents at once")
-        private List<Long> agentIds;
+        private List<Long> agentIds = new ArrayList<>();
 
         private LocalDate startDate;
         private LocalDate endDate;
@@ -675,156 +673,5 @@ public class RouteDTO {
 
         // Backup previous boundary
         private Boolean backupPrevious = true;
-    }
-
-    /**
-     * RouteStatsDTO for basic route statistics
-     */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class RouteStatsDTO {
-        private Long routeId;
-        private String routeName;
-        private Integer totalDeliveries;
-        private Integer successfulDeliveries;
-        private Integer pendingDeliveries;
-        private Integer failedDeliveries;
-        private Integer assignedAgents;
-        private BigDecimal averageDeliveryTime;
-        private BigDecimal efficiencyScore;
-        private LocalDate lastUpdated;
-
-        // Boundary-related stats
-        private Boolean hasBoundaryCoordinates;
-        private Double boundaryArea;
-        private Integer boundaryPoints;
-        private LocalDateTime boundaryLastUpdated;
-    }
-
-    /**
-     * NearbyRoutesRequest for finding nearby routes
-     */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class NearbyRoutesRequest {
-        @NotNull(message = "Latitude is required")
-        @DecimalMin(value = "-90.0", message = "Latitude must be between -90 and 90")
-        @DecimalMax(value = "90.0", message = "Latitude must be between -90 and 90")
-        private Double latitude;
-
-        @NotNull(message = "Longitude is required")
-        @DecimalMin(value = "-180.0", message = "Longitude must be between -180 and 180")
-        @DecimalMax(value = "180.0", message = "Longitude must be between -180 and 180")
-        private Double longitude;
-
-        @DecimalMin(value = "0.1", message = "Radius must be greater than 0")
-        @DecimalMax(value = "100.0", message = "Radius must be less than 100 km")
-        private Double radiusKm = 5.0;
-
-        // Filter options
-        private String routeType;
-        private String status;
-        private Boolean onlyWithBoundaries;
-        private Integer maxResults = 50;
-    }
-
-    /**
-     * RouteExportDTO for exporting route data
-     */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class RouteExportDTO {
-        @NotNull(message = "Hub ID is required")
-        private Long hubId;
-
-        @Pattern(regexp = "ACTIVE|INACTIVE|MAINTENANCE|SUSPENDED|ALL", message = "Invalid status filter")
-        private String status;
-
-        @Pattern(regexp = "RESIDENTIAL|COMMERCIAL|INDUSTRIAL|MIXED|UNIVERSITY|DOWNTOWN|ALL", message = "Invalid route type filter")
-        private String routeType;
-
-        private LocalDate dateFrom;
-        private LocalDate dateTo;
-
-        @Pattern(regexp = "CSV|EXCEL|PDF|JSON", message = "Invalid export format")
-        private String format; // CSV, EXCEL, PDF, JSON
-
-        private List<String> fields;
-
-        // Export options
-        private Boolean includeBoundaryCoordinates = true;
-        private Boolean includeAgentDetails = true;
-        private Boolean includePerformanceMetrics = false;
-    }
-
-    /**
-     * RouteImportDTO for importing route data
-     */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class RouteImportDTO {
-        @NotNull(message = "Hub ID is required")
-        private Long hubId;
-
-        private Boolean skipValidation = false;
-        private Boolean updateExisting = false;
-
-        @Pattern(regexp = "ACTIVE|INACTIVE", message = "Invalid default status")
-        private String defaultStatus = "ACTIVE";
-
-        private List<String> requiredFields;
-
-        // Boundary handling
-        private Boolean importBoundaryCoordinates = true;
-        private Boolean validateBoundaries = true;
-        private Boolean generateMissingBoundaries = false;
-
-        // Import metadata
-        private Long importedBy;
-        private String importReason;
-    }
-
-    /**
-     * RouteValidationResultDTO for validation results
-     */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class RouteValidationResultDTO {
-        private Boolean isValid;
-        private List<String> errors;
-        private List<String> warnings;
-        private Integer validRoutes;
-        private Integer invalidRoutes;
-        private List<RouteCreateDTO> validatedRoutes;
-
-        // Boundary validation results
-        private Integer routesWithValidBoundaries;
-        private Integer routesWithInvalidBoundaries;
-        private List<BoundaryValidationError> boundaryErrors;
-
-        // Validation summary
-        private String validationSummary;
-        private LocalDateTime validatedAt;
-        private Long validatedBy;
-    }
-
-    /**
-     * BoundaryValidationError for boundary-specific validation errors
-     */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BoundaryValidationError {
-        private Long routeId;
-        private String routeName;
-        private String errorType; // INVALID_FORMAT, INSUFFICIENT_POINTS, INVALID_COORDINATES, SELF_INTERSECTING
-        private String errorMessage;
-        private List<String> errorDetails;
-        private String suggestedFix;
     }
 }

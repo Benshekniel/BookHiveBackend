@@ -14,8 +14,11 @@ public class Competitions {
     @Column(name = "competition_id", nullable = false)
     private String competitionId;
 
-    @Column(name = "active_status", nullable = false)
+    @Column(name = "active_status", nullable = true)
     private boolean activeStatus;
+
+    @Column(name = "pause_status", nullable = true)
+    private boolean pauseStatus;
 
     @Column(name = "created_by", nullable = false)
     private String createdBy;
@@ -53,8 +56,8 @@ public class Competitions {
     @Column(name = "current_participants", nullable = false)
     private Integer currentParticipants;
 
-    @ElementCollection
-    @Column(name = "participant_emails")
+    @Type(JsonBinaryType.class)
+    @Column(name = "participant_emails", columnDefinition = "jsonb", nullable = true)
     private List<String> participantEmails;
 
     @Column(name = "theme")

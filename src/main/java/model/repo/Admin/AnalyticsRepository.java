@@ -71,7 +71,7 @@ public interface AnalyticsRepository extends JpaRepository<Users, Long> {
     // User Activity and Trust Score Queries
     @Query(value = "SELECT u.email, u.name, COUNT(t.transaction_id) as transaction_count " +
             "FROM users u " +
-            "LEFT JOIN transactions t ON u.user_id = t.borrower_id " +
+            "LEFT JOIN transactions t ON u.user_id = t.user_id " +
             "GROUP BY u.user_id, u.email, u.name " +
             "HAVING COUNT(t.transaction_id) > 0 " +
             "ORDER BY transaction_count DESC " +
@@ -79,22 +79,22 @@ public interface AnalyticsRepository extends JpaRepository<Users, Long> {
     List<Object[]> getTopUsersByActivity(int limit);
 
     @Query(value = "SELECT COUNT(*) FROM transactions t " +
-            "JOIN users u ON t.borrower_id = u.user_id " +
+            "JOIN users u ON t.user_id = u.user_id " +
             "WHERE u.email = ?1 AND t.status = 'COMPLETED'", nativeQuery = true)
     Long getCompletedTransactionsByUser(String userEmail);
 
     @Query(value = "SELECT COUNT(*) FROM transactions t " +
-            "JOIN users u ON t.borrower_id = u.user_id " +
+            "JOIN users u ON t.user_id = u.user_id " +
             "WHERE u.email = ?1", nativeQuery = true)
     Long getTotalTransactionsByUser(String userEmail);
 
     @Query(value = "SELECT COUNT(*) FROM transactions t " +
-            "JOIN users u ON t.borrower_id = u.user_id " +
+            "JOIN users u ON t.user_id = u.user_id " +
             "WHERE u.email = ?1 AND t.type = ?2", nativeQuery = true)
     Long getTransactionsByUserAndType(String userEmail, String type);
 
     @Query(value = "SELECT COUNT(*) FROM transactions t " +
-            "JOIN users u ON t.borrower_id = u.user_id " +
+            "JOIN users u ON t.user_id = u.user_id " +
             "WHERE u.email = ?1 AND t.created_at < ?2", nativeQuery = true)
     Long getTransactionsByUserBeforeDate(String userEmail, LocalDateTime date);
 }
