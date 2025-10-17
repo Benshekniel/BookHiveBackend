@@ -70,6 +70,33 @@ public class DeliveryController {
         }
     }
 
+    // Add this method to your existing DeliveryController class
+
+    @PutMapping("/{deliveryId}/reassign-routes")
+    public ResponseEntity<?> reassignRoutes(
+            @PathVariable Long deliveryId,
+            @RequestParam Long hubId) {
+        try {
+            log.info("Reassigning routes for delivery: {} in hub: {}", deliveryId, hubId);
+
+            DeliveryResponseDto updatedDelivery = deliveryService.reassignRoutes(deliveryId, hubId);
+
+            log.info("Successfully reassigned routes for delivery: {}, route: {}, pickup route: {}",
+                    deliveryId, updatedDelivery.getRouteId(), updatedDelivery.getProuteId());
+
+            return ResponseEntity.ok(updatedDelivery);
+
+        } catch (RuntimeException e) {
+            log.error("Error reassigning routes for delivery {}: {}", deliveryId, e.getMessage());
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+
+        } catch (Exception e) {
+            log.error("Unexpected error reassigning routes for delivery {}: {}", deliveryId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Error reassigning routes"));
+        }
+    }
+
     @GetMapping("/{deliveryId}")
     public ResponseEntity<?> getDeliveryById(@PathVariable Long deliveryId) {
         try {

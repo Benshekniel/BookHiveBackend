@@ -154,6 +154,18 @@ public class FileStorageServiceImpl implements FileStorageService {
         throw new IOException("File not found: " + fileName);
     }
 
+    @Override
+    public String storeFile(MultipartFile imageFile, String string) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'storeFile'");
+    }
+
+    @Override
+    public String getFileUrl(String fileName) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getFileUrl'");
+    }
+
 }
 //import com.google.api.client.http.InputStreamContent;
 //import com.google.api.services.drive.Drive;
