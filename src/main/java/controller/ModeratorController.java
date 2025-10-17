@@ -39,11 +39,92 @@ public class ModeratorController {
     @Autowired
     private FileStorageService fileStorageService;
 
+    // Get count of active users
+    @GetMapping("/countActiveUsers")
+    public ResponseEntity<Map<String, Integer>> countActiveUsers() {
+        int count = moderatorService.getActiveUserCount();
+        return ResponseEntity.ok(Map.of("activeUsers", count));
+    }
+
+    // Get count of flagged (banned or disabled) users
+    @GetMapping("/countFlaggedUsers")
+    public ResponseEntity<Map<String, Integer>> countFlaggedUsers() {
+        int count = moderatorService.getFlaggedUserCount();
+        return ResponseEntity.ok(Map.of("flaggedUsers", count));
+    }
+
 
     @GetMapping("/getPendingRegistrations")
     public ResponseEntity<List<Map<String, Object>>> getPendingRegistrations() {
         List<Map<String, Object>> pendings = moderatorService.getAllPending();
         return ResponseEntity.ok(pendings);
+    }
+
+    @GetMapping("/getFlaggedUsers")
+    public ResponseEntity<List<Map<String, Object>>> getFlaggedUsers() {
+        List<Map<String, Object>> flagged = moderatorService.getFlaggedUsers();
+        return ResponseEntity.ok(flagged);
+    }
+
+    @GetMapping("/getActiveUsers")
+    public ResponseEntity<List<Map<String, Object>>> getActiveUsers() {
+        List<Map<String, Object>> flagged = moderatorService.getActiveUsers();
+        return ResponseEntity.ok(flagged);
+    }
+
+    // Add a violation
+    @PostMapping("/applyViolation")
+    public ResponseEntity<String> applyViolation(
+            @RequestParam("email") String email,
+            @RequestParam("reason") String reason,
+            @RequestParam("status") String status) {
+
+        try {
+            moderatorService.addViolation(email, reason, status);
+            return ResponseEntity.ok("Violation added successfully for: " + email);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error adding violation: " + e.getMessage());
+        }
+    }
+
+    // Get violation reason by email
+    @GetMapping("/getViolationReason")
+    public ResponseEntity<?> getViolationReason(@RequestParam("email") String email) {
+        try {
+            String reason = moderatorService.getViolationReason(email);
+
+            if (reason != null && !reason.isEmpty()) {
+                return ResponseEntity.ok(Map.of(
+                        "email", email,
+                        "reason", reason
+                ));
+            } else {
+                return ResponseEntity.ok(Map.of(
+                        "message", "No violation found for: " + email
+                ));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of(
+                            "error", "Error fetching violation reason",
+                            "details", e.getMessage()
+                    ));
+        }
+    }
+
+
+
+    // Remove a violation
+    @DeleteMapping("/removeViolation")
+    public ResponseEntity<String> removeViolation(@RequestParam("email") String email) {
+        try {
+            moderatorService.removeViolation(email);
+            return ResponseEntity.ok("Violation removed successfully for: " + email);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error removing violation: " + e.getMessage());
+        }
     }
 
 

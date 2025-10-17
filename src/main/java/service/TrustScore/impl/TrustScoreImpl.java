@@ -1,5 +1,6 @@
 package service.TrustScore.impl;
 
+import jakarta.transaction.Transactional;
 import model.entity.AllUsers;
 import model.entity.TrustScore;
 import model.repo.AllUsersRepo;
@@ -18,6 +19,7 @@ public class TrustScoreImpl implements TrustScoreService {
     private AllUsersRepo allUsersRepo;
 
     @Override
+    @Transactional
     public void initial_Trustscore(String email) {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
@@ -35,14 +37,42 @@ public class TrustScoreImpl implements TrustScoreService {
             throw new IllegalStateException("User not found with email: " + email);
         }
 
-        // ✅ Get userId from user entity
-        // Convert int -> Long
-        Long userId = Long.valueOf(user.getUser_id());
+        // ✅ Ensure user data is fully flushed/committed before proceeding
+        allUsersRepo.flush();
 
-        // ✅ Create and save new TrustScore
+        // ✅ Create and save new TrustScore record safely
+        Long userId = Long.valueOf(user.getUser_id());
         TrustScore trustScore = new TrustScore(email, 500, userId);
         trustScoreRepo.save(trustScore);
     }
+
+
+//    @Override
+//    public void initial_Trustscore(String email) {
+//        if (email == null) {
+//            throw new IllegalArgumentException("Email cannot be null");
+//        }
+//
+//        // Check if trust score already exists for this email
+//        TrustScore existingTrustScore = trustScoreRepo.findByEmail(email);
+//        if (existingTrustScore != null) {
+//            throw new IllegalStateException("Trust score already initialized for email: " + email);
+//        }
+//
+//        // ✅ Fetch user from AllUsersRepo
+//        AllUsers user = allUsersRepo.findByEmail(email);
+//        if (user == null) {
+//            throw new IllegalStateException("User not found with email: " + email);
+//        }
+//
+//        // ✅ Get userId from user entity
+//        // Convert int -> Long
+//        Long userId = Long.valueOf(user.getUser_id());
+//
+//        // ✅ Create and save new TrustScore
+//        TrustScore trustScore = new TrustScore(email, 500, userId);
+//        trustScoreRepo.save(trustScore);
+//    }
 
     @Override
     public void adjust_Trustscore(String email, Integer finalAmount) {
