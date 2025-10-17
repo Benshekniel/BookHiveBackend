@@ -4,6 +4,7 @@ import model.dto.AllUsersDTO;
 import model.entity.AllUsers;
 import model.repo.AllUsersRepo;
 import model.repo.ModeratorRepo;
+import model.repo.ViolationsUserRepo;
 import org.springframework.http.ResponseEntity;
 import service.Email.EmailService;
 import service.Moderator.ModeratorService;
@@ -30,9 +31,22 @@ public class ModeratorImpl implements ModeratorService {
     private EmailService emailService;
 
 
+    @Autowired
+    private ViolationsUserRepo violationsUserRepository;
+
+
     public List<Map<String, Object>> getAllPending() {
         return moderatorRepo.findAllPending();
     }
+
+    public List<Map<String, Object>> getFlaggedUsers() {
+        return moderatorRepo.findAllFlagged();
+    }
+
+    public List<Map<String, Object>> getActiveUsers() {
+        return moderatorRepo.findAllActive();
+    }
+
 
     @Override
     public String approveUserStatus(String email,String name) {
@@ -74,6 +88,44 @@ public class ModeratorImpl implements ModeratorService {
         }
 
         return response;
+    }
+
+    // Add a violation
+    public void addViolation(String email, String reason, String status) {
+        // Step 1: Add the violation record
+        violationsUserRepository.insertViolation(email, reason);
+
+        // Step 2: Change user status based on parameter
+        if ("banned".equalsIgnoreCase(status)) {
+            moderatorRepo.banUserByEmail(email);
+        } else if ("disabled".equalsIgnoreCase(status)) {
+            moderatorRepo.disableUserByEmail(email);
+        } else {
+            System.out.println("⚠ Unknown status type: " + status);
+        }
+    }
+
+
+    // Delete a violation by email
+    @Override
+    public void removeViolation(String email) {
+        violationsUserRepository.deleteByEmail(email);
+        moderatorRepo.activeUserByEmail(email);
+    }
+
+    @Override
+    public String getViolationReason(String email) {
+        return violationsUserRepository.findReasonByEmail(email);
+    }
+
+    @Override
+    public int getActiveUserCount() {
+        return moderatorRepo.countActiveUsers();
+    }
+
+    @Override
+    public int getFlaggedUserCount() {
+        return moderatorRepo.countFlaggedUsers();
     }
 
 
