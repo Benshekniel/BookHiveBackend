@@ -13,13 +13,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "notifications")
-public class Notification {
+@Table(name = "feedback")
+public class Feedback {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,21 +30,16 @@ public class Notification {
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
-    @Column(nullable = false)
-    private String title;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String message;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "donation_id", nullable = false, unique = true)
+    private Donation donation;
 
     @Column(nullable = false)
-    private String type; // donation, request, event, message, delivery, system
+    private Integer rating; // 1-5 stars
+
+    @Column(columnDefinition = "TEXT")
+    private String comment;
 
     @Column(nullable = false)
-    private boolean read = false;
-
-    @Column
-    private String actionUrl;
-
-    @Column(nullable = false)
-    private LocalDateTime timestamp;
+    private LocalDateTime date;
 }

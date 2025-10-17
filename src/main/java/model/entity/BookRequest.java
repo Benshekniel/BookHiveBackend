@@ -3,10 +3,8 @@ package model.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,14 +13,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "donations")
-public class Donation {
+@Table(name = "book_requests")
+public class BookRequest {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,44 +30,35 @@ public class Donation {
     private Organization organization;
 
     @Column(nullable = false)
-    private Long donorId;
+    private String title;
 
     @Column
-    private String donorName;
-
-    @Column
-    private String donorLocation;
-
-    @Column(nullable = false)
-    private String bookTitle;
+    private String subject;
 
     @Column(nullable = false)
     private Integer quantity;
 
     @Column
-    private String condition; // EXCELLENT, VERY_GOOD, GOOD, FAIR
-
-    @Column(nullable = false)
-    private String status; // PENDING, APPROVED, REJECTED, SHIPPED, IN_TRANSIT, RECEIVED
-
-    @Column
-    private String trackingNumber;
+    private String urgency = "medium"; // low, medium, high
 
     @Column(columnDefinition = "TEXT")
-    private String notes;
+    private String description;
 
     @Column(nullable = false)
-    private LocalDateTime dateDonated;
+    private String status; // DRAFT, PENDING, APPROVED, REJECTED, FULFILLED, CANCELED
+
+    @Column(nullable = false)
+    private LocalDateTime dateRequested;
 
     @Column
-    private LocalDate dateShipped;
+    private LocalDateTime dateApproved;
 
     @Column
-    private LocalDate estimatedDelivery;
+    private LocalDateTime dateFulfilled;
 
     @Column
-    private LocalDate dateReceived;
+    private String rejectionReason;
 
-    @OneToOne(mappedBy = "donation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Feedback feedback;
+    @Column
+    private Long donorId;
 }
