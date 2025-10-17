@@ -11,11 +11,11 @@ import java.util.List;
 @Repository
 public interface HubRepository extends JpaRepository<Hub, Long> {
 
-    // 🔥 FIXED: Changed "hub" to "hubs" in table name
+    //  FIXED: Changed "hub" to "hubs" in table name
     @Query(value = "SELECT * FROM hubs ORDER BY hub_id LIMIT :limit", nativeQuery = true)
     List<Hub> findLimitedHubs(@Param("limit") int limit);
 
-    // 🔥 Alternative using Spring Data pagination (recommended)
+    //  Alternative using Spring Data pagination (recommended)
     @Query(value = "SELECT h FROM Hub h ORDER BY h.hubId")
     List<Hub> findAllOrderedByIdWithLimit(@Param("limit") int limit);
 
@@ -25,7 +25,7 @@ public interface HubRepository extends JpaRepository<Hub, Long> {
     @Query("SELECT h FROM Hub h WHERE h.name LIKE %:name%")
     List<Hub> findByNameContaining(@Param("name") String name);
 
-    // 🔥 FIXED: Changed "hub" to "hubs" in all native queries
+    //  FIXED: Changed "hub" to "hubs" in all native queries
     @Query(value = "SELECT h.hub_id, h.name, h.city, h.address, " +
             "u.name as manager_name, " +
             "COUNT(DISTINCT a.agent_id) as total_agents, " +
@@ -43,7 +43,7 @@ public interface HubRepository extends JpaRepository<Hub, Long> {
             "GROUP BY h.hub_id, h.name, h.city, h.address, u.name", nativeQuery = true)
     List<Object[]> findHubsSummaryData();
 
-    // 🔥 FIXED: Changed "hub" to "hubs" in native query
+    //  FIXED: Changed "hub" to "hubs" in native query
     @Query(value = "SELECT h.hub_id, h.name, h.city, h.address, " +
             "u.name as manager_name, " +
             "COUNT(DISTINCT a.agent_id) as total_agents, " +
@@ -63,7 +63,7 @@ public interface HubRepository extends JpaRepository<Hub, Long> {
             "LIMIT :limit", nativeQuery = true)
     List<Object[]> findHubsSummaryDataWithLimit(@Param("limit") int limit);
 
-    // 🔥 FIXED: All other native queries - change "hub" to "hubs"
+    //  FIXED: All other native queries - change "hub" to "hubs"
     @Query(value = "SELECT h.hub_id, h.name, h.city, " +
             "COUNT(DISTINCT a.agent_id) as agent_count, " +
             "COUNT(DISTINCT d.delivery_id) as delivery_count, " +
@@ -119,7 +119,7 @@ public interface HubRepository extends JpaRepository<Hub, Long> {
     @Query("SELECT h FROM Hub h WHERE h.hubManagerId IS NOT NULL")
     List<Hub> findHubsWithManager();
 
-    // 🔥 FIXED: Performance optimization queries
+    //  FIXED: Performance optimization queries
     @Query(value = "SELECT h.hub_id, h.name, " +
             "COUNT(DISTINCT a.agent_id) as total_agents, " +
             "COUNT(DISTINCT CASE WHEN a.availability_status = 'AVAILABLE' THEN a.agent_id END) as available_agents " +
@@ -141,7 +141,7 @@ public interface HubRepository extends JpaRepository<Hub, Long> {
     @Query("SELECT h FROM Hub h WHERE h.hubId IN :hubIds")
     List<Hub> findHubsByIds(@Param("hubIds") List<Long> hubIds);
 
-    // 🔥 FIXED: Statistics for dashboard
+    //  FIXED: Statistics for dashboard
     @Query(value = "SELECT " +
             "COUNT(*) as total_hubs, " +
             "COUNT(CASE WHEN h.hub_manager_id IS NOT NULL THEN 1 END) as hubs_with_manager, " +
@@ -156,7 +156,7 @@ public interface HubRepository extends JpaRepository<Hub, Long> {
     @Query("SELECT h FROM Hub h WHERE h.city IN :cities")
     List<Hub> findByCities(@Param("cities") List<String> cities);
 
-    // 🔥 FIXED: Hub performance metrics
+    //  FIXED: Hub performance metrics
     @Query(value = "SELECT h.hub_id, h.name, h.city, " +
             "COUNT(DISTINCT a.agent_id) as agents, " +
             "COUNT(DISTINCT CASE WHEN d.created_at >= CURRENT_DATE - INTERVAL '7 days' THEN d.delivery_id END) as weekly_deliveries, " +
