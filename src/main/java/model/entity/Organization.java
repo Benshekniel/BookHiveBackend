@@ -1,217 +1,122 @@
 package model.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+
+@Data
+@NoArgsConstructor
 @Entity
-@Table(name="organizations")
+@Table(name = "organizations")
 public class Organization {
-
+    
     @Id
-    @Column(name="org_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orgId;
+    @Column(nullable = true)
+    private Long id;
 
-    @Column(name="type", length = 255)
-    private String type;
-
-    @Column(name="reg_no", length = 255)
+    @Column(nullable = true)
     private String regNo;
 
-    @Column(name="fname", length = 255)
-    private String fname;
+    @Column(nullable = false)
+    private String organizationName;
 
-    @Column(name="lname", length = 255)
-    private String lname;
+    @Column
+    private String registrationNumber;
 
-    @Column(name="email", length = 255)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name="password", length = 255)
-    private String password;
+    @Column(nullable = false)
+    private String phone;
 
-    @Column(name="phone", length = 255)
-    private int phone;
-
-    @Column(name="years", length = 255)
-    private int years;
-
-    @Column(name="address", length = 255)
+    @Column(nullable = false)
     private String address;
 
-    @Column(name="city", length = 255)
-    private String city;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    @Column(name="state", length = 255)
-    private String state;
+    @Column
+    private String website;
 
-    @Column(name="zip", length = 255)
-    private String zip;
+    @Column
+    private Integer established;
 
-    @Column(name="imageFileName", length = 255)
-    private String imageFileName;     // Stored filename (you'll generate and save it)
+    @Column
+    private Integer studentCount;
 
-    @Column(name="fileType", length = 255)
-    private String fileType;
+    @Column
+    private String contactPerson;
 
-    public Organization(String type, String regNo, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
-        this.type = type;
-        this.regNo = regNo;
-        this.fname = fname;
-        this.lname = lname;
-        this.email = email;
-        this.password = password;
-        this.phone = phone;
-        this.years = years;
-        this.address = address;
-        this.city = city;
-        this.state = state;
-        this.zip = zip;
-        this.imageFileName = imageFileName;
-        this.fileType = fileType;
+    @Column
+    private String contactTitle;
+
+    @Column
+    private String organizationType = "school";
+
+    @Column
+    private String profileImage;
+
+    @Column(nullable = false)
+    private Boolean publicProfile = true;
+
+    @Column(nullable = false)
+    private Boolean contactPermissions = true;
+
+    @Column(nullable = false)
+    private Boolean activityVisibility = true;
+
+    @Column(nullable = false)
+    private Boolean twoFactorEnabled = false;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<BookRequest> bookRequests = new HashSet<>();
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Donation> donations = new HashSet<>();
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Feedback> feedbacks = new HashSet<>();
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Notification> notifications = new HashSet<>();
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
-    public Organization() {
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 
-    public Long getOrgId() {
-        return orgId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getRegNo() {
-        return regNo;
-    }
-
-    public String getFname() {
-        return fname;
-    }
-
-    public String getLname() {
-        return lname;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public int getPhone() {
-        return phone;
-    }
-
-    public int getYears() {
-        return years;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public String getZip() {
-        return zip;
-    }
-
-    public String getImageFileName() {
-        return imageFileName;
-    }
-
-    public String getFileType() {
-        return fileType;
-    }
-
-    public void setOrgId(Long orgId) {
-        this.orgId = orgId;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setRegNo(String regNo) {
-        this.regNo = regNo;
-    }
-
-    public void setFname(String fname) {
-        this.fname = fname;
-    }
-
-    public void setLname(String lname) {
-        this.lname = lname;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setPhone(int phone) {
-        this.phone = phone;
-    }
-
-    public void setYears(int years) {
-        this.years = years;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public void setZip(String zip) {
-        this.zip = zip;
-    }
-
-    public void setImageFileName(String imageFileName) {
-        this.imageFileName = imageFileName;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
-    }
-
-    @Override
-    public String toString() {
-        return "Organization{" +
-                "orgId=" + orgId +
-                ", type='" + type + '\'' +
-                ", regNo='" + regNo + '\'' +
-                ", fname='" + fname + '\'' +
-                ", lname='" + lname + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", phone=" + phone +
-                ", years=" + years +
-                ", address='" + address + '\'' +
-                ", city='" + city + '\'' +
-                ", state='" + state + '\'' +
-                ", zip='" + zip + '\'' +
-                ", imageFileName='" + imageFileName + '\'' +
-                ", fileType='" + fileType + '\'' +
-                '}';
+    public Organization(String type, String trim, String trim2, String trim3, String email2, String encode,
+            String trim4, int years, Object object, Object object2, Object object3, Object object4,
+            String imageFileName, String fileType) {
+        //TODO Auto-generated constructor stub
     }
 }

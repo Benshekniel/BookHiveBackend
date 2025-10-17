@@ -27,9 +27,11 @@ public class HubController {
         }
     }
 
+    // 🔥 Updated to support limit parameter
     @GetMapping
-    public ResponseEntity<List<HubResponseDto>> getAllHubs() {
-        List<HubResponseDto> hubs = hubService.getAllHubs();
+    public ResponseEntity<List<HubResponseDto>> getAllHubs(
+            @RequestParam(required = false) Integer limit) {
+        List<HubResponseDto> hubs = hubService.getAllHubs(limit);
         return ResponseEntity.ok(hubs);
     }
 

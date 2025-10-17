@@ -1,34 +1,76 @@
 package model.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "donations")
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+@Entity
+@Table(name = "donations")
 public class Donation {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long donationId;
+    private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private DonationStatus status;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
 
-    private LocalDateTime createdAt;
+    @Column(nullable = false)
+    private Long donorId;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+    @Column
+    private String donorName;
 
-    public enum DonationStatus {
-        PENDING, APPROVED, REJECTED, COMPLETED
-    }
+    @Column
+    private String donorLocation;
+
+    @Column(nullable = false)
+    private String bookTitle;
+
+    @Column(nullable = false)
+    private Integer quantity;
+
+    @Column
+    private String condition; // EXCELLENT, VERY_GOOD, GOOD, FAIR
+
+    @Column(nullable = false)
+    private String status; // PENDING, APPROVED, REJECTED, SHIPPED, IN_TRANSIT, RECEIVED
+
+    @Column
+    private String trackingNumber;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
+    @Column(nullable = false)
+    private LocalDateTime dateDonated;
+
+    @Column
+    private LocalDate dateShipped;
+
+    @Column
+    private LocalDate estimatedDelivery;
+
+    @Column
+    private LocalDate dateReceived;
+
+    @OneToOne(mappedBy = "donation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Feedback feedback;
 }
