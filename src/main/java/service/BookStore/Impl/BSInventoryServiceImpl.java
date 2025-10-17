@@ -1,5 +1,6 @@
 package service.BookStore.Impl;
 
+import model.dto.BookStore.BSStatDTOs;
 import model.entity.BSInventory;
 import model.dto.BookStore.BSInventoryDTOs;
 import model.entity.BookStore;
@@ -107,6 +108,24 @@ public class BSInventoryServiceImpl implements BSInventoryService {
             inventoryRepo.save(item);
             return true;
         }
+    }
+
+    public BSStatDTOs.RegularInventoryDTO getRegularInventoryStats(Integer storeId) {
+        return null;
+    }
+    public BSStatDTOs.DonationInventoryDTO getDonationInventoryStats(Integer storeId) {
+        return null;
+    }
+
+    public boolean unmarkForDonation(Integer inventoryId) {
+        return inventoryRepo.findByInventoryId(inventoryId)
+                .map(existingItem -> {
+                    existingItem.setIsForDonation(false);
+                    inventoryRepo.save(existingItem);
+
+                    return true;
+                })
+                .orElse(false);
     }
 
     public boolean deleteItem(Integer inventoryId) {
