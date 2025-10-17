@@ -22,5 +22,11 @@ public interface CompetitionService {
 
     public String makeResume(String competitionId,String email);
 
+    public String joinCompetition(String competitionId, String email);
+
+    public String leaveCompetition(String competitionId, String email);
+
+    public List<String> getCompetitionsByEmail(String email);
+
 
 }

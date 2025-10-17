@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import service.FileUpload.UploadService;
 import service.GoogleDriveUpload.FileStorageService;
 import service.Login.LoginService;
+import service.Moderator.CompetitionService;
 import service.User.BooksService;
 import service.User.UserCompetitionService;
 
@@ -36,8 +37,9 @@ public class UserController {
 
     @Autowired
     private UserCompetitionService userCompetitionService;
+    @Autowired
+    private CompetitionService competitionService;
 
-    //Books APIs
 
     @PostMapping("/saveBook-User")
     public ResponseEntity<?> saveBookasUser(
@@ -64,54 +66,6 @@ public class UserController {
         return ResponseEntity.ok(books);
     }
 
-    @GetMapping("/getBook/{id}")
-    public ResponseEntity<UserBooksDTO> getBookById(@PathVariable Long id) {
-        UserBooksDTO book = booksService.getBookById(id);
-        if (book != null) {
-            return ResponseEntity.ok(book);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PostMapping
-            ("/updateBook/{id}")
-    public ResponseEntity<?> updateBook(@PathVariable Long id, @RequestBody UserBooksDTO userBooksDTO) {
-        String response = booksService.updateBook(id, userBooksDTO);
-        return ResponseEntity.ok(Map.of("message", response));
-    }
-
-    @PutMapping("/updateBookWithImage/{id}")
-    public ResponseEntity<?> updateBookWithImage(
-            @PathVariable Long id,
-            @RequestPart(value = "coverImage", required = false) MultipartFile bookImage,
-            @RequestPart("bookData") UserBooksDTO userBooksDTO) throws IOException {
-
-        // If new image is provided, upload it
-        if (bookImage != null && !bookImage.isEmpty()) {
-            String bookImageName = fileStorageService.generateRandomFilename(bookImage);
-            userBooksDTO.setBookImage(bookImageName);
-
-            String response = booksService.updateBook(id, userBooksDTO);
-            if ("success".equals(response)) {
-                fileStorageService.uploadFile(bookImage, "userBooks", bookImageName);
-                return ResponseEntity.ok(Map.of("message", response));
-            }
-            return ResponseEntity.ok(Map.of("message", response));
-        } else {
-            // Update without new image
-            String response = booksService.updateBook(id, userBooksDTO);
-            return ResponseEntity.ok(Map.of("message", response));
-        }
-    }
-
-    @DeleteMapping("/deleteBook/{id}")
-    public ResponseEntity<?> deleteBook(@PathVariable Long id) {
-        String response = booksService.deleteBook(id);
-        return ResponseEntity.ok(Map.of("message", response));
-    }
-
-    //Competition APIs
 
     @GetMapping("/getAllCompetitions")
     public ResponseEntity<List<Map<String, Object>>> getAllCompetitions() {
@@ -147,6 +101,48 @@ public class UserController {
         }
     }
 
+    // Join competition
+    @PostMapping("/joinCompetition")
+    public ResponseEntity<Map<String, String>> joinCompetition(
+            @RequestParam String competitionId,
+            @RequestParam String email) {
 
+        String response = competitionService.joinCompetition(competitionId, email);
+
+        switch (response) {
+            case "joined_successfully":
+                return ResponseEntity.ok(Map.of("message", "User joined competition successfully."));
+            case "competition_not_found":
+                return ResponseEntity.badRequest().body(Map.of("message", "Competition not found."));
+            default:
+                return ResponseEntity.internalServerError().body(Map.of("message", response));
+        }
+    }
+
+    // Leave competition
+    @PostMapping("/leaveCompetition")
+    public ResponseEntity<Map<String, String>> leaveCompetition(
+            @RequestParam String competitionId,
+            @RequestParam String email) {
+
+        String response = competitionService.leaveCompetition(competitionId, email);
+
+        if ("left_successfully".equals(response)) {
+            return ResponseEntity.ok(Map.of("message", "User left competition successfully."));
+        } else {
+            return ResponseEntity.internalServerError().body(Map.of("message", response));
+        }
+    }
+
+
+    // ✅ Endpoint to get all competitions a user is participating in
+    @GetMapping("/participating/{email}")
+    public ResponseEntity<List<String>> getCompetitionsByEmail(@PathVariable String email) {
+        List<String> competitionIds = competitionService.getCompetitionsByEmail(email);
+        if (competitionIds.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(competitionIds);
+    }
 
 }

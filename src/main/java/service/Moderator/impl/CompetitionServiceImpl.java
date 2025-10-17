@@ -5,6 +5,7 @@ import model.dto.CompetitionDTO;
 import model.entity.Competitions;
 import model.repo.AllUsersRepo;
 import model.repo.CompetitionRepo;
+import model.repo.CompetitionsParticipantEmailsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import service.Moderator.CompetitionService;
@@ -18,6 +19,9 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Autowired
     private CompetitionRepo competitionRepo;
+
+    @Autowired
+    private CompetitionsParticipantEmailsRepo participantEmailsRepo;
 
 
     @Override
@@ -86,5 +90,39 @@ public class CompetitionServiceImpl implements CompetitionService {
     public String makeResume(String competitionId, String email) {
         int updated = competitionRepo.unpauseCompetition(competitionId, email);
         return updated > 0 ? "success" : "competition not found or email mismatch";
+    }
+
+    @Transactional
+    public String joinCompetition(String competitionId, String email) {
+        try {
+            // Check if competition exists
+            boolean exists = competitionRepo.existsById(competitionId);
+            if (!exists) {
+                return "competition_not_found";
+            }
+
+            // Add participant to the competition
+            participantEmailsRepo.insertParticipant(competitionId, email);
+            return "joined_successfully";
+        } catch (Exception e) {
+            // Handle duplicate entry or SQL exceptions
+            return "error: " + e.getMessage();
+        }
+    }
+
+    @Transactional
+    public String leaveCompetition(String competitionId, String email) {
+        try {
+            participantEmailsRepo.deleteParticipant(competitionId, email);
+            return "left_successfully";
+        } catch (Exception e) {
+            return "error: " + e.getMessage();
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<String> getCompetitionsByEmail(String email) {
+        return participantEmailsRepo.findCompetitionIdsByEmail(email);
     }
 }

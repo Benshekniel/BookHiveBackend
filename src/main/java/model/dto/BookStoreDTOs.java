@@ -1,4 +1,4 @@
-package model.dto.BookStore;
+package model.dto;
 
 import model.entity.BookStore;
 
@@ -25,7 +25,6 @@ public class BookStoreDTOs {
 
         private Integer userId;
     }
-
     @Data @NoArgsConstructor @AllArgsConstructor
     public static class ProfileBookStoreDTO {
         private String storeName;

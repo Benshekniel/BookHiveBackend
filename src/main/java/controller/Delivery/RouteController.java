@@ -1,9 +1,6 @@
 // RouteController.java - All Route-related Controllers consolidated into one file
 package controller.Delivery;
 
-import model.dto.Delivery.DeliveryDto;
-import service.Delivery.impl.DeliveryService;
-import service.Delivery.impl.RouteAssignmentService;
 import model.dto.Delivery.RouteDTO;
 import model.dto.Delivery.RouteDTO.*;
 import service.Delivery.impl.RouteService;
@@ -31,8 +28,6 @@ public class RouteController {
 
     @Autowired
     private RouteService routeService;
-    private DeliveryService deliveryService;
-    private RouteAssignmentService routeAssignmentService;
 
     // ================================
     // MAIN ROUTE ENDPOINTS
@@ -184,31 +179,6 @@ public class RouteController {
     public ResponseEntity<List<RouteOptimizationSuggestionDTO>> getOptimizationSuggestions(@PathVariable Long routeId) {
         List<RouteOptimizationSuggestionDTO> suggestions = routeService.getOptimizationSuggestions(routeId);
         return ResponseEntity.ok(suggestions);
-    }
-
-    @PostMapping("/{routeId}/reassign-delivery")
-    public ResponseEntity<DeliveryDto.DeliveryResponseDto> reassignDeliveryRoutes(
-            @PathVariable Long routeId,
-            @RequestParam Long deliveryId,
-            @RequestParam Long hubId) {
-        try {
-            // You'll need to inject DeliveryService into RouteController
-            DeliveryDto.DeliveryResponseDto delivery = deliveryService.reassignRoutes(deliveryId, hubId);
-            return ResponseEntity.ok(delivery);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @GetMapping("/assignment-stats/{hubId}")
-    public ResponseEntity<RouteAssignmentService.RouteAssignmentStats> getRouteAssignmentStats(
-            @PathVariable Long hubId) {
-        try {
-            RouteAssignmentService.RouteAssignmentStats stats = routeAssignmentService.getAssignmentStats(hubId);
-            return ResponseEntity.ok(stats);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
     }
 
     // ================================

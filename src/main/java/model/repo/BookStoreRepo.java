@@ -1,6 +1,5 @@
-package model.repo.BookStore;
+package model.repo;
 
-import model.entity.AllUsers;
 import model.entity.BookStore;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +10,5 @@ import java.util.Optional;
 public interface BookStoreRepo extends JpaRepository<BookStore, Integer> {
 
     Optional <BookStore> findByStoreId(Integer storeId);
-    BookStore findByAllUser(AllUsers allUser);
 
 }
