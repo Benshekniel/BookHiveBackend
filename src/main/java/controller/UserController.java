@@ -2,15 +2,18 @@ package controller;
 
 import model.dto.*;
 //import model.dto.BooksDTO;
+import model.entity.CompetitionSubmissions;
 import model.messageResponse.LoginResponse;
 import model.entity.Competitions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import service.FileUpload.UploadService;
 import service.GoogleDriveUpload.FileStorageService;
 import service.Login.LoginService;
+import service.Moderator.CompetitionService;
 import service.User.BooksService;
 import service.User.UserCompetitionService;
 
@@ -36,7 +39,8 @@ public class UserController {
 
     @Autowired
     private UserCompetitionService userCompetitionService;
-
+    @Autowired
+    private CompetitionService competitionService;
 
 
     @PostMapping("/saveBook-User")
@@ -99,6 +103,74 @@ public class UserController {
         }
     }
 
+    // Join competition
+    @PostMapping("/joinCompetition")
+    public ResponseEntity<Map<String, String>> joinCompetition(
+            @RequestParam String competitionId,
+            @RequestParam String email) {
 
+        String response = competitionService.joinCompetition(competitionId, email);
+
+        switch (response) {
+            case "joined_successfully":
+                return ResponseEntity.ok(Map.of("message", "User joined competition successfully."));
+            case "competition_not_found":
+                return ResponseEntity.badRequest().body(Map.of("message", "Competition not found."));
+            default:
+                return ResponseEntity.internalServerError().body(Map.of("message", response));
+        }
+    }
+
+    // Leave competition
+    @PostMapping("/leaveCompetition")
+    public ResponseEntity<Map<String, String>> leaveCompetition(
+            @RequestParam String competitionId,
+            @RequestParam String email) {
+
+        String response = competitionService.leaveCompetition(competitionId, email);
+
+        if ("left_successfully".equals(response)) {
+            return ResponseEntity.ok(Map.of("message", "User left competition successfully."));
+        } else {
+            return ResponseEntity.internalServerError().body(Map.of("message", response));
+        }
+    }
+
+
+    // ✅ Endpoint to get all competitions a user is participating in
+    @GetMapping("/participating/{email}")
+    public ResponseEntity<List<String>> getCompetitionsByEmail(@PathVariable String email) {
+        List<String> competitionIds = competitionService.getCompetitionsByEmail(email);
+        if (competitionIds.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(competitionIds);
+    }
+
+    // ✅ Fetch all submissions for a user
+    @GetMapping("/submissions/{email}")
+    public ResponseEntity<List<CompetitionSubmissions>> getSubmissionsByEmail(@PathVariable String email) {
+        List<CompetitionSubmissions> submissions = competitionService.getSubmissionsByEmail(email);
+        if (submissions.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(submissions);
+    }
+
+    // ✅ Endpoint: Get competitions where the user is participating
+    @GetMapping("/myCompetitions")
+    public ResponseEntity<?> getUserParticipatingCompetitions(@RequestParam("email") String email) {
+        try {
+            List<Map<String, Object>> competitions = competitionService.getUserParticipatingCompetitions(email);
+            if (competitions.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No competitions found for email: " + email);
+            }
+            return ResponseEntity.ok(competitions);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error fetching competitions: " + e.getMessage());
+        }
+    }
 
 }
