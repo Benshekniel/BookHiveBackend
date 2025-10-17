@@ -1,6 +1,7 @@
 package controller.BookStore;
 
 import model.dto.BookStore.BSInventoryDTOs;
+import model.dto.BookStore.BSStatDTOs;
 import service.BookStore.BSInventoryService;
 import service.BookStore.BookStoreService;
 import service.GoogleDriveUpload.FileStorageService;
@@ -119,6 +120,26 @@ public class BSInventoryController {
 
         if (updated) return ResponseEntity.ok("Stock updated successfully");
         else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unable to update stock!");
+    }
+
+
+
+    @GetMapping("/stats/regular/{userId}")
+    public ResponseEntity<BSStatDTOs.RegularInventoryDTO> getRegularStats (
+            @PathVariable Integer userId) {
+        Integer storeId = bookStoreService.getStoreIdByUserId(userId);
+
+        BSStatDTOs.RegularInventoryDTO stats = inventoryService.getRegularInventoryStats(storeId);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/stats/donation/{userId}")
+    public ResponseEntity<BSStatDTOs.DonationInventoryDTO> getDonationStats (
+            @PathVariable Integer userId) {
+        Integer storeId = bookStoreService.getStoreIdByUserId(userId);
+
+        BSStatDTOs.DonationInventoryDTO stats = inventoryService.getDonationInventoryStats(storeId);
+        return ResponseEntity.ok(stats);
     }
 
 
