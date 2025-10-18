@@ -118,7 +118,7 @@ public class Org_RegisterImpl implements Register_OrgAccount {
                 orgDTO.getLname().trim(),
                 email,
                 passwordEncoder.encode(orgDTO.getPassword()),
-                orgDTO.getPhone().trim(),
+                07454654654,
                 orgDTO.getYears(),
                 orgDTO.getAddress() != null ? orgDTO.getAddress().trim() : null,
                 orgDTO.getCity() != null ? orgDTO.getCity().trim() : null,
