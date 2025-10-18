@@ -25,6 +25,7 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "organization_id", nullable = false)
         @Column(nullable = true)
