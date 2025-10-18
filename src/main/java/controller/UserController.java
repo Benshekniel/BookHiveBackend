@@ -73,6 +73,29 @@ public class UserController {
         return ResponseEntity.ok(competitions);
     }
 
+    @GetMapping("/getBook/{id}")
+    public ResponseEntity<UserBooksDTO> getBookById(@PathVariable Long id) {
+        UserBooksDTO book = booksService.getBookById(id);
+        if (book != null) {
+            return ResponseEntity.ok(book);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+            ("/updateBook/{id}")
+    public ResponseEntity<?> updateBook(@PathVariable Long id, @RequestBody UserBooksDTO userBooksDTO) {
+        String response = booksService.updateBook(id, userBooksDTO);
+        return ResponseEntity.ok(Map.of("message", response));
+    }
+
+    @DeleteMapping("/deleteBook/{id}")
+    public ResponseEntity<?> deleteBook(@PathVariable Long id) {
+        String response = booksService.deleteBook(id);
+        return ResponseEntity.ok(Map.of("message", response));
+    }
+
     @PostMapping("/userSaveStory")
     public ResponseEntity<Map<String, String>>  userSaveStory(
             @RequestBody CompetitionSubmissionsDTO competitionSubmissionsDTO) {
