@@ -1,5 +1,6 @@
 package controller.BookStore;
 
+import model.dto.BookStore.BSStatDTOs;
 import model.dto.BookStore.BookStoreDTOs.RegisterBookStoreDTO;
 import model.dto.BookStore.BookStoreDTOs.ProfileBookStoreDTO;
 import org.springframework.http.HttpStatus;
@@ -36,5 +37,25 @@ public class BookStoreController {
         if (updated) return ResponseEntity.ok("BookStore updated successfully");
         else
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("BookStore Not found!");
+    }
+
+    @GetMapping("/store-details/{userId}")
+    public ResponseEntity<ProfileBookStoreDTO> getStoreProfileDetails (
+            @PathVariable("userId") Integer userId ) {
+
+        ProfileBookStoreDTO store = bookStoreService.getStoreProfileDetails(userId);
+        if (store == null)
+            return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(store);
+    }
+
+    @GetMapping("/stats/{userId}")
+    public ResponseEntity<BSStatDTOs.DashboardStatsDTO> getBookStoreStats (
+            @PathVariable("userId") Integer userId ) {
+
+        BSStatDTOs.DashboardStatsDTO stats = bookStoreService.getBookStoreStats(userId);
+        if (stats == null)
+            return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(stats);
     }
 }

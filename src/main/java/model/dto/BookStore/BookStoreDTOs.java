@@ -2,15 +2,13 @@ package model.dto.BookStore;
 
 import model.entity.BookStore;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 
 public class BookStoreDTOs {
 
-    @Data @NoArgsConstructor @AllArgsConstructor
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RegisterBookStoreDTO {
         private String storeName;
         private String businessRegistrationNumber;
@@ -26,7 +24,7 @@ public class BookStoreDTOs {
         private Integer userId;
     }
 
-    @Data @NoArgsConstructor @AllArgsConstructor
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProfileBookStoreDTO {
         private String storeName;
 
