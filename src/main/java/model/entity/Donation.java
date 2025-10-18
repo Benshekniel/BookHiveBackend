@@ -42,6 +42,9 @@ public class Donation {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @Column(columnDefinition = "TEXT")
+    private String category;
+
     @Column(nullable = true)
     private LocalDateTime dateDonated;
 
@@ -54,8 +57,8 @@ public class Donation {
     @Column
     private LocalDate dateReceived;
 
-    @OneToOne(mappedBy = "donation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Feedback feedback;
+//    @OneToOne(mappedBy = "donation", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Feedback feedback;
 
     // 🔹 Priority column
     @Column(nullable = false)
@@ -69,6 +72,12 @@ public class Donation {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    @Column(nullable = true)
+    private String rejectedReason;
+
+    @Column(nullable = true)
+    private String orgName;
 }
 
 //package model.entity;

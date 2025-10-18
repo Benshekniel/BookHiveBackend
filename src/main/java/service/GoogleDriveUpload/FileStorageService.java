@@ -15,4 +15,6 @@ public interface FileStorageService {
         Drive getDriveService();
         String getFileWebViewLinkByName(String fileName, String folderName) throws IOException;
         String getFileAsBase64(String fileName, String folderName) throws IOException;
+        String storeFile(MultipartFile imageFile, String string);
+        String getFileUrl(String fileName);
 }

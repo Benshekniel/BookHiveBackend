@@ -1,8 +1,5 @@
 package model.dto;
 
-import model.entity.AllUsers;
-import org.springframework.web.multipart.MultipartFile;
-
 public class OrgDTO {
     private String type;
     private String reg_no;
@@ -10,7 +7,7 @@ public class OrgDTO {
     private String lname;
     private String email;
     private String password;
-    private int phone;
+    private String phone;
     private int years;
     private String address;
     private String city;
@@ -19,7 +16,7 @@ public class OrgDTO {
     private String imageFileName;
     private String fileType;
 
-    public OrgDTO(String type, String reg_no, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
+    public OrgDTO(String type, String reg_no, String fname, String lname, String email, String password, String phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
         this.type = type;
         this.reg_no = reg_no;
         this.fname = fname;
@@ -36,7 +33,7 @@ public class OrgDTO {
         this.fileType = fileType;
     }
 
-    public OrgDTO(String type, String reg_no,  String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip) {
+    public OrgDTO(String type, String reg_no,  String fname, String lname, String email, String password, String phone, int years, String address, String city, String state, String zip) {
         this.type = type;
         this.reg_no = reg_no;
         this.fname = fname;
@@ -78,7 +75,7 @@ public class OrgDTO {
         return password;
     }
 
-    public int getPhone() {
+    public String getPhone() {
         return phone;
     }
 
@@ -134,7 +131,7 @@ public class OrgDTO {
         this.password = password;
     }
 
-    public void setPhone(int phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
     }
 

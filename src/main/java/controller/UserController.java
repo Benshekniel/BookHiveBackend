@@ -2,11 +2,11 @@ package controller;
 
 import model.dto.*;
 //import model.dto.BooksDTO;
-import model.entity.Users;
+import model.entity.CompetitionSubmissions;
 import model.messageResponse.LoginResponse;
 import model.entity.Competitions;
-import model.repo.UsersRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:9999") // Allow Vite's port
@@ -30,10 +29,6 @@ public class UserController {
 
     @Autowired
     private BooksService booksService;
-
-    @Autowired
-    private UsersRepo usersRepo;
-
 
 
     @Autowired
@@ -48,6 +43,7 @@ public class UserController {
     private CompetitionService competitionService;
 
 
+    //Books APIs
     @PostMapping("/saveBook-User")
     public ResponseEntity<?> saveBookasUser(
             @RequestPart("coverImage") MultipartFile bookImage,
@@ -73,13 +69,6 @@ public class UserController {
         return ResponseEntity.ok(books);
     }
 
-
-    @GetMapping("/getAllCompetitions")
-    public ResponseEntity<List<Map<String, Object>>> getAllCompetitions() {
-        List<Map<String, Object>> competitions = userCompetitionService.getAllUserCompetitionsMapped();
-        return ResponseEntity.ok(competitions);
-    }
-
     @GetMapping("/getBook/{id}")
     public ResponseEntity<UserBooksDTO> getBookById(@PathVariable Long id) {
         UserBooksDTO book = booksService.getBookById(id);
@@ -101,6 +90,14 @@ public class UserController {
     public ResponseEntity<?> deleteBook(@PathVariable Long id) {
         String response = booksService.deleteBook(id);
         return ResponseEntity.ok(Map.of("message", response));
+    }
+
+    //Competition APIs
+
+    @GetMapping("/getAllCompetitions")
+    public ResponseEntity<List<Map<String, Object>>> getAllCompetitions() {
+        List<Map<String, Object>> competitions = userCompetitionService.getAllUserCompetitionsMapped();
+        return ResponseEntity.ok(competitions);
     }
 
     @PostMapping("/userSaveStory")
@@ -175,15 +172,30 @@ public class UserController {
         return ResponseEntity.ok(competitionIds);
     }
 
-    @GetMapping("/getLoginedUser")
-    public ResponseEntity<Users> getLoginedUser(@RequestParam String email) {
-        Optional<Users> user = usersRepo.findByEmail(email);
-        if (user.isPresent()) {
-            Users userData = user.get();
-            userData.setPassword(null); // Exclude password from response
-            return ResponseEntity.ok(userData);
+    // ✅ Fetch all submissions for a user
+    @GetMapping("/submissions/{email}")
+    public ResponseEntity<List<CompetitionSubmissions>> getSubmissionsByEmail(@PathVariable String email) {
+        List<CompetitionSubmissions> submissions = competitionService.getSubmissionsByEmail(email);
+        if (submissions.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(submissions);
+    }
+
+    // ✅ Endpoint: Get competitions where the user is participating
+    @GetMapping("/myCompetitions")
+    public ResponseEntity<?> getUserParticipatingCompetitions(@RequestParam("email") String email) {
+        try {
+            List<Map<String, Object>> competitions = competitionService.getUserParticipatingCompetitions(email);
+            if (competitions.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No competitions found for email: " + email);
+            }
+            return ResponseEntity.ok(competitions);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error fetching competitions: " + e.getMessage());
+        }
     }
 
 }

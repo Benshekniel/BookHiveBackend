@@ -39,6 +39,12 @@ public class SocketIOService {
             server.addDisconnectListener(onDisconnected());
             server.addEventListener("join_user", JoinUserRequest.class, onUserJoined());
 
+            // ADD MESSAGE HANDLERS:
+            server.addEventListener("send_message", Map.class, onSendMessage());
+            server.addEventListener("new_message", Map.class, onSendMessage());
+            server.addEventListener("mobile_message", Map.class, onSendMessage());
+            server.addEventListener("ping_test", Map.class, onPingTest());
+
             server.start();
 
             System.out.println("=================================================");
@@ -46,6 +52,7 @@ public class SocketIOService {
             System.out.println("Host: " + server.getConfiguration().getHostname());
             System.out.println("Port: " + server.getConfiguration().getPort());
             System.out.println("URL: http://localhost:" + server.getConfiguration().getPort());
+            System.out.println("✅ MESSAGE HANDLERS LOADED");
             System.out.println("=================================================");
 
             log.info("Socket.IO server started on port: " + server.getConfiguration().getPort());
@@ -140,6 +147,73 @@ public class SocketIOService {
         };
     }
 
+    // NEW: Handle send_message events from mobile
+    private DataListener<Map> onSendMessage() {
+        return (client, data, ackSender) -> {
+            try {
+                System.out.println("📨 RECEIVED SEND_MESSAGE: " + data);
+                log.info("Received send_message: " + data);
+
+                Object senderIdObj = data.get("senderId");
+                Object receiverIdObj = data.get("receiverId");
+                String content = (String) data.get("content");
+                String platform = (String) data.get("platform");
+
+                if (senderIdObj == null || receiverIdObj == null || content == null) {
+                    log.error("Missing required message fields");
+                    System.err.println("❌ MISSING MESSAGE FIELDS: " + data);
+                    return;
+                }
+
+                Long senderId = Long.valueOf(senderIdObj.toString());
+                Long receiverId = Long.valueOf(receiverIdObj.toString());
+
+                System.out.println("📤 MESSAGE: From " + senderId + " to " + receiverId + ": " + content);
+                System.out.println("📱 Platform: " + platform);
+
+                // Send message to receiver using existing method
+                sendMessageToUser(receiverId, data);
+
+                // Send confirmation to sender using existing method
+                Map<String, Object> confirmation = Map.of(
+                        "messageId", data.get("messageId"),
+                        "status", "delivered",
+                        "receiverId", receiverId
+                );
+                sendMessageSentConfirmation(senderId, confirmation);
+
+                System.out.println("✅ MESSAGE PROCESSING COMPLETED");
+
+            } catch (Exception e) {
+                log.error("Error handling send_message: " + e.getMessage(), e);
+                System.err.println("❌ ERROR IN SEND_MESSAGE: " + e.getMessage());
+                e.printStackTrace();
+            }
+        };
+    }
+
+    // NEW: Handle ping test events
+    private DataListener<Map> onPingTest() {
+        return (client, data, ackSender) -> {
+            try {
+                System.out.println("🏓 PING TEST RECEIVED: " + data);
+                log.info("Ping test from client: " + client.getSessionId());
+
+                Map<String, Object> pongData = Map.of(
+                        "message", "Pong from Java server",
+                        "timestamp", System.currentTimeMillis(),
+                        "receivedData", data
+                );
+
+                safeClientSend(client, "pong_test", pongData);
+                System.out.println("🏓 PONG SENT: " + pongData);
+
+            } catch (Exception e) {
+                log.error("Error handling ping_test: " + e.getMessage(), e);
+            }
+        };
+    }
+
     // FIXED: Send message to specific user using direct client reference
     public void sendMessageToUser(Long userId, Object message) {
         try {
@@ -149,12 +223,14 @@ public class SocketIOService {
                 if (client != null && client.isChannelOpen()) {
                     System.out.println("SENDING MESSAGE TO USER " + userId + ": " + message);
                     safeClientSend(client, "new_message", message);
+                    safeClientSend(client, "message_received", message); // Send both events for compatibility
                     log.info("Message sent to user: " + userId);
                     System.out.println("MESSAGE SENT TO USER: " + userId);
                 } else {
                     // Clean up stale session
                     cleanupClientSession(sessionId);
                     log.warn("User {} client not available, session cleaned up", userId);
+                    System.out.println("USER CLIENT NOT AVAILABLE: " + userId);
                 }
             } else {
                 log.warn("User {} is not online, message not sent", userId);
