@@ -162,7 +162,7 @@ public class BSInventoryDTOs {
 
         private String condition;
 
-//        private Integer stockCount;
+        private Integer stockCount;
         private Integer sellableCount;
         private BigDecimal sellPrice;
 
@@ -187,7 +187,7 @@ public class BSInventoryDTOs {
 
         private String condition;
 
-//        private Integer stockCount;
+        private Integer stockCount;
         private Integer otherCount;
 
         private LocalDateTime createdAt;

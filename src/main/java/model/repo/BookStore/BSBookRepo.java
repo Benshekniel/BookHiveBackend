@@ -19,5 +19,7 @@ public interface BSBookRepo extends JpaRepository<BSBook, Integer> {
 
     List<BSBook> findByBookStore_StoreIdAndIsForSellingTrue(Integer storeId);
     List<BSBook> findByBookStore_StoreIdAndIsForSellingFalse(Integer storeId);
+
+    long countByBookStore_StoreId (Integer storeId);
 }
 
