@@ -1,5 +1,4 @@
 package model.entity;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,18 +20,20 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "feedback")
 public class Feedback {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", nullable = false)
-    private Organization organization;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "organization_id", nullable = false)
+        @Column(nullable = true)
+        private Long organizationId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "donation_id", nullable = false, unique = true)
-    private Donation donation;
+        //    @OneToOne(fetch = FetchType.LAZY)
+        //    @JoinColumn(name = "donation_id", nullable = false, unique = true)
+        @Column(nullable = true)
+        private Long donationId;
 
     @Column(nullable = false)
     private Integer rating; // 1-5 stars

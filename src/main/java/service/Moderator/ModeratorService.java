@@ -2,6 +2,7 @@ package service.Moderator;
 
 import model.dto.AllUsersDTO;
 import model.dto.UserBooksDTO;
+import model.entity.Donation;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,15 @@ public interface ModeratorService {
 
     public int getFlaggedUserCount();
 
+    public List<Donation> getPendingDonations();
+
+    public boolean approveDonation(Long donationId);
+
+    public List<Donation> getApprovedDonations();
+
+    public List<Donation> getRejectedDonations();
+
+    public String rejectDonation(Long donationId, String reason);
 
 }
 
