@@ -2,6 +2,7 @@ package controller.BookStore;
 
 import model.dto.BookStore.BSBookDTOs;
 import model.dto.BookStore.BSInventoryDTOs;
+import model.dto.BookStore.BSStatDTOs;
 import service.BookStore.BSBookService;
 import service.BookStore.BookStoreService;
 import service.GoogleDriveUpload.FileStorageService;
@@ -144,6 +145,17 @@ public class BSBookController {
         if (books.isEmpty())
             return ResponseEntity.noContent().build();
         return ResponseEntity.ok(books);
+    }
+
+
+
+    @GetMapping("/stats/lendOnly/{userId}")
+    public ResponseEntity<BSStatDTOs.LendOnlyStatDTO> getLendOnlyStats (
+            @PathVariable Integer userId) {
+        Integer storeId = bookStoreService.getStoreIdByUserId(userId);
+
+        BSStatDTOs.LendOnlyStatDTO stats = bookService.getLendOnlyStats(storeId);
+        return ResponseEntity.ok(stats);
     }
 
 

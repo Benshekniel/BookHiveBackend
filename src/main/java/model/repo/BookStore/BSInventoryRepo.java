@@ -15,6 +15,8 @@ public interface BSInventoryRepo extends JpaRepository<BSInventory, Integer> {
 
     Optional<BSInventory> findByInventoryId(Integer inventoryId);
 
+    List<BSInventory> findByIsForDonationFalse ();
+
     List<BSInventory> findByBookStore_StoreIdAndIsForDonationFalse(Integer storeId);
     List<BSInventory> findByBookStore_StoreIdAndIsForDonationTrue(Integer storeId);
 

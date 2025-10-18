@@ -12,14 +12,14 @@ public class BSStatDTOs {
 
     @Data @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RegularInventoryDTO {
-        private long totalBooks;         // SUM of stockCount
-        private long totalSellable;      // SUM of sellableCount
-        private long newBooks;           // count with condition = NEW
+        private long totalBooks;            // SUM of stockCount
+        private long totalSellable;         // SUM of sellableCount
+        private long newBooks;              // count with condition = NEW
 
-        private long lowStockAlerts;     // count where stockCount < threshold
-        private List<String> lowStockTitles;
+        private long lowStockAlerts;         // count where stockCount < threshold
+        private List<String> lowStockTitles; // top 3 low stock records' titles
 
-        private List<String> topGenres;
+        private List<String> topGenres;     // top 3 most in stock genres
     }
 
     @Data @JsonIgnoreProperties(ignoreUnknown = true)
@@ -45,7 +45,7 @@ public class BSStatDTOs {
     }
 
     @Data @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class SaleAlsoStatDTO {
+    public static class SellAlsoStatDTO {
         private long totalBooks;
 
         private long soldCount;

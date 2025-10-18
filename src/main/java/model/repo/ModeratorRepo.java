@@ -1,6 +1,7 @@
 package model.repo;
 
 import jakarta.transaction.Transactional;
+import model.entity.Donation;
 import model.entity.Moderator;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -79,5 +80,36 @@ public interface ModeratorRepo extends JpaRepository<Moderator, Long> {
     // Count all flagged users (banned or disabled)
     @Query("SELECT COUNT(a) FROM AllUsers a WHERE (a.status = 'banned' OR a.status = 'disabled') AND a.role = 'user'")
     int countFlaggedUsers();
+
+    // ✅ Fetch all donations that are PENDING or have NULL status
+    @Query("SELECT d FROM Donation d WHERE d.status = 'PENDING' OR d.status IS NULL")
+    List<Donation> getPendingDonations();
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Donation d SET d.status = :status WHERE d.id = :donationId")
+    int updateDonationStatus(@Param("donationId") Long donationId, @Param("status") String status);
+
+    // ✅ Update status to REJECTED with reason
+    @Modifying
+    @Transactional
+    @Query("UPDATE Donation d SET d.status = 'REJECTED', d.rejectedReason = :reason WHERE d.id = :donationId")
+    int rejectDonation(@Param("donationId") Long donationId, @Param("reason") String reason);
+
+    // ✅ Fetch all APPROVED donations
+    @Query("SELECT d FROM Donation d WHERE d.status = 'APPROVED'")
+    List<Donation> findAllApprovedDonations();
+
+    // ✅ Fetch all REJECTED donations
+    @Query("SELECT d FROM Donation d WHERE d.status = 'REJECTED'")
+    List<Donation> findAllRejectedDonations();
+
+    // ✅ Fetch all PENDING donations
+    @Query("SELECT d FROM Donation d WHERE d.status = 'PENDING' OR d.status IS NULL")
+    List<Donation> findAllPendingDonations();
+
+    // ✅ Optional: Fetch donations by priority (e.g., High / Medium / Low)
+//    @Query("SELECT d FROM Donation d WHERE d.priority = :priority")
+//    List<Donation> findDonationsByPriority(String priority);
 
 }

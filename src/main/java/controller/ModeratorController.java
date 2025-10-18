@@ -4,6 +4,7 @@ import model.dto.AllUsersDTO;
 import model.dto.CompetitionDTO;
 import model.dto.UserBooksDTO;
 import model.entity.Competitions;
+import model.entity.Donation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -214,5 +215,41 @@ public class ModeratorController {
     ){
         String result = competitionService.makeResume(competitionId,email);
         return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    @GetMapping("/getPendingDonations")
+    public ResponseEntity<List<Donation>> getPendingDonations() {
+        List<Donation> pendingDonations = moderatorService.getPendingDonations();
+        return ResponseEntity.ok(pendingDonations);
+    }
+
+    // 🔹 Endpoint to approve a donation by ID
+    @PutMapping("/approveDonation/{id}")
+    public ResponseEntity<String> approveDonation(@PathVariable("id") Long id) {
+        boolean success = moderatorService.approveDonation(id);
+
+        if (success) {
+            return ResponseEntity.ok("Donation with ID " + id + " has been approved.");
+        } else {
+            return ResponseEntity.badRequest().body("No donation found with ID: " + id);
+        }
+    }
+
+    // ✅ Reject a donation with reason
+    @PutMapping("/rejectDonation/{id}")
+    public ResponseEntity<String> rejectDonation(@PathVariable Long id, @RequestParam String reason) {
+        return ResponseEntity.ok(moderatorService.rejectDonation(id, reason));
+    }
+
+    // ✅ Get all approved donations
+    @GetMapping("/getApprovedDonations")
+    public List<Donation> getApprovedDonations() {
+        return moderatorService.getApprovedDonations();
+    }
+
+    // ✅ Get all rejected donations
+    @GetMapping("/getRejectedDonations")
+    public List<Donation> getRejectedDonations() {
+        return moderatorService.getRejectedDonations();
     }
 }

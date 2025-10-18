@@ -2,6 +2,7 @@ package service.BookStore.Impl;
 
 import model.dto.BookStore.BSBookDTOs;
 import model.dto.BookStore.BSInventoryDTOs;
+import model.dto.BookStore.BSStatDTOs;
 import model.entity.BSBook;
 import model.entity.BSInventory;
 import model.entity.BookStore;
@@ -45,8 +46,8 @@ public class BSBookServiceImpl implements BSBookService {
         BSBook book = new BSBook();
         modelMapper.map(inventory, book);
         modelMapper.map(toBSBookDTO, book);
-        book.setBookId(null);
 
+        book.setBookId(null);
         bookRepo.save(book);
         return true;
     }
@@ -88,6 +89,15 @@ public class BSBookServiceImpl implements BSBookService {
         }
     }
 
+
+    public BSStatDTOs.LendOnlyStatDTO getLendOnlyStats(Integer storeId) {
+        return null;
+    }
+    public BSStatDTOs.SellAlsoStatDTO getSellAlsoStats(Integer storeId) {
+        return null;
+    }
+
+
     public boolean editBook(BSBookDTOs.EditDTO editDTO) {
         Integer bookId = editDTO.getBookId();
         Optional<BSBook> bookOpt = bookRepo.findByBookId (bookId);
@@ -103,6 +113,16 @@ public class BSBookServiceImpl implements BSBookService {
         }
     }
 
+    public boolean unmarkForSelling (Integer bookId) {
+        return bookRepo.findByBookId(bookId)
+                .map(existingItem -> {
+                    existingItem.setIsForSelling(false);
+                    bookRepo.save(existingItem);
+                    return true;
+                })
+                .orElse(false);
+    }
+    
     public boolean deleteBook(Integer bookId) {
         return bookRepo.findByBookId(bookId)
                 .map(existingItem -> {
