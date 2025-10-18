@@ -25,15 +25,16 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "organization_id", nullable = false)
-    @Column(nullable = true)
-    private Long organizationId;
 
-    //    @OneToOne(fetch = FetchType.LAZY)
-    //    @JoinColumn(name = "donation_id", nullable = false, unique = true)
-    @Column(nullable = true)
-    private Long donationId;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "organization_id", nullable = false)
+        @Column(nullable = true)
+        private Long organizationId;
+
+        //    @OneToOne(fetch = FetchType.LAZY)
+        //    @JoinColumn(name = "donation_id", nullable = false, unique = true)
+        @Column(nullable = true)
+        private Long donationId;
 
     @Column(nullable = false)
     private Integer rating; // 1-5 stars

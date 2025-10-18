@@ -1,7 +1,9 @@
 package service.Moderator.impl;
 
+import jakarta.transaction.Transactional;
 import model.dto.AllUsersDTO;
 import model.entity.AllUsers;
+import model.entity.Donation;
 import model.repo.AllUsersRepo;
 import model.repo.ModeratorRepo;
 import model.repo.ViolationsUserRepo;
@@ -126,6 +128,36 @@ public class ModeratorImpl implements ModeratorService {
     @Override
     public int getFlaggedUserCount() {
         return moderatorRepo.countFlaggedUsers();
+    }
+
+    @Override
+    public List<Donation> getPendingDonations() {
+        return moderatorRepo.getPendingDonations();
+    }
+
+    @Override
+    public boolean approveDonation(Long donationId) {
+        int updated = moderatorRepo.updateDonationStatus(donationId, "APPROVED");
+        return updated > 0;
+    }
+
+    // Reject donation with reason
+    @Transactional
+    public String rejectDonation(Long donationId, String reason) {
+        int updated = moderatorRepo.rejectDonation(donationId, reason);
+        return updated > 0 ? "Donation rejected" : "Donation not found";
+    }
+
+    // Retrieve all approved donations
+    @Override
+    public List<Donation> getApprovedDonations() {
+        return moderatorRepo.findAllApprovedDonations();
+    }
+
+    // Retrieve all rejected donations
+    @Override
+    public List<Donation> getRejectedDonations() {
+        return moderatorRepo.findAllRejectedDonations();
     }
 
 
