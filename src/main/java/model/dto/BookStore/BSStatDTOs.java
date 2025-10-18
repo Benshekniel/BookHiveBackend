@@ -11,6 +11,14 @@ import java.util.List;
 public class BSStatDTOs {
 
     @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class DashboardStatsDTO {
+        private long totalInventoryItems;
+        private long totalBooksItems;
+        private long totalTransactions;
+        private BigDecimal totalTransactionsValue;
+    }
+
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RegularInventoryDTO {
         private long totalBooks;            // SUM of stockCount
         private long totalSellable;         // SUM of sellableCount
@@ -19,12 +27,13 @@ public class BSStatDTOs {
         private long lowStockAlerts;         // count where stockCount < threshold
         private List<String> lowStockTitles; // top 3 low stock records' titles
 
-        private List<String> topGenres;     // top 3 most in stock genres
+        private List<String> topTitles;     // top 3 most in stock titles
     }
 
     @Data @JsonIgnoreProperties(ignoreUnknown = true)
     public static class DonationInventoryDTO {
         private long totalDonationBooks;
+
         private long donatedStock;
         private long pendingStock;
 
