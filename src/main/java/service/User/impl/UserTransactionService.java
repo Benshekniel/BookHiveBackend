@@ -2,7 +2,11 @@ package service.User.impl;
 
 import model.dto.UserTransactionDto;
 import model.entity.Transaction;
+import model.entity.Delivery;
 import model.repo.User.UserTransactionRepository;
+import model.repo.Delivery.DeliveryRepository; // Your existing delivery repo
+import service.User.impl.DeliveryTrackingService;
+import service.Delivery.impl.DeliveryService; // Your existing delivery service
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +28,15 @@ public class UserTransactionService {
 
     @Autowired
     private UserTransactionRepository transactionRepository;
+
+    @Autowired
+    private DeliveryTrackingService deliveryTrackingService;
+
+    @Autowired
+    private DeliveryRepository deliveryRepository; // Your existing delivery repo
+
+    @Autowired
+    private DeliveryService deliveryService; // Your existing delivery service
 
     // Mock data for users and books (replace with actual service calls)
     private Map<Long, UserTransactionDto.UserDetailsDto> mockUsers;
@@ -135,7 +148,9 @@ public class UserTransactionService {
             System.err.println("Error getting transaction stats for user " + userId + ": " + e.getMessage());
             return createEmptyStats();
         }
-    }    // Helper method to safely extract Long values
+    }
+
+    // Helper method to safely extract Long values
     private Long extractLongValue(Object[] result, int index) {
         if (index >= result.length || result[index] == null) {
             return 0L;
@@ -193,33 +208,52 @@ public class UserTransactionService {
     private Page<Transaction> filterInMemory(Page<Transaction> transactions, UserTransactionDto.TransactionFilterDto filter) {
         List<Transaction> filtered = transactions.getContent().stream()
                 .filter(t -> {
-                    if (filter.getStatus() != null && !t.getStatus().name().equalsIgnoreCase(filter.getStatus())) {
-                        return false;
-                    }
-                    if (filter.getType() != null) {
-                        String mappedType = mapFrontendTypeToBackend(filter.getType());
-                        if (!t.getType().name().equalsIgnoreCase(mappedType)) {
+                    try {
+                        // Status filter
+                        if (filter.getStatus() != null) {
+                            Transaction.TransactionStatus targetStatus = Transaction.TransactionStatus.valueOf(filter.getStatus().toUpperCase());
+                            if (t.getStatus() != targetStatus) {
+                                return false;
+                            }
+                        }
+
+                        // Type filter
+                        if (filter.getType() != null) {
+                            String mappedType = mapFrontendTypeToBackend(filter.getType());
+                            Transaction.TransactionType targetType = Transaction.TransactionType.valueOf(mappedType);
+                            if (t.getType() != targetType) {
+                                return false;
+                            }
+                        }
+
+                        // Payment status filter
+                        if (filter.getPaymentStatus() != null) {
+                            Transaction.PaymentStatus targetPaymentStatus = Transaction.PaymentStatus.valueOf(filter.getPaymentStatus().toUpperCase());
+                            if (t.getPaymentStatus() != targetPaymentStatus) {
+                                return false;
+                            }
+                        }
+
+                        // Date range filter
+                        if (filter.getFromDate() != null && t.getCreatedAt().isBefore(filter.getFromDate())) {
                             return false;
                         }
-                    }
-                    if (filter.getPaymentStatus() != null &&
-                            (t.getPaymentStatus() == null || !t.getPaymentStatus().name().equalsIgnoreCase(filter.getPaymentStatus()))) {
+                        if (filter.getToDate() != null && t.getCreatedAt().isAfter(filter.getToDate())) {
+                            return false;
+                        }
+
+                        return true;
+                    } catch (IllegalArgumentException e) {
+                        // If enum conversion fails, exclude the transaction
                         return false;
                     }
-                    if (filter.getFromDate() != null && t.getCreatedAt().isBefore(filter.getFromDate())) {
-                        return false;
-                    }
-                    if (filter.getToDate() != null && t.getCreatedAt().isAfter(filter.getToDate())) {
-                        return false;
-                    }
-                    return true;
                 })
                 .collect(Collectors.toList());
 
         return new org.springframework.data.domain.PageImpl<>(
                 filtered,
                 transactions.getPageable(),
-                transactions.getTotalElements()
+                filtered.size() // Use filtered size, not original total
         );
     }
 
@@ -437,10 +471,108 @@ public class UserTransactionService {
         dto.setRefundAmount(transaction.getRefundAmount());
         dto.setDeductionAmount(transaction.getDeductionAmount());
 
-        // Generate tracking information
+        // ✅ UPDATED: Generate tracking information using real delivery data
         dto.setTracking(generateTrackingInfo(transaction));
 
         return dto;
+    }
+
+    // ✅ UPDATED: Use real delivery tracking instead of mock data
+    private List<UserTransactionDto.TrackingDto> generateTrackingInfo(Transaction transaction) {
+        List<UserTransactionDto.TrackingDto> trackingList = new ArrayList<>();
+
+        try {
+            // Get real tracking info from delivery service using your existing delivery system
+            List<DeliveryTrackingService.TrackingInfo> deliveryTracking =
+                    deliveryTrackingService.getTrackingInfoByTransactionId(transaction.getTransactionId());
+
+            // Convert to DTO format
+            for (DeliveryTrackingService.TrackingInfo info : deliveryTracking) {
+                UserTransactionDto.TrackingDto trackingDto = new UserTransactionDto.TrackingDto();
+                trackingDto.setStatus(info.getStatus());
+                trackingDto.setTimestamp(info.getTimestamp());
+                trackingDto.setDescription(info.getDescription());
+                trackingList.add(trackingDto);
+            }
+
+            // Add transaction-specific information
+            addTransactionSpecificTracking(trackingList, transaction);
+
+        } catch (Exception e) {
+            System.err.println("Error getting delivery tracking, using fallback: " + e.getMessage());
+            // Fallback to basic tracking
+            trackingList = generateFallbackTrackingInfo(transaction);
+        }
+
+        return trackingList;
+    }
+
+    private void addTransactionSpecificTracking(List<UserTransactionDto.TrackingDto> trackingList, Transaction transaction) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a");
+
+        // Add transaction-specific tracking based on type and status
+        if (transaction.getType() == Transaction.TransactionType.LOAN &&
+                transaction.getStatus() == Transaction.TransactionStatus.OVERDUE) {
+
+            trackingList.add(createTrackingEntry(
+                    "Overdue",
+                    LocalDateTime.now().format(formatter),
+                    "Book return is overdue by " + (transaction.getOverdueDays() != null ? transaction.getOverdueDays() : 0) + " days"
+            ));
+        }
+
+        if (transaction.getStatus() == Transaction.TransactionStatus.CANCELLED) {
+            trackingList.add(createTrackingEntry(
+                    "Order Cancelled",
+                    (transaction.getCancelDate() != null ?
+                            transaction.getCancelDate().atStartOfDay() : LocalDateTime.now()).format(formatter),
+                    "Order cancelled. " +
+                            (transaction.getRefundAmount() != null && transaction.getRefundAmount().compareTo(BigDecimal.ZERO) > 0 ?
+                                    "Refund of Rs. " + transaction.getRefundAmount() + " will be processed within 3-5 business days." :
+                                    "")
+            ));
+        }
+    }
+
+    private List<UserTransactionDto.TrackingDto> generateFallbackTrackingInfo(Transaction transaction) {
+        List<UserTransactionDto.TrackingDto> tracking = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a");
+
+        // Basic tracking as fallback
+        tracking.add(createTrackingEntry(
+                "Order Placed",
+                transaction.getCreatedAt().format(formatter),
+                "Your order has been confirmed"
+        ));
+
+        // Status-based tracking
+        switch (transaction.getStatus()) {
+            case PENDING:
+                tracking.add(createTrackingEntry(
+                        "Awaiting Confirmation",
+                        transaction.getCreatedAt().format(formatter),
+                        "Waiting for seller confirmation"
+                ));
+                break;
+            case ACTIVE:
+                tracking.add(createTrackingEntry(
+                        "Processing",
+                        transaction.getCreatedAt().plusHours(1).format(formatter),
+                        "Order is being processed"
+                ));
+                break;
+            case COMPLETED:
+                if (transaction.getActualDelivery() != null) {
+                    tracking.add(createTrackingEntry(
+                            "Delivered",
+                            transaction.getActualDelivery().format(formatter),
+                            "Order delivered successfully"
+                    ));
+                }
+                break;
+        }
+
+        return tracking;
     }
 
     // Enhanced book image fallback - FIXED VERSION
@@ -471,74 +603,6 @@ public class UserTransactionService {
         if (transaction.getBorrowerId() != null) {
             dto.setBorrower(mockUsers.get(transaction.getBorrowerId()));
         }
-    }
-
-    private List<UserTransactionDto.TrackingDto> generateTrackingInfo(Transaction transaction) {
-        List<UserTransactionDto.TrackingDto> tracking = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a");
-
-        // Order placed
-        tracking.add(createTrackingEntry(
-                "Order Placed",
-                transaction.getCreatedAt().format(formatter),
-                "Your order has been confirmed"
-        ));
-
-        // Status-based tracking
-        switch (transaction.getStatus()) {
-            case PENDING:
-                tracking.add(createTrackingEntry(
-                        "Awaiting Confirmation",
-                        transaction.getCreatedAt().format(formatter),
-                        "Waiting for seller confirmation"
-                ));
-                break;
-            case ACTIVE:
-                if (transaction.getType() == Transaction.TransactionType.LOAN) {
-                    tracking.add(createTrackingEntry(
-                            "Book Dispatched",
-                            transaction.getStartDate().format(formatter),
-                            "Book is on the way to you"
-                    ));
-                    tracking.add(createTrackingEntry(
-                            "Borrowing Active",
-                            transaction.getStartDate().format(formatter),
-                            "Enjoy reading! Return by " +
-                                    (transaction.getEndDate() != null ?
-                                            transaction.getEndDate().format(DateTimeFormatter.ofPattern("MMM dd")) : "due date")
-                    ));
-                }
-                break;
-            case COMPLETED:
-                if (transaction.getActualDelivery() != null) {
-                    tracking.add(createTrackingEntry(
-                            "Delivered",
-                            transaction.getActualDelivery().format(formatter),
-                            "Order delivered successfully"
-                    ));
-                }
-                break;
-            case OVERDUE:
-                tracking.add(createTrackingEntry(
-                        "Overdue",
-                        LocalDateTime.now().format(formatter),
-                        "Book return is overdue by " + transaction.getOverdueDays() + " days"
-                ));
-                break;
-            case CANCELLED:
-                tracking.add(createTrackingEntry(
-                        "Order Cancelled",
-                        (transaction.getCancelDate() != null ?
-                                transaction.getCancelDate().atStartOfDay() : LocalDateTime.now()).format(formatter),
-                        "Order cancelled. " +
-                                (transaction.getRefundAmount() != null && transaction.getRefundAmount().compareTo(BigDecimal.ZERO) > 0 ?
-                                        "Refund of Rs. " + transaction.getRefundAmount() + " will be processed within 3-5 business days." :
-                                        "")
-                ));
-                break;
-        }
-
-        return tracking;
     }
 
     private UserTransactionDto.TrackingDto createTrackingEntry(String status, String timestamp, String description) {
@@ -628,11 +692,33 @@ public class UserTransactionService {
         return "BH" + System.currentTimeMillis();
     }
 
+    private String mapSortField(String frontendField) {
+        // Map frontend sort fields to actual entity fields
+        switch (frontendField) {
+            case "createdAt":
+            case "created_at":
+            case "orderDate":
+                return "createdAt";
+            case "updatedAt":
+            case "updated_at":
+                return "updatedAt";
+            case "startDate":
+            case "start_date":
+                return "startDate";
+            case "endDate":
+            case "end_date":
+                return "endDate";
+            default:
+                return "createdAt"; // Safe default
+        }
+    }
+
     private Pageable createPageable(UserTransactionDto.TransactionFilterDto filter) {
+        String sortField = mapSortField(filter.getSortBy());
         Sort sort = Sort.by(
                 "DESC".equalsIgnoreCase(filter.getSortDirection()) ?
                         Sort.Direction.DESC : Sort.Direction.ASC,
-                filter.getSortBy()
+                sortField
         );
         return PageRequest.of(filter.getPage(), filter.getSize(), sort);
     }
@@ -747,29 +833,6 @@ public class UserTransactionService {
 
         return svg.toString();
     }
-
-    private String mapSortField(String frontendField) {
-        // Map frontend sort fields to actual entity fields
-        switch (frontendField) {
-            case "createdAt":
-            case "created_at":
-            case "orderDate":
-                return "createdAt";  // Now properly mapped in entity
-            case "updatedAt":
-            case "updated_at":
-                return "updatedAt";
-            case "startDate":
-            case "start_date":
-                return "startDate";
-            case "endDate":
-            case "end_date":
-                return "endDate";
-            default:
-                return "createdAt";  // Safe default
-        }
-    }
-
-
 
     // Helper class for refund calculation
     private static class RefundCalculation {
