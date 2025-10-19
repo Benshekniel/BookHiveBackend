@@ -5,15 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
-import io.hypersistence.utils.hibernate.type.array.ListArrayType;
-import org.hibernate.type.SqlTypes;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
 /** Reviews for transactions involving books owned by BookStore users. */
 @Entity

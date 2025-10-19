@@ -38,14 +38,14 @@ public class BookRequestServiceImpl implements BookRequestService {
 
         // Create request entity
         BookRequest request = new BookRequest();
-        request.setOrganization(organization);
+        request.setOrganization(organization); // Reverted to use setOrganization
         request.setTitle(createDTO.getTitle());
         request.setSubject(createDTO.getSubject());
         request.setQuantity(createDTO.getQuantity());
         request.setUrgency(createDTO.getUrgency());
         request.setDescription(createDTO.getDescription());
         request.setStatus("PENDING");
-        request.setDateRequested(LocalDateTime.now());
+        request.setDateRequested(LocalDateTime.now()); // Reverted to use dateRequested
 
         // Save and return mapped DTO
         BookRequest saved = bookRequestRepository.save(request);
@@ -123,14 +123,14 @@ public class BookRequestServiceImpl implements BookRequestService {
     private BookRequestDTO mapToDTO(BookRequest request) {
         BookRequestDTO dto = new BookRequestDTO();
         dto.setId(request.getId());
-        dto.setOrganizationId(request.getOrganization().getOrgId());
+        dto.setOrganizationId(request.getOrganization().getOrgId()); // Use organization relationship
         dto.setTitle(request.getTitle());
         dto.setSubject(request.getSubject());
         dto.setQuantity(request.getQuantity());
         dto.setUrgency(request.getUrgency());
         dto.setDescription(request.getDescription());
         dto.setStatus(request.getStatus());
-        dto.setDateRequested(request.getDateRequested().toString());
+        dto.setDateRequested(request.getDateRequested().toString()); // Use dateRequested
 
         if (request.getDateApproved() != null) {
             dto.setDateApproved(request.getDateApproved().toString());

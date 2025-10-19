@@ -1,59 +1,40 @@
+// BookRequestRepository.java
 package model.repo.organization;
 
 import model.entity.BookRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface BookRequestRepository extends JpaRepository<BookRequest, Long> {
+    
+    // Basic finder methods using organization relationship
     List<BookRequest> findByOrganizationOrgIdOrderByDateRequestedDesc(Long orgId);
-
-    @Query("SELECT br FROM BookRequest br WHERE br.organization.orgId = :orgId ORDER BY br.dateRequested DESC LIMIT :limit")
-    List<BookRequest> findRecentByOrganizationId(@Param("orgId") Long orgId, @Param("limit") int limit);
-
+    List<BookRequest> findTop5ByOrganizationOrgIdOrderByDateRequestedDesc(Long orgId);
+    List<BookRequest> findByOrganizationOrgIdAndStatus(Long orgId, String status);
+    List<BookRequest> findByStatus(String status);
+    
+    // Count methods using organization relationship
     Long countByOrganizationOrgId(Long orgId);
-
     Long countByOrganizationOrgIdAndStatus(Long orgId, String status);
-
-    @Query("SELECT COALESCE(COUNT(br), 0) FROM BookRequest br WHERE br.organization.orgId = :orgId AND br.status = :status AND br.dateRequested BETWEEN :start AND :end")
-    Long countByOrganizationOrgIdAndStatusAndDateRequestedBetween(
-            @Param("orgId") Long orgId,
-            @Param("status") String status,
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end);
+    Long countByOrganizationOrgIdAndStatusAndDateRequestedBetween(Long orgId, String status, LocalDateTime start, LocalDateTime end);
+    
+    // Paginated queries
+    Page<BookRequest> findByOrganizationOrgId(Long orgId, Pageable pageable);
+    Page<BookRequest> findByOrganizationOrgIdAndStatus(Long orgId, String status, Pageable pageable);
+    
+    // Recent requests query
+    @Query("SELECT b FROM BookRequest b WHERE b.organization.orgId = :orgId ORDER BY b.dateRequested DESC")
+    List<BookRequest> findRecentByOrganizationId(@Param("orgId") Long orgId, Pageable pageable);
+    
+    // Default method for compatibility
+    default List<BookRequest> findRecentByOrganizationId(Long orgId, int limit) {
+        return findRecentByOrganizationId(orgId, Pageable.ofSize(limit));
+    }
 }
-
-//package model.repo.organization;
-//
-//import model.entity.BookRequest;
-//import org.springframework.data.jpa.repository.JpaRepository;
-//import org.springframework.data.jpa.repository.Query;
-//import org.springframework.data.repository.query.Param;
-//import org.springframework.stereotype.Repository;
-//
-//import java.time.LocalDateTime;
-//import java.util.List;
-//
-//@Repository
-//public interface BookRequestRepository extends JpaRepository<BookRequest, Long> {
-//    List<BookRequest> findByOrgIdOrderByDateRequestedDesc(Long orgId);
-//
-//    @Query("SELECT br FROM BookRequest br WHERE br.orgId = :orgId ORDER BY br.dateRequested DESC LIMIT :limit")
-//    List<BookRequest> findRecentByOrgId(@Param("orgId") Long orgId, @Param("limit") int limit);
-//
-//    Long countByOrgId(Long orgId);
-//
-//    Long countByOrgIdAndStatus(Long orgId, String status);
-//
-//    @Query("SELECT COALESCE(COUNT(br), 0) FROM BookRequest br WHERE br.orgId = :orgId AND br.status = :status AND br.dateRequested BETWEEN :start AND :end")
-//    Long countByOrgIdAndStatusAndDateRequestedBetween(
-//            @Param("orgId") Long orgId,
-//            @Param("status") String status,
-//            @Param("start") LocalDateTime start,
-//            @Param("end") LocalDateTime end);
-//}

@@ -1,21 +1,15 @@
 package service.SignUp.impl;
 
 
-import model.dto.OrgDTO;
 import model.dto.UsersDto;
 import model.entity.AllUsers;
-import model.entity.Organization;
 import model.entity.Users;
 import model.repo.AllUsersRepo;
-import model.repo.OrgRepo;
 import model.repo.UsersRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import service.SignUp.Register_OrgAccount;
 import service.SignUp.Register_UserAccount;
-
-import java.util.Optional;
 
 @Service
 public class User_RegisterImpl implements Register_UserAccount {
