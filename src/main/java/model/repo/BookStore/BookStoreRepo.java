@@ -1,8 +1,9 @@
 package model.repo.BookStore;
 
+import model.entity.BookStore;
+
 import jakarta.transaction.Transactional;
 import model.entity.AllUsers;
-import model.entity.BookStore;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,10 +16,10 @@ import java.util.Optional;
 public interface BookStoreRepo extends JpaRepository<BookStore, Integer> {
 
     Optional <BookStore> findByStoreId(Integer storeId);
-//    BookStore findByAllUser(AllUsers allUser);
 
     @Query(value = "SELECT * FROM bookstores WHERE user_id = :userId", nativeQuery = true)
     BookStore findByAllUserNew(@Param("userId") Integer userId);
+
 
     // ✅ Update user_id in bookstore where email matches
     @Modifying

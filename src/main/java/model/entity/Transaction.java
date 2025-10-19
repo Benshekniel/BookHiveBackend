@@ -49,8 +49,15 @@ public class Transaction {
     @Column(name = "payment_status")
     private PaymentStatus paymentStatus;
 
+    /** book belonging to a customer type regular user */
     @Column(name = "book_id")
     private Long bookId;
+
+    /** individual book items belonging to a bookstore user */
+    private Integer bsBookId;
+
+    /** bulk book items belonging to a bookstore user */
+    private Integer bsInventoryId;
 
     @Column(name = "user_id")
     private Long userId;

@@ -16,13 +16,13 @@ import java.util.Map;
 @Table(name = "bookstores")
 @Data @NoArgsConstructor @AllArgsConstructor
 public class BookStore {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer storeId;
 
     @Column(nullable = false)
     private int user_id;
+
 
     @Email
     @Column(nullable = false)
@@ -36,8 +36,6 @@ public class BookStore {
 
     @Column(nullable = false)
     private String storeName;
-
-
 
     @Column(nullable = false)
     private String businessRegistrationNumber;
@@ -67,8 +65,7 @@ public class BookStore {
     private Integer esblishedYears;
 
     @Column(nullable = false, length = 5)
-    private String postalCode;//zip
-
+    private String postalCode; //zip
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb",nullable = true)
@@ -79,7 +76,8 @@ public class BookStore {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
+    // "PENDING, YES, NO"
+  
     @Column(nullable = true)
     private String isApproved;    // "PENDING, YES, NO"
 
@@ -98,9 +96,6 @@ public class BookStore {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-//        isApproved = Approval.PENDING;
-
-//        userId = getAllUser().getUser_id();
     }
     @PreUpdate
     protected void onUpdate() {
@@ -110,10 +105,6 @@ public class BookStore {
     public enum BookType {
         NEW_BOOKS, USED_BOOKS, BOTH
     }
-//    public enum Approval {
-//        PENDING, YES, NO
-//    }
-
 
     public BookStore(String fName, String lName, String email, String phoneNumber, String address, String city, String district, String postalCode, String storeName, String businessRegistrationNumber, Integer esblishedYears) {
         this.fName = fName;

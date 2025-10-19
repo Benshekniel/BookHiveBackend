@@ -38,6 +38,9 @@ public class BSInventory {
     @Column(columnDefinition = "text[]")
     private List<String> tags;          // eg: ["bestseller", "classic", "award-winner"]
 
+    /** something to connect with when assigning books to donations eg: SCIENCE, FICTION, etc */
+    private String category;
+
     /** Single image - cover page of book, preferably png from the internet itself.
      * It is the name of the image file name only, stored in folder BSBook/coverImage/ */
     private String coverImage;
