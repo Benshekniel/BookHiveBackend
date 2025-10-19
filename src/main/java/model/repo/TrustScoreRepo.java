@@ -1,5 +1,6 @@
 package model.repo;
 
+import jakarta.transaction.Transactional;
 import model.entity.TrustScore;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -60,5 +61,10 @@ public interface TrustScoreRepo extends JpaRepository<TrustScore, Long> {
     @Modifying
     @Query("DELETE FROM TrustScore t WHERE t.email = :email")
     int deleteByEmail(@Param("email") String email);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE TrustScore t SET t.score = :newScore WHERE t.email = :email")
+    int updateScoreByEmail2(String email, Integer newScore);
 
 }
