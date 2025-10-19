@@ -23,7 +23,9 @@ public class BookStore {
     @Column(nullable = false)
     private int user_id;
 
-    @Email @Column(nullable = false)
+
+    @Email
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -54,10 +56,10 @@ public class BookStore {
     private String address;     // first line of address: house no and street
 
     @Column(nullable = false)
-    private String city;
+    private String district; //state
 
     @Column(nullable = false)
-    private String district; //state
+    private String city;
 
     @Column(nullable = false)
     private Integer esblishedYears;
@@ -66,15 +68,25 @@ public class BookStore {
     private String postalCode; //zip
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(columnDefinition = "jsonb",nullable = true)
     private Map<String, String> businessHours; // {"monday": "9:00-18:00", "tuesday": "9:00-18:00", ...}
 
+    @Column(nullable = true)
     private BookType booksType; // "NEW_BOOKS, USED_BOOKS, BOTH"
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
+    // "PENDING, YES, NO"
+  
+    @Column(nullable = true)
     private String isApproved;    // "PENDING, YES, NO"
+
+//    private String approvalNote;
+
+    /** One-to-One relationship with AllUsers table */
+//    @OneToOne
+//    @JoinColumn(name = "user_id", nullable = false)
+//    private AllUsers allUser;
 
 //    /** Since AllUsers table user_id has a "_" in the middle we'll get it into a column by itself.
 //     * So create new AllUsers objects and use that in service */

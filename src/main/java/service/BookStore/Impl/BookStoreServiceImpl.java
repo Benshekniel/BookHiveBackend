@@ -33,6 +33,7 @@ public class BookStoreServiceImpl implements BookStoreService {
     private static final ModelMapper modelMapper = new ModelMapper();
 
     public Integer getStoreIdByUserId(Integer userId) {
+
         BookStore bookStore = bookStoreRepo.findByAllUserNew(userId);
         return bookStore.getStoreId();
     }

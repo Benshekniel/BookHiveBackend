@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @EnableJpaRepositories
 @Repository
 public interface CompetitionsParticipantEmailsRepo extends JpaRepository<competitionsParticipantEmails, String> {
@@ -30,5 +32,9 @@ public interface CompetitionsParticipantEmailsRepo extends JpaRepository<competi
     @Transactional
     @Query(value = "DELETE FROM competitions_participant_emails WHERE competition_id = ?1 AND email = ?2", nativeQuery = true)
     void deleteParticipant(String competitionId, String email);
+
+    // ✅ Fetch all competition IDs where a user (email) is already participating
+    @Query(value = "SELECT competition_id FROM competitions_participant_emails WHERE email = ?1", nativeQuery = true)
+    List<String> findCompetitionIdsByEmail(String email);
 
 }
