@@ -51,10 +51,30 @@ public class HubService {
         return convertToResponseDto(savedHub);
     }
 
-    public List<HubResponseDto> getAllHubs() {
-        return hubRepository.findAll().stream()
+    // 🔥 Updated to support limit parameter
+    public List<HubResponseDto> getAllHubs(Integer limit) {
+        log.info("Fetching hubs with limit: {}", limit);
+
+        List<Hub> hubs;
+
+        if (limit != null && limit > 0) {
+            // Use the new limited query
+            hubs = hubRepository.findLimitedHubs(limit);
+            log.info("Retrieved {} hubs with limit {}", hubs.size(), limit);
+        } else {
+            // Get all hubs
+            hubs = hubRepository.findAll();
+            log.info("Retrieved all {} hubs", hubs.size());
+        }
+
+        return hubs.stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    // 🔥 Alternative method using the existing getAllHubs (backward compatibility)
+    public List<HubResponseDto> getAllHubs() {
+        return getAllHubs(null); // Get all hubs
     }
 
     public Optional<HubResponseDto> getHubById(Long hubId) {
@@ -119,6 +139,23 @@ public class HubService {
 
     public List<HubStatsDto> getHubStats() {
         List<Hub> hubs = hubRepository.findAll();
+        return hubs.stream()
+                .map(this::convertToStatsDto)
+                .collect(Collectors.toList());
+    }
+
+    // 🔥 New method to get limited hub stats
+    public List<HubStatsDto> getHubStats(Integer limit) {
+        log.info("Fetching hub stats with limit: {}", limit);
+
+        List<Hub> hubs;
+
+        if (limit != null && limit > 0) {
+            hubs = hubRepository.findLimitedHubs(limit);
+        } else {
+            hubs = hubRepository.findAll();
+        }
+
         return hubs.stream()
                 .map(this::convertToStatsDto)
                 .collect(Collectors.toList());
@@ -272,8 +309,6 @@ public class HubService {
         dto.setAgentId(agent.getAgentId());
         dto.setHubId(agent.getHubId());
         dto.setAvailabilityStatus(agent.getAvailabilityStatus());
-//        dto.setPhoneNumber(agent.getPhoneNumber());
-//        dto.setCreatedAt(agent.getCreatedAt());
 
         // Get user details
         if (agent.getUserId() != null) {
@@ -295,7 +330,6 @@ public class HubService {
         dto.setStatus(delivery.getStatus());
         dto.setRouteId(delivery.getRouteId());
         dto.setCreatedAt(delivery.getCreatedAt());
-//        dto.setUpdatedAt(delivery.getUpdatedAt());
 
         return dto;
     }
@@ -306,6 +340,29 @@ public class HubService {
 
         try {
             List<Object[]> hubSummaryData = hubRepository.findHubsSummaryData();
+
+            return hubSummaryData.stream()
+                    .map(this::mapToHubSummaryDto)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error("Error fetching hubs summary: {}", e.getMessage());
+            throw new RuntimeException("Failed to fetch hubs summary", e);
+        }
+    }
+
+    // 🔥 New method to get limited hubs summary
+    public List<HubSummaryDto> getHubsSummary(Integer limit) {
+        log.info("Fetching optimized hubs summary with limit: {}", limit);
+
+        try {
+            List<Object[]> hubSummaryData;
+
+            if (limit != null && limit > 0) {
+                hubSummaryData = hubRepository.findHubsSummaryDataWithLimit(limit);
+            } else {
+                hubSummaryData = hubRepository.findHubsSummaryData();
+            }
 
             return hubSummaryData.stream()
                     .map(this::mapToHubSummaryDto)

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import service.SignUp.Register_ModeratorAccount;
 import service.SignUp.Register_OrgAccount;
 import service.SignUp.Register_UserAccount;
+import service.TrustScore.TrustScoreService;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -39,6 +40,9 @@ public class RegisterController {
     @Autowired
     private Register_ModeratorAccount registerModeratorAccount;
 
+
+    @Autowired
+    private TrustScoreService trustScoreService;
 
     @Autowired
     private UploadService uploadService;
@@ -178,6 +182,8 @@ public class RegisterController {
                 Map<String, String> idBackResult = fileStorageService.uploadFile(idBack, "idBack", idBackRandomName);
                 Map<String, String> billImageResult = fileStorageService.uploadFile(billImage, "billImage", billImageRandomName);
             }
+
+            trustScoreService.initial_Trustscore(usersDto.getEmail());
         }
 
         return ResponseEntity.ok(Map.of("message", response));

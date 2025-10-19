@@ -9,7 +9,6 @@ public class Organization {
 
     @Id
     @Column(name="org_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orgId;
 
     @Column(name="type", length = 255)

@@ -1,6 +1,6 @@
 package model.repo;
 
-import model.entity.Books;
+//import model.entity.Books;
 import model.entity.UserBooks;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface UserBooksRepo extends JpaRepository<UserBooks, Long> {
 
     Optional<UserBooks> findOneByUserEmailAndBookId(String userEmail, Long bookId);
+
+    Optional<UserBooks> findById(Long id);
 
     UserBooks findByIsbn(String isbn);
 

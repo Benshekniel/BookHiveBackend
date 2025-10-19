@@ -61,8 +61,10 @@ public class DeliveryDto {
         private String hubName;
         private Long agentId;
         private Long userId;
-        private Long routeId; // Route assignment result
+        private Long routeId; // Route assignment result for delivery
+        private Long prouteId; // Route assignment result for pickup - ADD THIS LINE
         private String routeName; // Route assignment result
+        private String prouteName; // Pickup route name - ADD THIS LINE
         private String agentName;
         private String customerName;
         private String customerPhone;
@@ -90,7 +92,6 @@ public class DeliveryDto {
         // Assignment method used
         private String assignmentMethod; // POLYGON_MATCH, POSTAL_CODE, DISTANCE, MANUAL
     }
-
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
