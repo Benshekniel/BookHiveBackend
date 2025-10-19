@@ -3,6 +3,7 @@ package service.BookStore.Impl;
 import model.dto.BookStore.BSStatDTOs;
 import model.entity.AllUsers;
 import model.entity.BookStore;
+import model.repo.AllUsersRepo;
 import model.repo.BookStore.BSBookRepo;
 import model.repo.BookStore.BSInventoryRepo;
 import model.repo.BookStore.BookStoreRepo;
@@ -23,6 +24,7 @@ import java.util.Optional;
 public class BookStoreServiceImpl implements BookStoreService {
 
     private final BookStoreRepo bookStoreRepo;
+    private final AllUsersRepo allUsersRepo;
 
     private final BSInventoryRepo inventoryRepo;
     private final BSBookRepo bookRepo;
@@ -31,21 +33,8 @@ public class BookStoreServiceImpl implements BookStoreService {
     private static final ModelMapper modelMapper = new ModelMapper();
 
     public Integer getStoreIdByUserId(Integer userId) {
-        AllUsers bsUser = new AllUsers();
-        bsUser.setUser_id(userId);
-
-        BookStore bookStore = bookStoreRepo.findByAllUser(bsUser);
+        BookStore bookStore = bookStoreRepo.findByAllUserNew(userId);
         return bookStore.getStoreId();
-    }
-
-    public boolean registerBookStore (BookStoreDTOs.RegisterBookStoreDTO bookStoreDTO) {
-        BookStore bookStore = modelMapper.map(bookStoreDTO, BookStore.class);
-        AllUsers user = new AllUsers();
-        user.setUser_id(bookStoreDTO.getUserId());
-        bookStore.setAllUser(user);
-
-        bookStoreRepo.save(bookStore);
-        return true;
     }
 
     public boolean updateBookStore (Integer userId, BookStoreDTOs.ProfileBookStoreDTO bookStoreDTO) {
@@ -57,6 +46,21 @@ public class BookStoreServiceImpl implements BookStoreService {
                     return true;
                 })
                 .orElse(false);
+    }
+
+    public boolean changePassword (BookStoreDTOs.PassChangeDTO passChangeDTO) {
+        Optional<AllUsers> bsUserOpt = allUsersRepo.findById(passChangeDTO.getUserId());
+        if (bsUserOpt.isEmpty())
+            return false;
+        else {
+            AllUsers bsUser = bsUserOpt.get();
+            if (passChangeDTO.getOldPassword().equals(bsUser.getPassword())) {
+                bsUser.setPassword(passChangeDTO.getNewPassword());
+                allUsersRepo.save(bsUser);
+                return true;
+            }
+            else return false;
+        }
     }
 
     public BookStoreDTOs.ProfileBookStoreDTO getStoreProfileDetails (Integer userId) {
