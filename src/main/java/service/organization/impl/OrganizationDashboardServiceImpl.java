@@ -39,61 +39,81 @@ public class OrganizationDashboardServiceImpl implements OrganizationDashboardSe
 
     @Override
     public DashboardStatsDTO getDashboardStats(Long orgId) {
-        // Verify organization exists
-        if (!orgRepo.existsByOrgId(orgId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found with orgId: " + orgId);
+        try {
+            // Verify organization exists
+            if (!orgRepo.existsByOrgId(orgId)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found with orgId: " + orgId);
+            }
+
+            // Previous month stats for comparison
+            YearMonth previousMonth = YearMonth.now().minusMonths(1);
+            LocalDateTime startOfPrevMonth = previousMonth.atDay(1).atStartOfDay();
+            LocalDateTime endOfPrevMonth = previousMonth.atEndOfMonth().atTime(23, 59, 59);
+
+            // Get current counts with error handling
+            Long pendingRequestsCount = bookRequestRepository.countByOrganizationOrgIdAndStatus(orgId, "PENDING");
+            long pendingRequests = pendingRequestsCount != null ? pendingRequestsCount : 0L;
+
+            long booksReceived = donationRepository.countBooksByOrganizationIdAndStatus(orgId, "RECEIVED");
+
+            long upcomingEvents = 5; // Mock data - would come from an events repository
+
+            Long totalDonationsCount = donationRepository.countByOrganizationId(orgId);
+            long totalDonations = totalDonationsCount != null ? totalDonationsCount : 0L;
+
+            // Get previous month counts for calculating change percentage
+            long prevMonthPendingRequests = 0L;
+            long prevMonthBooksReceived = 0L;
+            long prevMonthTotalDonations = 0L;
+
+            try {
+                Long prevMonthPendingRequestsCount = bookRequestRepository.countByOrganizationOrgIdAndStatusAndDateRequestedBetween(
+                        orgId, "PENDING", startOfPrevMonth, endOfPrevMonth);
+                prevMonthPendingRequests = prevMonthPendingRequestsCount != null ? prevMonthPendingRequestsCount : 0L;
+            } catch (Exception e) {
+                System.err.println("Error fetching previous month pending requests: " + e.getMessage());
+            }
+
+            try {
+                prevMonthBooksReceived = donationRepository.countBooksByOrganizationIdAndStatusAndDateReceivedBetween(
+                        orgId, "RECEIVED", startOfPrevMonth, endOfPrevMonth);
+            } catch (Exception e) {
+                System.err.println("Error fetching previous month books received: " + e.getMessage());
+            }
+
+            try {
+                Long prevMonthTotalDonationsCount = donationRepository.countByOrganizationIdAndDateDonatedBetween(
+                        orgId, startOfPrevMonth, endOfPrevMonth);
+                prevMonthTotalDonations = prevMonthTotalDonationsCount != null ? prevMonthTotalDonationsCount : 0L;
+            } catch (Exception e) {
+                System.err.println("Error fetching previous month total donations: " + e.getMessage());
+            }
+
+            // Calculate percentage changes
+            int pendingRequestsChange = calculatePercentageChange(prevMonthPendingRequests, pendingRequests);
+            int booksReceivedChange = calculatePercentageChange(prevMonthBooksReceived, booksReceived);
+            int totalDonationsChange = calculatePercentageChange(prevMonthTotalDonations, totalDonations);
+
+            // Build the stats DTO
+            DashboardStatsDTO stats = new DashboardStatsDTO();
+            stats.setPendingRequests(pendingRequests);
+            stats.setBooksReceived(booksReceived);
+            stats.setUpcomingEvents(upcomingEvents);
+            stats.setTotalDonations(totalDonations);
+
+            stats.setPendingRequestsChange(pendingRequestsChange);
+            stats.setBooksReceivedChange(booksReceivedChange);
+            stats.setTotalDonationsChange(totalDonationsChange);
+            stats.setUpcomingEventsChange(0); // No change data for events in this example
+
+            return stats;
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Error in getDashboardStats for orgId " + orgId + ": " + e.getMessage());
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch dashboard stats: " + e.getMessage(), e);
         }
-
-        // Current month stats
-        LocalDateTime startOfMonth = YearMonth.now().atDay(1).atStartOfDay();
-        LocalDateTime endOfMonth = YearMonth.now().atEndOfMonth().atTime(23, 59, 59);
-
-        // Previous month stats for comparison
-        YearMonth previousMonth = YearMonth.now().minusMonths(1);
-        LocalDateTime startOfPrevMonth = previousMonth.atDay(1).atStartOfDay();
-        LocalDateTime endOfPrevMonth = previousMonth.atEndOfMonth().atTime(23, 59, 59);
-
-        // Get current counts
-        Long pendingRequestsCount = bookRequestRepository.countByOrganizationOrgIdAndStatus(orgId, "PENDING");
-        long pendingRequests = pendingRequestsCount != null ? pendingRequestsCount : 0L;
-
-        long booksReceived = donationRepository.countBooksByOrganizationIdAndStatus(orgId, "RECEIVED");
-
-        long upcomingEvents = 5; // Mock data - would come from an events repository
-
-        Long totalDonationsCount = donationRepository.countByOrganizationId(orgId);
-        long totalDonations = totalDonationsCount != null ? totalDonationsCount : 0L;
-
-        // Get previous month counts for calculating change percentage
-        Long prevMonthPendingRequestsCount = bookRequestRepository.countByOrganizationOrgIdAndStatusAndDateRequestedBetween(
-                orgId, "PENDING", startOfPrevMonth, endOfPrevMonth);
-        long prevMonthPendingRequests = prevMonthPendingRequestsCount != null ? prevMonthPendingRequestsCount : 0L;
-
-        long prevMonthBooksReceived = donationRepository.countBooksByOrganizationIdAndStatusAndDateReceivedBetween(
-                orgId, "RECEIVED", startOfPrevMonth, endOfPrevMonth);
-
-        Long prevMonthTotalDonationsCount = donationRepository.countByOrganizationIdAndDateDonatedBetween(
-                orgId, startOfPrevMonth, endOfPrevMonth);
-        long prevMonthTotalDonations = prevMonthTotalDonationsCount != null ? prevMonthTotalDonationsCount : 0L;
-
-        // Calculate percentage changes
-        int pendingRequestsChange = calculatePercentageChange(prevMonthPendingRequests, pendingRequests);
-        int booksReceivedChange = calculatePercentageChange(prevMonthBooksReceived, booksReceived);
-        int totalDonationsChange = calculatePercentageChange(prevMonthTotalDonations, totalDonations);
-
-        // Build the stats DTO
-        DashboardStatsDTO stats = new DashboardStatsDTO();
-        stats.setPendingRequests(pendingRequests);
-        stats.setBooksReceived(booksReceived);
-        stats.setUpcomingEvents(upcomingEvents);
-        stats.setTotalDonations(totalDonations);
-
-        stats.setPendingRequestsChange(pendingRequestsChange);
-        stats.setBooksReceivedChange(booksReceivedChange);
-        stats.setTotalDonationsChange(totalDonationsChange);
-        stats.setUpcomingEventsChange(0); // No change data for events in this example
-
-        return stats;
     }
 
     @Override
