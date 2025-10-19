@@ -38,6 +38,8 @@ public class Transaction {
 
     private LocalDateTime updatedAt;
 
+    private String paMethodNew;
+
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
@@ -52,6 +54,10 @@ public class Transaction {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
+
+    @Column(name = "delivery_address",columnDefinition="TEXT")
+    private String deliveryAddress;
+
 
     @PreUpdate
     protected void onUpdate() {

@@ -12,5 +12,7 @@ public interface BooksService {
     String updateBook(Long id, UserBooksDTO userBooksDTO);
     String deleteBook(Long id);
 
+    public String updateTransactionDeliveryAddress(int allUsersId);
+
 
 }
