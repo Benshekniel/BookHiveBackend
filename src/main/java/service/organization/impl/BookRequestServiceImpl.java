@@ -102,14 +102,13 @@ public class BookRequestServiceImpl implements BookRequestService {
         BookRequest request = bookRequestRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book request not found with id: " + id));
 
-        // Check if request can be canceled
+        // Check if request can be deleted
         if (!isRequestCancelable(request.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This request cannot be canceled in its current state");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This request cannot be deleted in its current state");
         }
 
-        // Update status to canceled
-        request.setStatus("CANCELED");
-        bookRequestRepository.save(request);
+        // Actually delete the request from database
+        bookRequestRepository.delete(request);
     }
 
     private boolean isRequestEditable(String status) {
