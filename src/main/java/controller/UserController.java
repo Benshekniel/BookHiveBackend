@@ -15,6 +15,7 @@ import service.FileUpload.UploadService;
 import service.GoogleDriveUpload.FileStorageService;
 import service.Login.LoginService;
 import service.Moderator.CompetitionService;
+import service.Moderator.TrustScoreRegulationService;
 import service.User.BooksService;
 import service.User.UserCompetitionService;
 import model.repo.UsersRepo;
@@ -48,6 +49,8 @@ public class UserController {
     @Autowired
     private CompetitionService competitionService;
 
+    @Autowired
+    private TrustScoreRegulationService regulationService;
 
     //Books APIs
     @PostMapping("/saveBook-User")
