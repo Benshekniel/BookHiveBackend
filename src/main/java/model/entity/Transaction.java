@@ -45,6 +45,8 @@ public class Transaction {
     @Column(name = "updated_at")  // 🔥 Add explicit mapping
     private LocalDateTime updatedAt;
 
+    private String paMethodNew;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
     private PaymentStatus paymentStatus;
@@ -138,6 +140,10 @@ public class Transaction {
             paymentMethod = PaymentMethod.CASH_ON_DELIVERY;
         }
     }
+
+    @Column(name = "delivery_address",columnDefinition="TEXT")
+    private String deliveryAddress;
+
 
     @PreUpdate
     protected void onUpdate() {
