@@ -121,7 +121,7 @@
 //    private BookRequestDTO mapToDTO(BookRequest request) {
 //        BookRequestDTO dto = new BookRequestDTO();
 //        dto.setId(request.getId());
-//        dto.setOrganizationId(request.getOrganization().getId());
+////        dto.setOrganizationId(request.getOrganization().getId());
 //        dto.setTitle(request.getTitle());
 //        dto.setSubject(request.getSubject());
 //        dto.setQuantity(request.getQuantity());

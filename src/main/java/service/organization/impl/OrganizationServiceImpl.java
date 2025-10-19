@@ -56,21 +56,21 @@
 //        Organization organization = findOrganizationById(id);
 //
 //        // Update fields
-//        organization.setOrganizationName(updateDTO.getOrganizationName());
-//        organization.setRegistrationNumber(updateDTO.getRegistrationNumber());
-//        organization.setEmail(updateDTO.getEmail());
-//        organization.setPhone(updateDTO.getPhone());
-//        organization.setAddress(updateDTO.getAddress());
-//        organization.setDescription(updateDTO.getDescription());
-//        organization.setWebsite(updateDTO.getWebsite());
-//        organization.setEstablished(updateDTO.getEstablished());
-//        organization.setStudentCount(updateDTO.getStudentCount());
-//        organization.setContactPerson(updateDTO.getContactPerson());
-//        organization.setContactTitle(updateDTO.getContactTitle());
-//        organization.setOrganizationType(updateDTO.getOrganizationType());
-//        organization.setPublicProfile(updateDTO.getPublicProfile());
-//        organization.setContactPermissions(updateDTO.getContactPermissions());
-//        organization.setActivityVisibility(updateDTO.getActivityVisibility());
+////        organization.setOrganizationName(updateDTO.getOrganizationName());
+////        organization.setRegistrationNumber(updateDTO.getRegistrationNumber());
+////        organization.setEmail(updateDTO.getEmail());
+////        organization.setPhone(updateDTO.getPhone());
+////        organization.setAddress(updateDTO.getAddress());
+////        organization.setDescription(updateDTO.getDescription());
+////        organization.setWebsite(updateDTO.getWebsite());
+////        organization.setEstablished(updateDTO.getEstablished());
+////        organization.setStudentCount(updateDTO.getStudentCount());
+////        organization.setContactPerson(updateDTO.getContactPerson());
+////        organization.setContactTitle(updateDTO.getContactTitle());
+////        organization.setOrganizationType(updateDTO.getOrganizationType());
+////        organization.setPublicProfile(updateDTO.getPublicProfile());
+////        organization.setContactPermissions(updateDTO.getContactPermissions());
+////        organization.setActivityVisibility(updateDTO.getActivityVisibility());
 //
 //        Organization saved = organizationRepository.save(organization);
 //        return mapToProfileDTO(saved);
