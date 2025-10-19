@@ -66,16 +66,14 @@ public class BookStore {
     private String postalCode; //zip
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb",nullable = true)
+    @Column(columnDefinition = "jsonb")
     private Map<String, String> businessHours; // {"monday": "9:00-18:00", "tuesday": "9:00-18:00", ...}
 
-    @Column(nullable = true)
     private BookType booksType; // "NEW_BOOKS, USED_BOOKS, BOTH"
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @Column(nullable = true)
     private String isApproved;    // "PENDING, YES, NO"
 
 //    /** Since AllUsers table user_id has a "_" in the middle we'll get it into a column by itself.

@@ -1,6 +1,5 @@
 package model.repo.BookStore;
 
-import model.entity.AllUsers;
 import model.entity.BookStore;
 
 import org.springframework.data.jpa.repository.JpaRepository;

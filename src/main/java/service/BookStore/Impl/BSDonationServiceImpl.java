@@ -1,6 +1,5 @@
 package service.BookStore.Impl;
 
-import model.dto.BookStore.BSBookDTOs;
 import model.dto.BookStore.BSDonationDTO.DonationDetailsDTO;
 import model.dto.BookStore.BSInventoryDTOs;
 import model.entity.BSInventory;
@@ -34,7 +33,7 @@ public class BSDonationServiceImpl implements BSDonationService {
         return eventList.stream()
                 .map(item -> modelMapper.map(item, DonationDetailsDTO.class))
                 .toList();
-    };
+    }
 
     public List<BSInventoryDTOs.ConciseDonationDTO> getInventoryListByCategory (String category) {
         List<BSInventory> itemList = inventoryRepo.findAllByCategory(category);
@@ -43,6 +42,6 @@ public class BSDonationServiceImpl implements BSDonationService {
         return itemList.stream()
                 .map(item -> modelMapper.map(item, BSInventoryDTOs.ConciseDonationDTO.class))
                 .toList();
-    };
+    }
 
 }

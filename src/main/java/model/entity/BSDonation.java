@@ -7,7 +7,7 @@
 //
 //import java.time.LocalDateTime;
 //
-///** Entity for books donated by BookStore users. */
+//** Entity for books donated by BookStore users. */
 //@Entity
 //@Table(name = "bookstore_donations")
 //@Data @NoArgsConstructor @AllArgsConstructor

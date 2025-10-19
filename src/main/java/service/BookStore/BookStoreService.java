@@ -5,12 +5,12 @@ import model.dto.BookStore.BookStoreDTOs;
 
 public interface BookStoreService {
 
-    public Integer getStoreIdByUserId(Integer userId);
+    Integer getStoreIdByUserId(Integer userId);
 
-    public boolean updateBookStore (Integer userId, BookStoreDTOs.ProfileBookStoreDTO bookStoreDTO);
-    public boolean changePassword (BookStoreDTOs.PassChangeDTO passChangeDTO);
+    boolean updateBookStore (Integer userId, BookStoreDTOs.ProfileBookStoreDTO bookStoreDTO);
+    boolean changePassword (BookStoreDTOs.PassChangeDTO passChangeDTO);
 
-    public BookStoreDTOs.ProfileBookStoreDTO getStoreProfileDetails (Integer userId);
+    BookStoreDTOs.ProfileBookStoreDTO getStoreProfileDetails (Integer userId);
 
     BSStatDTOs.DashboardStatsDTO getBookStoreStats(Integer userId);
 }
