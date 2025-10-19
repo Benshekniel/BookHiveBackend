@@ -1,16 +1,17 @@
 package service.organization.impl;
 
-import model.dto.organization.FeedbackDTO;
 import model.dto.organization.FeedbackCreateDTO;
+import model.dto.organization.FeedbackDTO;
 import model.entity.Donation;
 import model.entity.Feedback;
-import model.entity.Organization;
+import model.repo.OrgRepo;
 import model.repo.organization.DonationRepository;
 import model.repo.organization.FeedbackRepository;
-import model.repo.organization.OrganizationRepository;
 import service.organization.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,66 +21,62 @@ import java.util.stream.Collectors;
 public class FeedbackServiceImpl implements FeedbackService {
 
     private final FeedbackRepository feedbackRepository;
-    private final OrganizationRepository organizationRepository;
     private final DonationRepository donationRepository;
+    private final OrgRepo orgRepo;
 
     @Autowired
     public FeedbackServiceImpl(
             FeedbackRepository feedbackRepository,
-            OrganizationRepository organizationRepository,
-            DonationRepository donationRepository) {
+            DonationRepository donationRepository,
+            OrgRepo orgRepo) {
         this.feedbackRepository = feedbackRepository;
-        this.organizationRepository = organizationRepository;
         this.donationRepository = donationRepository;
+        this.orgRepo = orgRepo;
     }
 
     @Override
-    public FeedbackDTO createFeedback(FeedbackCreateDTO createDTO) {
-        // Find organization
-        Organization organization = organizationRepository.findById(createDTO.getOrganizationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
-
-        // Find donation
-        Donation donation = donationRepository.findById(createDTO.getDonationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Donation not found"));
-
-        // Verify donation belongs to organization
-        if (!donation.getOrganization().getId().equals(organization.getId())) {
-            throw new BadRequestException("Donation does not belong to this organization");
+    public FeedbackDTO createFeedback(FeedbackCreateDTO feedbackCreateDTO) {
+        if (!orgRepo.existsByOrgId(feedbackCreateDTO.getOrganizationId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found");
         }
 
-        // Verify donation status is RECEIVED
+        Donation donation = donationRepository.findById(feedbackCreateDTO.getDonationId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Donation not found"));
+
+        if (!donation.getOrganizationId().equals(feedbackCreateDTO.getOrganizationId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Organization ID mismatch");
+        }
+
+        if (feedbackRepository.existsByDonationId(feedbackCreateDTO.getDonationId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Feedback already exists for this donation");
+        }
+
         if (!"RECEIVED".equals(donation.getStatus())) {
-            throw new BadRequestException("Feedback can only be given for received donations");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Donation must be in RECEIVED state to add feedback");
         }
 
-        // Check if feedback already exists
-        if (feedbackRepository.existsByDonationId(donation.getId())) {
-            throw new BadRequestException("Feedback has already been submitted for this donation");
+        if (feedbackCreateDTO.getRating() < 1 || feedbackCreateDTO.getRating() > 5) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating must be between 1 and 5");
         }
 
-        // Create feedback entity
         Feedback feedback = new Feedback();
-        feedback.setOrganization(organization);
-        feedback.setDonation(donation);
-        feedback.setRating(createDTO.getRating());
-        feedback.setComment(createDTO.getComment());
+        feedback.setOrganizationId(feedbackCreateDTO.getOrganizationId());
+        feedback.setDonationId(feedbackCreateDTO.getDonationId());
+        feedback.setRating(feedbackCreateDTO.getRating());
+        feedback.setComment(feedbackCreateDTO.getComment());
         feedback.setDate(LocalDateTime.now());
 
-        // Save and return mapped DTO
         Feedback saved = feedbackRepository.save(feedback);
         return mapToDTO(saved);
     }
 
     @Override
-    public List<FeedbackDTO> getFeedbackByOrganization(Long organizationId) {
-        // Ensure organization exists
-        if (!organizationRepository.existsById(organizationId)) {
-            throw new ResourceNotFoundException("Organization not found");
+    public List<FeedbackDTO> getFeedbackByOrganization(Long orgId) {
+        if (!orgRepo.existsByOrgId(orgId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found");
         }
 
-        // Get feedback and map to DTOs
-        List<Feedback> feedbackList = feedbackRepository.findByOrganizationIdOrderByDateDesc(organizationId);
+        List<Feedback> feedbackList = feedbackRepository.findByOrganizationIdOrderByDateDesc(orgId);
         return feedbackList.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -88,17 +85,15 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public FeedbackDTO getFeedbackByDonation(Long donationId) {
         Feedback feedback = feedbackRepository.findByDonationId(donationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Feedback not found for this donation"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Feedback not found for donation"));
         return mapToDTO(feedback);
     }
 
     private FeedbackDTO mapToDTO(Feedback feedback) {
         FeedbackDTO dto = new FeedbackDTO();
         dto.setId(feedback.getId());
-        dto.setOrganizationId(feedback.getOrganization().getId());
-        dto.setDonationId(feedback.getDonation().getId());
-        dto.setDonorName(feedback.getDonation().getDonorName());
-        dto.setBookTitle(feedback.getDonation().getBookTitle());
+        dto.setOrganizationId(feedback.getOrganizationId());
+        dto.setDonationId(feedback.getDonationId());
         dto.setRating(feedback.getRating());
         dto.setComment(feedback.getComment());
         dto.setDate(feedback.getDate().toString());

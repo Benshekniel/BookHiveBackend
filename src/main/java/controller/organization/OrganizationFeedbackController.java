@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
-@CrossOrigin(origins = {"http://localhost:9999", "http://localhost:3000"})
 
+@CrossOrigin(origins = {"http://localhost:9999", "http://localhost:3000"})
 @RestController
 @RequestMapping("/api/organization-feedback")
 public class OrganizationFeedbackController {
@@ -30,9 +30,9 @@ public class OrganizationFeedbackController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @GetMapping("/organization/{organizationId}")
-    public ResponseEntity<List<FeedbackDTO>> getFeedbackByOrganization(@PathVariable Long organizationId) {
-        List<FeedbackDTO> feedback = feedbackService.getFeedbackByOrganization(organizationId);
+    @GetMapping("/organization/{orgId}")
+    public ResponseEntity<List<FeedbackDTO>> getFeedbackByOrganization(@PathVariable Long orgId) {
+        List<FeedbackDTO> feedback = feedbackService.getFeedbackByOrganization(orgId);
         return ResponseEntity.ok(feedback);
     }
 

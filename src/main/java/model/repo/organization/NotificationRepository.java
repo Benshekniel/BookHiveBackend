@@ -12,10 +12,10 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findByOrganizationIdOrderByTimestampDesc(Long organizationId);
+    List<Notification> findByOrganizationOrgIdOrderByTimestampDesc(Long organizationId);
 
     @Modifying
     @Transactional
-    @Query("UPDATE Notification n SET n.read = true WHERE n.organization.id = :organizationId AND n.read = false")
+    @Query("UPDATE Notification n SET n.read = true WHERE n.organization.orgId = :organizationId AND n.read = false")
     void markAllAsReadForOrganization(@Param("organizationId") Long organizationId);
 }

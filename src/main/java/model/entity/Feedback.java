@@ -1,5 +1,4 @@
 package model.entity;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,23 +15,27 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
+
+
 @Data
 @NoArgsConstructor
 @Entity
 @Table(name = "feedback")
 public class Feedback {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", nullable = false)
-    private Organization organization;
+    //    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "organization_id", nullable = false)
+    @Column(nullable = true)
+    private Long organizationId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "donation_id", nullable = false, unique = true)
-    private Donation donation;
+    //    @OneToOne(fetch = FetchType.LAZY)
+    //    @JoinColumn(name = "donation_id", nullable = false, unique = true)
+    @Column(nullable = true)
+    private Long donationId;
 
     @Column(nullable = false)
     private Integer rating; // 1-5 stars
@@ -43,3 +46,30 @@ public class Feedback {
     @Column(nullable = false)
     private LocalDateTime date;
 }
+//@Data
+//@NoArgsConstructor
+//@Entity
+//@Table(name = "feedback")
+//public class Feedback {
+//
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long id;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "organization_id", nullable = false)
+//    private Organization organization;
+//
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "donation_id", nullable = false, unique = true)
+//    private Donation donation;
+//
+//    @Column(nullable = false)
+//    private Integer rating; // 1-5 stars
+//
+//    @Column(columnDefinition = "TEXT")
+//    private String comment;
+//
+//    @Column(nullable = false)
+//    private LocalDateTime date;
+//}

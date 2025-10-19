@@ -8,59 +8,43 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DonationRepository extends JpaRepository<Donation, Long> {
+
+    // Find donations by organization ID, sorted by dateDonated descending
     List<Donation> findByOrganizationIdOrderByDateDonatedDesc(Long organizationId);
 
-    List<Donation> findByOrganizationIdAndStatusAndFeedbackIsNull(Long organizationId, String status);
+    // Find donations by organization ID and status with no feedback
+    @Query("SELECT d FROM Donation d WHERE d.organizationId = :organizationId AND d.status = :status AND NOT EXISTS (SELECT f FROM Feedback f WHERE f.donationId = d.id)")
+    List<Donation> findByOrganizationIdAndStatusAndNoFeedback(@Param("organizationId") Long organizationId, @Param("status") String status);
 
+    // Count donations by organization ID
     Long countByOrganizationId(Long organizationId);
 
+    // Count donations by organization ID and status
     Long countByOrganizationIdAndStatus(Long organizationId, String status);
 
-    @Query(value = "SELECT COALESCE(SUM(d.quantity), 0) FROM donations d WHERE d.organization_id = :organizationId AND d.status = :status", nativeQuery = true)
-    long countBooksByOrganizationIdAndStatus(@Param("organizationId") Long organizationId, @Param("status") String status);
+    // Sum the quantity of donations by organization ID and status
+    @Query("SELECT COALESCE(SUM(d.quantity), 0) FROM Donation d WHERE d.organizationId = :organizationId AND d.status = :status")
+    Long countBooksByOrganizationIdAndStatus(@Param("organizationId") Long organizationId, @Param("status") String status);
 
-    @Query(value = "SELECT COALESCE(SUM(d.quantity), 0) FROM donations d WHERE d.organization_id = :organizationId AND d.status = :status AND d.date_received BETWEEN :start AND :end", nativeQuery = true)
-    long countBooksByOrganizationIdAndStatusAndDateReceivedBetween(
+    // Sum the quantity of donations by organization ID, status, and dateReceived range
+    @Query("SELECT COALESCE(SUM(d.quantity), 0) FROM Donation d WHERE d.organizationId = :organizationId AND d.status = :status AND d.dateReceived BETWEEN :start AND :end")
+    Long countBooksByOrganizationIdAndStatusAndDateReceivedBetween(
             @Param("organizationId") Long organizationId,
             @Param("status") String status,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
 
-    @Query(value = "SELECT COALESCE(COUNT(d.id), 0) FROM donations d WHERE d.organization_id = :organizationId AND d.date_donated BETWEEN :start AND :end", nativeQuery = true)
-    long countByOrganizationIdAndDateDonatedBetween(
+    // Count donations by organization ID and dateDonated range
+    @Query("SELECT COALESCE(COUNT(d), 0) FROM Donation d WHERE d.organizationId = :organizationId AND d.dateDonated BETWEEN :start AND :end")
+    Long countByOrganizationIdAndDateDonatedBetween(
             @Param("organizationId") Long organizationId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
+
+    // Added for FeedbackServiceImpl
+    Optional<Donation> findById(Long id);
 }
-//@Repository
-//public interface DonationRepository extends JpaRepository<Donation, Long> {
-//    List<Donation> findByOrganizationIdOrderByDateDonatedDesc(Long organizationId);
-//
-//    List<Donation> findByOrganizationIdAndStatusAndFeedbackIsNull(Long organizationId, String status);
-//
-//    Long countByOrganizationId(Long organizationId);
-//
-//    Long countByOrganizationIdAndStatus(Long organizationId, String status);
-//
-//    @Query("SELECT SUM(d.quantity) FROM Donation d WHERE d.organization.id = :organizationId AND d.status = :status")
-//    Long countBooksByOrganizationIdAndStatus(@Param("organizationId") Long organizationId, @Param("status") String status);
-//
-//    @Query("SELECT SUM(d.quantity) FROM Donation d WHERE d.organization.id = :organizationId AND d.status = :status AND d.dateReceived BETWEEN :start AND :end")
-//    Long countBooksByOrganizationIdAndStatusAndDateReceivedBetween(
-//            @Param("organizationId") Long organizationId,
-//            @Param("status") String status,
-//            @Param("start") LocalDateTime start,
-//            @Param("end") LocalDateTime end);
-//
-//    Long countByOrganizationIdAndDateDonatedBetween(
-//            Long organizationId, LocalDateTime start, LocalDateTime end);
-//}

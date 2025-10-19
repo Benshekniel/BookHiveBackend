@@ -8,6 +8,8 @@ import model.repo.organization.OrganizationRepository;
 import service.organization.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,14 +30,14 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public List<NotificationDTO> getNotificationsByOrganization(Long organizationId) {
+    public List<NotificationDTO> getNotificationsByOrganization(Long orgId) {
         // Ensure organization exists
-        if (!organizationRepository.existsById(organizationId)) {
-            throw new ResourceNotFoundException("Organization not found");
+        if (!organizationRepository.existsById(orgId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found with id: " + orgId);
         }
 
         // Get notifications and map to DTOs
-        List<Notification> notifications = notificationRepository.findByOrganizationIdOrderByTimestampDesc(organizationId);
+        List<Notification> notifications = notificationRepository.findByOrganizationOrgIdOrderByTimestampDesc(orgId);
         return notifications.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -44,7 +46,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public NotificationDTO markAsRead(Long id) {
         Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found with id: " + id));
 
         notification.setRead(true);
         Notification updated = notificationRepository.save(notification);
@@ -52,19 +54,19 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void markAllAsRead(Long organizationId) {
+    public void markAllAsRead(Long orgId) {
         // Ensure organization exists
-        Organization organization = organizationRepository.findById(organizationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
+        Organization organization = organizationRepository.findById(orgId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found with id: " + orgId));
 
         // Mark all as read
-        notificationRepository.markAllAsReadForOrganization(organizationId);
+        notificationRepository.markAllAsReadForOrganization(orgId);
     }
 
     @Override
     public void deleteNotification(Long id) {
         if (!notificationRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Notification not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found with id: " + id);
         }
         notificationRepository.deleteById(id);
     }
@@ -72,7 +74,7 @@ public class NotificationServiceImpl implements NotificationService {
     private NotificationDTO mapToDTO(Notification notification) {
         NotificationDTO dto = new NotificationDTO();
         dto.setId(notification.getId());
-        dto.setOrganizationId(notification.getOrganization().getId());
+        dto.setOrganizationId(notification.getOrganization().getOrgId());
         dto.setTitle(notification.getTitle());
         dto.setMessage(notification.getMessage());
         dto.setType(notification.getType());
