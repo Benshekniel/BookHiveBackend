@@ -18,6 +18,8 @@ public class BSInventoryDTOs {
         private List<String> genres;
         private List<String> tags;
 
+        private String category;
+
         private String description;
         private String terms;
 
@@ -70,6 +72,8 @@ public class BSInventoryDTOs {
         private List<String> genres;
         private List<String> tags;
 
+        private String category;
+
         private String coverImage;
 
         private String description;
@@ -111,6 +115,8 @@ public class BSInventoryDTOs {
         private List<String> authors;
         private List<String> genres;
         private List<String> tags;
+
+        private String category;
 
         private String coverImage;
 
@@ -177,6 +183,8 @@ public class BSInventoryDTOs {
         private List<String> authors;
         private List<String> genres;
         private List<String> tags;
+
+        private String category;
 
         private Integer seriesInstallment;
         private String seriesName;
