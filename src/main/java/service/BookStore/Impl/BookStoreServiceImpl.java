@@ -21,20 +21,20 @@ public class BookStoreServiceImpl implements BookStoreService {
     private static final ModelMapper modelMapper = new ModelMapper();
 
     public Integer getStoreIdByUserId(Integer userId) {
-        AllUsers bsUser = new AllUsers();
-        bsUser.setUser_id(userId);
+//        AllUsers bsUser = new AllUsers();
+//        bsUser.setUser_id(userId);
 
-        BookStore bookStore = bookStoreRepo.findByAllUser(bsUser);
+        BookStore bookStore = bookStoreRepo.findByAllUserNew(userId);
         return bookStore.getStoreId();
     }
 
     public boolean registerBookStore (BookStoreDTOs.RegisterBookStoreDTO bookStoreDTO) {
-        BookStore bookStore = modelMapper.map(bookStoreDTO, BookStore.class);
-        AllUsers user = new AllUsers();
-        user.setUser_id(bookStoreDTO.getUserId());
-        bookStore.setAllUser(user);
-
-        bookStoreRepo.save(bookStore);
+//        BookStore bookStore = modelMapper.map(bookStoreDTO, BookStore.class);
+//        AllUsers user = new AllUsers();
+//        user.setUser_id(bookStoreDTO.getUserId());
+//        bookStore.setAllUser(user);
+//
+//        bookStoreRepo.save(bookStore);
         return true;
     }
 
