@@ -3,6 +3,7 @@ package controller;
 import model.dto.*;
 //import model.dto.BooksDTO;
 import model.entity.CompetitionSubmissions;
+import model.entity.Users;
 import model.messageResponse.LoginResponse;
 import model.entity.Competitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +17,13 @@ import service.Login.LoginService;
 import service.Moderator.CompetitionService;
 import service.User.BooksService;
 import service.User.UserCompetitionService;
+import model.repo.UsersRepo;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:9999") // Allow Vite's port
@@ -33,6 +36,9 @@ public class UserController {
 
     @Autowired
     private UploadService uploadService;
+
+    @Autowired
+    private UsersRepo usersRepo;
 
     @Autowired
     private FileStorageService fileStorageService;
@@ -197,5 +203,16 @@ public class UserController {
                     .body("Error fetching competitions: " + e.getMessage());
         }
     }
+
+//    @GetMapping("/getLoginedUser")
+//    public ResponseEntity<Users> getLoginedUser(@RequestParam String email) {
+//        Optional<Users> user = usersRepo.findByEmail(email);
+//        if (user.isPresent()) {
+//            Users userData = user.get();
+//            userData.setPassword(null); // Exclude password from response
+//            return ResponseEntity.ok(userData);
+//        }
+//        return ResponseEntity.notFound().build();
+//    }
 
 }
