@@ -3,6 +3,7 @@ package service.Moderator.impl;
 import jakarta.transaction.Transactional;
 import model.dto.AllUsersDTO;
 import model.entity.AllUsers;
+import model.entity.BookStore;
 import model.entity.Donation;
 import model.repo.AllUsersRepo;
 import model.repo.ModeratorRepo;
@@ -160,5 +161,40 @@ public class ModeratorImpl implements ModeratorService {
         return moderatorRepo.findAllRejectedDonations();
     }
 
+    @Override
+    public List<BookStore> getPendingOrUnapprovedBookStores() {
+        return moderatorRepo.findPendingOrUnapprovedBookStores();
+    }
+
+    @Override
+    public List<BookStore> getRejectedBookStores() {
+        return moderatorRepo.findRejectedBookStores();
+    }
+
+    @Override
+    public List<BookStore> getApprovedBookStores() {
+        return moderatorRepo.findApprovedBookStores();
+    }
+
+    @Override
+    public String rejectBookStore(Integer userId) {
+        int rowsAffected = moderatorRepo.rejectBookStoreByUserId(userId);
+        moderatorRepo.rejectBookStoreById(userId);
+        return rowsAffected > 0 ? "success" : "No BookStore found for user_id: " + userId;
+    }
+
+    @Override
+    public String approveBookStore(Integer userId) {
+        int rowsAffected = moderatorRepo.approveBookStoreByUserId(userId);
+        moderatorRepo.activeBookStoreById(userId);
+        return rowsAffected > 0 ? "success" : "No BookStore found for user_id: " + userId;
+    }
+
+    @Override
+    public String banBookStore(Integer userId) {
+        int rowsAffected = moderatorRepo.banBookStoreByUserId(userId);
+        moderatorRepo.banBookStoreById(userId);
+        return rowsAffected > 0 ? "success" : "No BookStore found for user_id: " + userId;
+    }
 
 }

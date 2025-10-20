@@ -2,7 +2,9 @@ package controller.Admin;
 
 import model.dto.ModeratorDto;
 import model.entity.Moderator;
+import model.entity.Organization;
 import service.Admin.AdminModeratorService;
+import service.Admin.OrganizationFetching.OrgAdminService;
 import util.MessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,9 @@ public class AdminModeratorController {
 
     @Autowired
     private AdminModeratorService moderatorService;
+
+    @Autowired
+    private OrgAdminService organizationAdminService;
 
     // ==================== CREATE OPERATIONS ====================
 
@@ -270,5 +275,47 @@ public class AdminModeratorController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(MessageResponse.error("Internal server error: " + e.getMessage()));
         }
+    }
+//================================organization======================================
+
+    @GetMapping("/activeOrgs")
+    public ResponseEntity<List<Organization>> getActiveOrganizations() {
+        return ResponseEntity.ok(organizationAdminService.getActiveOrganizations());
+    }
+
+    @GetMapping("/bannedOrgs")
+    public ResponseEntity<List<Organization>> getBannedOrganizations() {
+        return ResponseEntity.ok(organizationAdminService.getBannedOrganizations());
+    }
+
+    @GetMapping("/pendingOrgs")
+    public ResponseEntity<List<Organization>> getPendingOrganizations() {
+        return ResponseEntity.ok(organizationAdminService.getPendingOrganizations());
+    }
+
+    @GetMapping("/rejectedOrgs")
+    public ResponseEntity<List<Organization>> getRejectedOrganizations() {
+        return ResponseEntity.ok(organizationAdminService.getRejectedOrganizations());
+    }
+
+    // ✅ Activate organization
+    @PutMapping("/applyActivateOrgs/{userId}")
+    public ResponseEntity<String> activateOrganization(@PathVariable Integer userId) {
+        String message = organizationAdminService.activateOrganization(userId);
+        return ResponseEntity.ok(message);
+    }
+
+    // ✅ Ban organization
+    @PutMapping("/applyBanOrgs/{userId}")
+    public ResponseEntity<String> banOrganization(@PathVariable Integer userId) {
+        String message = organizationAdminService.banOrganization(userId);
+        return ResponseEntity.ok(message);
+    }
+
+    // ✅ Reject organization
+    @PutMapping("/applyRejectOrgs/{userId}")
+    public ResponseEntity<String> rejectOrganization(@PathVariable Integer userId) {
+        String message = organizationAdminService.rejectOrganization(userId);
+        return ResponseEntity.ok(message);
     }
 }
