@@ -2,25 +2,39 @@ package controller;
 
 import model.dto.*;
 //import model.dto.BooksDTO;
+import model.dto.Bidding.UserBidDTO;
+import model.dto.Bidding.UserBorrowRequestDTO;
+import model.entity.Bid.Bid_History;
+import model.entity.Bid.SellorMode;
+import model.entity.Bid.UserBorrowRequest;
+import model.entity.Bid.User_Bid;
 import model.entity.CompetitionSubmissions;
+import model.entity.Transaction;
+import model.entity.Users;
 import model.messageResponse.LoginResponse;
 import model.entity.Competitions;
+import model.repo.Delivery.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import service.Delivery.impl.TransactionService;
 import service.FileUpload.UploadService;
 import service.GoogleDriveUpload.FileStorageService;
 import service.Login.LoginService;
 import service.Moderator.CompetitionService;
+import service.Moderator.TrustScoreRegulationService;
 import service.User.BooksService;
+import service.User.BorrowService;
 import service.User.UserCompetitionService;
+import model.repo.UsersRepo;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:9999") // Allow Vite's port
@@ -35,6 +49,9 @@ public class UserController {
     private UploadService uploadService;
 
     @Autowired
+    private UsersRepo usersRepo;
+
+    @Autowired
     private FileStorageService fileStorageService;
 
     @Autowired
@@ -42,6 +59,14 @@ public class UserController {
     @Autowired
     private CompetitionService competitionService;
 
+    @Autowired
+    private TrustScoreRegulationService regulationService;
+
+    @Autowired
+    private TransactionRepository transactionService;
+
+    @Autowired
+    private BorrowService borrowRequestService;
 
     //Books APIs
     @PostMapping("/saveBook-User")
@@ -196,6 +221,246 @@ public class UserController {
             return ResponseEntity.internalServerError()
                     .body("Error fetching competitions: " + e.getMessage());
         }
+    }
+
+//    @GetMapping("/getLoginedUser")
+//    public ResponseEntity<Users> getLoginedUser(@RequestParam String email) {
+//        Optional<Users> user = usersRepo.findByEmail(email);
+//        if (user.isPresent()) {
+//            Users userData = user.get();
+//            userData.setPassword(null); // Exclude password from response
+//            return ResponseEntity.ok(userData);
+//        }
+//        return ResponseEntity.notFound().build();
+//    }
+
+
+    @GetMapping("/getLoginUser")
+    public ResponseEntity<?> getLoginedUser(@RequestParam String email) {
+        Optional<Users> user = usersRepo.loginedUser(email);
+
+        if (user.isPresent()) {
+            Users userData = user.get();
+            userData.setPassword(null); // hide password for security
+            return ResponseEntity.ok(userData);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "User not found for email: " + email));
+        }
+    }
+
+
+//    @PutMapping("/{transactionId}/payment")
+//    public ResponseEntity<String> updatePayment(
+//            @PathVariable Long transactionId,
+//            @RequestBody NewTransactionDTO updateDTO) {
+//        int updated = usersRepo.updatePayment(
+//                transactionId,
+//                updateDTO.getUserId(),
+//                updateDTO.getBookId(),
+//                updateDTO.getPaymentAmount(),
+//                updateDTO.getPaMethodNew(),
+//                updateDTO.getPaymentStatus()
+//        );
+//        if (updated > 0) {
+//            return ResponseEntity.ok("Payment updated successfully");
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+
+    @PostMapping("/userTranscation")
+    public ResponseEntity<Transaction> createTransaction(@RequestBody NewTransactionDTO dto) {
+
+        Transaction transaction = new Transaction();
+        transaction.setType(Transaction.TransactionType.SALE);
+        transaction.setStatus(dto.getStatus());
+        transaction.setPaymentAmount(dto.getPaymentAmount());
+        transaction.setBookId(dto.getBookId());
+        transaction.setUserId(dto.getUserId());
+        transaction.setPaMethodNew(dto.getPaMethodNew());
+
+        // Get address from Users table before saving
+        Optional<String> addressOpt = usersRepo.findAddressByAllUsersId(dto.getUserId().intValue());
+        addressOpt.ifPresent(transaction::setDeliveryAddress);
+
+        // Payment logic
+        String paymentMethod = dto.getPaMethodNew();
+        if ("card".equalsIgnoreCase(paymentMethod)) {
+            transaction.setPaymentStatus(Transaction.PaymentStatus.COMPLETED);
+        } else if ("cash".equalsIgnoreCase(paymentMethod)) {
+            transaction.setPaymentStatus(Transaction.PaymentStatus.PENDING);
+        } else {
+            transaction.setPaymentStatus(dto.getPaymentStatus());
+        }
+
+        // Save new transaction (with address)
+        Transaction savedTransaction = transactionService.save(transaction);
+
+        return ResponseEntity.ok(savedTransaction);
+    }
+
+
+
+    // Simple test endpoint
+    @GetMapping("/updateAddress/{userId}")
+    public ResponseEntity<String> testUpdateAddress(@PathVariable int userId) {
+        try {
+            String result = booksService.updateTransactionDeliveryAddress(userId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/bids/place")
+    public String placeBid(@RequestBody UserBidDTO userBidDTO) {
+        return booksService.placeUserBid(userBidDTO);
+    }
+
+    // ✅ Fetch all bids for a specific book by its ID
+    @GetMapping("/bidFetch/{bookId}")
+    public ResponseEntity<List<User_Bid>> getBidsByBookId(@PathVariable Long bookId) {
+        List<User_Bid> bids = booksService.getBidsByBookId(bookId);
+        return ResponseEntity.ok(bids);
+    }
+
+    // ✅ GET: Fetch all bid history for a given bookId
+    @GetMapping("/bidHistoryFetch/{bookId}")
+    public ResponseEntity<List<Bid_History>> getBidHistoryByBookId(@PathVariable Long bookId) {
+        List<Bid_History> bidHistoryList = booksService.getBidHistoryByBookId(bookId);
+
+        if (bidHistoryList.isEmpty()) {
+            return ResponseEntity.status(404).body(null);
+        }
+
+        return ResponseEntity.ok(bidHistoryList);
+    }
+
+    // ✅ Update winner name by bidId
+    @PutMapping("/bidHistoryApplywinner")
+    public ResponseEntity<String> updateBidWinner(
+            @RequestParam Long bidId,
+            @RequestParam String winnerName
+    ) {
+        boolean success = booksService.updateBidWinner(bidId, winnerName);
+
+        if (success) {
+            return ResponseEntity.ok("✅ Bid winner updated successfully");
+        } else {
+            return ResponseEntity.status(404).body("❌ Bid ID not found");
+        }
+    }
+
+    // Set seller mode for a user
+    @PostMapping("/setSellorStatus/{userId}")
+    public SellorMode setSellor(@RequestBody SellorMode sellorMode) {
+        return booksService.setSellorMode(sellorMode);
+    }
+
+    // Get seller mode for a user
+    @PostMapping("/getSellorStatus/{userId}")
+    public SellorMode getSellor(@PathVariable int userId) {
+        return booksService.getSellorMode(userId);
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Create a borrow request (client sends minimal DTO)
+    @PostMapping("/createBorrow")
+    public ResponseEntity<UserBorrowRequestDTO> create(@RequestBody UserBorrowRequestDTO dto) {
+        UserBorrowRequestDTO saved = borrowRequestService.createBorrowRequest(dto);
+        return ResponseEntity.ok(saved);
+    }
+
+    // Get one by id
+    @GetMapping("/requestsBorrow/{id}")
+    public ResponseEntity<UserBorrowRequestDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(borrowRequestService.getById(id));
+    }
+
+    // Requestor's requests
+    @GetMapping("/requestsBorrow/by-user/{userId}")
+    public ResponseEntity<List<UserBorrowRequestDTO>> getByRequestor(@PathVariable int userId) {
+        return ResponseEntity.ok(borrowRequestService.getByRequestor(userId));
+    }
+
+    // Owner's incoming requests
+    @GetMapping("/requestsBorrow/by-owner/{ownerId}")
+    public ResponseEntity<List<UserBorrowRequestDTO>> getByOwner(@PathVariable int ownerId) {
+        return ResponseEntity.ok(borrowRequestService.getByOwner(ownerId));
+    }
+
+    // Update status: APPROVED / REJECTED / COMPLETED / CANCELLED
+    @PutMapping("/requestsBorrow/{id}/status")
+    public ResponseEntity<UserBorrowRequestDTO> updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status
+    ) {
+        return ResponseEntity.ok(borrowRequestService.updateStatus(id, status));
+    }
+
+
+    // Quick boolean: any status
+    @GetMapping("/existsBorrow/{userId}/{bookId}")
+    public ResponseEntity<Boolean> existsAny(@PathVariable int userId, @PathVariable Long bookId) {
+        boolean exists = borrowRequestService.existsBorrowRequest(userId, bookId);
+        return ResponseEntity.ok(exists);
+        // Or JSON: return ResponseEntity.ok(Map.of("exists", exists));
+    }
+
+    // Optional: only active statuses
+    @GetMapping("/existsBorrowActive/{userId}/{bookId}")
+    public ResponseEntity<Boolean> existsActive(@PathVariable int userId, @PathVariable Long bookId) {
+        boolean exists = borrowRequestService.existsActiveBorrowRequest(userId, bookId);
+        return ResponseEntity.ok(exists);
+        // Or JSON: return ResponseEntity.ok(Map.of("exists", exists));
+    }
+
+    // Requester side: fetch entries created by this user
+    // Requester side: fetch entries created by this user
+    @GetMapping("/borrowUser/{userId}")
+    public ResponseEntity<List<UserBorrowRequest>> getRequestsByUserEntity(@PathVariable int userId) {
+        return ResponseEntity.ok(borrowRequestService.getRequestsByUserEntity(userId));
+    }
+
+    // Seller/Owner side: fetch entries where this user is the owner
+    @GetMapping("/borrowOwner/{ownerId}")
+    public ResponseEntity<List<UserBorrowRequest>> getRequestsByOwnerEntity(@PathVariable int ownerId) {
+        return ResponseEntity.ok(borrowRequestService.getRequestsByOwnerEntity(ownerId));
+    }
+
+    /// ///////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////
+
+    @PutMapping("/approveBorrowRequest/{bookId}/{requestId}")
+    public ResponseEntity<UserBorrowRequest> approve(
+            @PathVariable Long bookId,
+            @PathVariable Long requestId,
+            @RequestParam(name = "autoRejectOthers", defaultValue = "true") boolean autoRejectOthers
+    ) {
+        return ResponseEntity.ok(borrowRequestService.approve(requestId, bookId, autoRejectOthers));
+    }
+
+    // Reject specific (single)
+    @PutMapping("/rejectBorrowRequest/{bookId}/{requestId}")
+    public ResponseEntity<UserBorrowRequest> reject(
+            @PathVariable Long bookId,
+            @PathVariable Long requestId
+    ) {
+        return ResponseEntity.ok(borrowRequestService.reject(requestId, bookId));
+    }
+
+    // Delete specific
+    @DeleteMapping("/deleteBorrowRequest/{bookId}/{requestId}")
+    public ResponseEntity<Void> delete(
+            @PathVariable Long bookId,
+            @PathVariable Long requestId
+    ) {
+        borrowRequestService.delete(requestId, bookId);
+        return ResponseEntity.noContent().build();
     }
 
 }

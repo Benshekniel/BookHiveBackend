@@ -76,9 +76,12 @@ public class Donation {
     @Column(nullable = true)
     private String rejectedReason;
 
-
     @Column(nullable = true)
     private String orgName;
+
+    // 🔹 Link to book request (if this donation came from a book request)
+    @Column(name = "book_request_id", nullable = true)
+    private Long bookRequestId;
 }
 
 //package model.entity;

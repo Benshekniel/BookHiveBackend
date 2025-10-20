@@ -168,14 +168,6 @@ public class AdminModeratorService {
 
     // Update moderator details
     public Moderator updateModerator(Long id, ModeratorDto moderatorDto) {
-        // Validate DTO
-        if (!moderatorDto.isValidForUpdate()) {
-            throw new RuntimeException("Invalid moderator data for update");
-        }
-
-        // Trim string fields
-        moderatorDto.trimStringFields();
-
         // Find existing moderator
         Optional<Moderator> optionalModerator = moderatorRepository.findById(id);
         if (optionalModerator.isEmpty()) {
@@ -192,28 +184,28 @@ public class AdminModeratorService {
         }
 
         // Update fields if provided
-        if (moderatorDto.getName() != null) {
+        if (moderatorDto.getName() != null && !moderatorDto.getName().trim().isEmpty()) {
             moderator.setName(moderatorDto.getName());
         }
-        if (moderatorDto.getEmail() != null) {
+        if (moderatorDto.getEmail() != null && !moderatorDto.getEmail().trim().isEmpty()) {
             moderator.setEmail(moderatorDto.getEmail());
         }
-        if (moderatorDto.getPassword() != null && !moderatorDto.getPassword().trim().isEmpty()) {
+        if (moderatorDto.getPassword() != null && !moderatorDto.getPassword().isEmpty()) {
             moderator.setPassword(passwordEncoder.encode(moderatorDto.getPassword()));
         }
-        if (moderatorDto.getPhone() > 0) {
+        if (moderatorDto.getPhone() != 0) {
             moderator.setPhone(moderatorDto.getPhone());
         }
         if (moderatorDto.getDob() != null) {
             moderator.setDob(moderatorDto.getDob());
         }
-        if (moderatorDto.getCity() != null) {
+        if (moderatorDto.getCity() != null && !moderatorDto.getCity().trim().isEmpty()) {
             moderator.setCity(moderatorDto.getCity());
         }
-        if (moderatorDto.getExperience() >= 0) {
+        if (moderatorDto.getExperience() != 0) {
             moderator.setExperience(moderatorDto.getExperience());
         }
-        if (moderatorDto.getAddress() != null) {
+        if (moderatorDto.getAddress() != null && !moderatorDto.getAddress().trim().isEmpty()) {
             moderator.setAddress(moderatorDto.getAddress());
         }
 

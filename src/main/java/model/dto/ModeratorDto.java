@@ -120,7 +120,7 @@ public class ModeratorDto {
     public boolean isValidForCreation() {
         return name != null && !name.trim().isEmpty() &&
                 email != null && !email.trim().isEmpty() &&
-                password != null && !password.trim().isEmpty() && password.length() >= 6 &&
+                password != null && !password.trim().isEmpty() &&
                 phone > 0 &&
                 dob != null &&
                 city != null && !city.trim().isEmpty() &&
@@ -129,32 +129,12 @@ public class ModeratorDto {
     }
 
     public boolean isValidForUpdate() {
-        // For updates, allow null values (partial updates)
-        // But validate non-null values
-        boolean nameValid = (name == null || (!name.trim().isEmpty() && name.length() <= 100));
-        boolean emailValid = (email == null || (!email.trim().isEmpty() && isValidEmail(email)));
-        boolean passwordValid = (password == null || (!password.trim().isEmpty() && password.length() >= 6));
-        boolean phoneValid = (phone == 0 || phone > 0); // Allow 0 as "not updating" indicator
-        boolean cityValid = (city == null || (!city.trim().isEmpty() && city.length() <= 100));
-        boolean addressValid = (address == null || (!address.trim().isEmpty() && address.length() <= 255));
-        boolean experienceValid = (experience >= 0); // Allow 0 or positive values
-
-        return nameValid && emailValid && passwordValid && phoneValid &&
-                cityValid && addressValid && experienceValid;
-    }
-
-    // Helper method to validate email format
-    private boolean isValidEmail(String email) {
-        if (email == null) return false;
-        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-        return email.matches(emailRegex);
-    }
-
-    // Helper method to check if any update field is provided
-    public boolean hasUpdateData() {
-        return name != null || email != null || password != null ||
-                phone != 0 || dob != null || city != null ||
-                experience >= 0 || address != null;
+        // For updates, we allow partial data
+        return (name == null || !name.trim().isEmpty()) &&
+                (email == null || !email.trim().isEmpty()) &&
+                (city == null || !city.trim().isEmpty()) &&
+                (address == null || !address.trim().isEmpty()) &&
+                experience >= 0;
     }
 
     // Helper method to trim all string fields
@@ -164,9 +144,6 @@ public class ModeratorDto {
         }
         if (email != null) {
             email = email.trim();
-        }
-        if (password != null) {
-            password = password.trim();
         }
         if (city != null) {
             city = city.trim();

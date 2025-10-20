@@ -5,6 +5,7 @@ import model.entity.BSInventory;
 import model.dto.BookStore.BSInventoryDTOs;
 import model.entity.BookStore;
 import model.repo.BookStore.BSInventoryRepo;
+import model.repo.BookStore.BookStoreRepo;
 import service.BookStore.BSInventoryService;
 
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ import org.modelmapper.ModelMapper;
 public class BSInventoryServiceImpl implements BSInventoryService {
     
     private final BSInventoryRepo inventoryRepo;
+    private final BookStoreRepo storeRepo;
+
     private static final ModelMapper modelMapper = new ModelMapper();
     
     public boolean createInventory (BSInventoryDTOs.RegisterDTO registerDTO, Integer storeId) {
@@ -49,7 +52,7 @@ public class BSInventoryServiceImpl implements BSInventoryService {
     }
 
     public List<BSInventoryDTOs.ConciseRegularDTO> getRegularInventory(Integer storeId) {
-        List<BSInventory> bookList = inventoryRepo.findByBookStore_StoreIdAndIsForDonationFalse (storeId);
+        List<BSInventory> bookList = inventoryRepo.findAllByBookStore_StoreIdAndIsForDonationFalse(storeId);
         if (bookList.isEmpty())
             return Collections.emptyList();
         return bookList.stream()
@@ -57,7 +60,7 @@ public class BSInventoryServiceImpl implements BSInventoryService {
                 .toList();
     }
     public List<BSInventoryDTOs.ConciseDonationDTO> getDonationInventory(Integer storeId) {
-        List<BSInventory> bookList = inventoryRepo.findByBookStore_StoreIdAndIsForDonationTrue (storeId);
+        List<BSInventory> bookList = inventoryRepo.findAllByBookStore_StoreIdAndIsForDonationTrue(storeId);
         if (bookList.isEmpty())
             return Collections.emptyList();
         return bookList.stream()
@@ -111,10 +114,29 @@ public class BSInventoryServiceImpl implements BSInventoryService {
     }
 
     public BSStatDTOs.RegularInventoryDTO getRegularInventoryStats(Integer storeId) {
-        return null;
+        BSStatDTOs.RegularInventoryDTO statDTO = new BSStatDTOs.RegularInventoryDTO();
+
+        statDTO.setTotalBooks(inventoryRepo.getTotalRegularStockByStoreId(storeId));
+        statDTO.setTotalSellable(inventoryRepo.getSellableRegularStockByStoreId(storeId));
+        statDTO.setLowStockAlerts(inventoryRepo.countByBookStore_StoreIdAndIsForDonationFalseAndStockCountLessThan(storeId, 5));
+        statDTO.setNewBooks(inventoryRepo.getTotalNewRegularStockByStoreId(storeId));
+
+        statDTO.setLowStockTitles(inventoryRepo.findTop3ByBookStore_StoreIdAndIsForDonationFalseOrderByStockCountAsc(storeId)
+                .stream().map(BSInventory::getTitle).toList());
+        statDTO.setTopTitles(inventoryRepo.findTop3ByBookStore_StoreIdAndIsForDonationFalseOrderByStockCountDesc(storeId)
+                .stream().map(BSInventory::getTitle).toList());
+
+        return statDTO;
     }
+
     public BSStatDTOs.DonationInventoryDTO getDonationInventoryStats(Integer storeId) {
-        return null;
+        BSStatDTOs.DonationInventoryDTO statDTO = new BSStatDTOs.DonationInventoryDTO();
+
+        statDTO.setTotalDonationInventory(inventoryRepo.getTotalDonationStockByStoreId(storeId));
+        statDTO.setDonatedCount(storeRepo.getDonatedCountByStoreId(storeId));
+        statDTO.setDonatedClientCount(storeRepo.getDonatedClientCountByStoreId(storeId));
+
+        return statDTO;
     }
 
     public boolean unmarkForDonation(Integer inventoryId) {

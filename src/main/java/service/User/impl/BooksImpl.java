@@ -1,12 +1,27 @@
 package service.User.impl;
 
+import jakarta.transaction.Transactional;
+import model.dto.Bidding.UserBidDTO;
 import model.dto.UserBooksDTO;
+import model.entity.AllUsers;
+import model.entity.Bid.Bid_History;
+import model.entity.Bid.SellorMode;
+import model.entity.Bid.User_Bid;
+import model.entity.Delivery;
 import model.entity.UserBooks;
+import model.entity.Users;
+import model.repo.AllUsersRepo;
+import model.repo.Delivery.TransactionRepository;
 import model.repo.UserBooksRepo;
+import model.repo.UsersRepo;
+import model.repo.bid.BidHistoryRepo;
+import model.repo.bid.SellorModeRepo;
+import model.repo.bid.UserBidRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import service.User.BooksService;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -14,6 +29,24 @@ public class BooksImpl  implements BooksService {
 
     @Autowired
     private UserBooksRepo userBooksRepo;
+
+    @Autowired
+    private UserBidRepo userBidRepo;
+
+    @Autowired
+    private BidHistoryRepo bidHistoryRepo;
+
+    @Autowired
+    private UsersRepo usersRepo;
+
+    @Autowired
+    private AllUsersRepo allUsersRepo;
+
+    @Autowired
+    private SellorModeRepo sellorModeRepo;
+
+    @Autowired
+    private TransactionRepository transactionRepo;
 
     @Override
     public String addBook(UserBooksDTO userBooksDTO) {
@@ -50,7 +83,26 @@ public class BooksImpl  implements BooksService {
                 userBooksDTO.getBookImage()
         );
 
-        userBooksRepo.save(userBooks);
+        // Save book entry
+        UserBooks savedBook = userBooksRepo.save(userBooks);
+
+
+        // ✅ If "forBidding" is true, create a new Bid_History entry
+        if (Boolean.TRUE.equals(userBooksDTO.getForBidding())) {
+            Bid_History bid = new Bid_History();
+            bid.setBookId(savedBook.getBookId()); // or savedBook.getBookId() based on your entity field
+            bid.setBiddingStartDate(userBooksDTO.getBiddingStartDate());
+            bid.setBiddingEndDate(userBooksDTO.getBiddingEndDate());
+            bid.setInitial_bid_amount(userBooksDTO.getInitialBidPrice());
+            bid.setBidEnd(false);
+            bid.setBidWinner(null);
+            bid.setBookImage(userBooksDTO.getBookImage());
+
+            // Save bid entry
+            bidHistoryRepo.save(bid);
+        }
+
+
         return "success";
     }
 
@@ -156,4 +208,90 @@ public class BooksImpl  implements BooksService {
         }
         return "book not found";
     }
+
+    @Override
+    @Transactional
+    public String updateTransactionDeliveryAddress(int allUsersId) {
+        // Step 1: Get the address from Users table using All_Users user_id
+        Optional<String> addressOpt = usersRepo.findAddressByAllUsersId(((int) allUsersId));
+        if (addressOpt.isEmpty()) {
+            return "Address not found for All_Users ID: " + allUsersId;
+        }
+        String address = addressOpt.get();
+
+        // Step 2: Get the email from All_Users to find the corresponding user_id in Users
+        Optional<AllUsers> allUsersOpt = allUsersRepo.findById(allUsersId);
+        if (allUsersOpt.isEmpty()) {
+            return "All_Users record not found for ID: " + allUsersId;
+        }
+        String email = allUsersOpt.get().getEmail();
+
+        // Step 3: Get the user_id from Users table using the email
+        Optional<Users> userOpt = usersRepo.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return "Users record not found for email: " + email;
+        }
+        Long usersTableUserId = userOpt.get().getUserId();
+
+        // Step 4: Update transactions with the address
+        int rowsAffected = usersRepo.updateAllDeliveryAddressesByUserId(((long) allUsersId), address);
+        if (rowsAffected > 0) {
+            return "Successfully updated " + rowsAffected + " transactions with delivery address";
+        } else {
+            return "No transactions found for user ID: " + usersTableUserId;
+        }
+    }
+
+    @Override
+    public String placeUserBid(UserBidDTO userBidDTO) {
+        try {
+            User_Bid userBid = new User_Bid(
+                    userBidDTO.getBidId(),
+                    userBidDTO.getBookId(),
+                    userBidDTO.getUserId(),
+                    userBidDTO.getBidAmount(),
+                    userBidDTO.getName()
+            );
+
+            userBidRepo.save(userBid);
+            return "Bid placed successfully!";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed to place bid: " + e.getMessage();
+        }
+    }
+
+    @Override
+    public List<User_Bid> getBidsByBookId(Long bookId) {
+        return userBidRepo.findByBookId(bookId);
+    }
+
+    // Fetch all bids for a given bookId
+    @Override
+    public List<Bid_History> getBidHistoryByBookId(Long bookId) {
+        return bidHistoryRepo.findByBookId(bookId);
+    }
+
+    @Override
+    public boolean updateBidWinner(Long bidId, String winnerName) {
+        int updated = bidHistoryRepo.updateBidWinnerAndEndBid(winnerName, bidId);
+        return updated > 0; // true if update successful
+    }
+
+    // Set seller mode to true for a user
+    // Directly save or update a SellorMode object
+    @Override
+    public SellorMode setSellorMode(SellorMode sellorMode) {
+        return sellorModeRepo.save(sellorMode);
+    }
+
+    @Override
+    public SellorMode getSellorMode(int userId) {
+        return sellorModeRepo.findByUserIdCustom(userId);
+    }
+
+//    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
 }
