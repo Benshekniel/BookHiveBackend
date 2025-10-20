@@ -1,5 +1,6 @@
 package model.repo.organization;
 
+import model.dto.organization.TopDonorDTO;
 import model.entity.Donation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -57,4 +58,18 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
     @Transactional
     @Modifying
     void deleteByBookRequestId(Long bookRequestId);
+
+    // Get top donors for an organization
+    @Query("SELECT new model.dto.organization.TopDonorDTO(d.donorId, " +
+           "u.name, " +
+           "SUM(d.quantity), " +
+           "COUNT(d), " +
+           "MAX(d.dateDonated)) " +
+           "FROM Donation d " +
+           "LEFT JOIN AllUsers u ON d.donorId = u.user_id " +
+           "WHERE d.organizationId = :organizationId " +
+           "AND d.status IN ('RECEIVED', 'APPROVED') " +
+           "GROUP BY d.donorId, u.name " +
+           "ORDER BY SUM(d.quantity) DESC")
+    List<TopDonorDTO> findTopDonorsByOrganization(@Param("organizationId") Long organizationId);
 }

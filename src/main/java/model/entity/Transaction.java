@@ -141,13 +141,17 @@ public class Transaction {
         }
     }
 
+//    @Column(name = "delivery_address",columnDefinition="TEXT")
+//    private String deliveryAddress;
+
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
     public enum TransactionType {
-        SALE, LOAN, DONATION, AUCTION
+        SALE, LEND, DONATION, BIDDING
     }
 
     public enum TransactionStatus {

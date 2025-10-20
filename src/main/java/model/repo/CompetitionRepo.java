@@ -80,6 +80,10 @@ public interface CompetitionRepo extends JpaRepository<Competitions, String> {
     @Query("SELECT c FROM Competitions c WHERE c.activeStatus = true")
     List<Competitions> findAllActiveCompetitions();
 
+    // ✅ Fetch active competitions (active_status = true and not paused) for Organization Dashboard
+    @Query("SELECT c FROM Competitions c WHERE c.activeStatus = true AND c.pauseStatus = false ORDER BY c.createdAt DESC")
+    List<Competitions> findActiveCompetitions();
+
     // ✅ Fetch competitions created by a specific moderator
     @Query("SELECT c FROM Competitions c WHERE c.createdBy = :createdBy")
     List<Competitions> findCompetitionsByCreator(String createdBy);

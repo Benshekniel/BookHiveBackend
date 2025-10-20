@@ -188,9 +188,9 @@ public class UserTransactionService {
             stats.setCancelledOrders(transactionRepository.countByUserAndStatus(userId, Transaction.TransactionStatus.CANCELLED));
 
             // Get counts by type
-            stats.setBorrowedBooks(transactionRepository.countByUserAndType(userId, Transaction.TransactionType.LOAN));
+            stats.setBorrowedBooks(transactionRepository.countByUserAndType(userId, Transaction.TransactionType.LEND));
             stats.setPurchasedBooks(transactionRepository.countByUserAndType(userId, Transaction.TransactionType.SALE));
-            stats.setWonAuctions(transactionRepository.countByUserAndType(userId, Transaction.TransactionType.AUCTION));
+            stats.setWonAuctions(transactionRepository.countByUserAndType(userId, Transaction.TransactionType.BIDDING));
             stats.setExchangedBooks(transactionRepository.countByUserAndType(userId, Transaction.TransactionType.DONATION));
 
             // Set defaults for financial data
@@ -511,7 +511,7 @@ public class UserTransactionService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a");
 
         // Add transaction-specific tracking based on type and status
-        if (transaction.getType() == Transaction.TransactionType.LOAN &&
+        if (transaction.getType() == Transaction.TransactionType.LEND &&
                 transaction.getStatus() == Transaction.TransactionStatus.OVERDUE) {
 
             trackingList.add(createTrackingEntry(
@@ -616,8 +616,8 @@ public class UserTransactionService {
     private String mapTransactionType(Transaction.TransactionType type) {
         switch (type) {
             case SALE: return "purchase";
-            case LOAN: return "borrow";
-            case AUCTION: return "bidding";
+            case LEND: return "borrow";
+            case BIDDING:  return "bidding";
             case DONATION: return "exchange"; // Map donation to exchange for frontend
             default: return type.name().toLowerCase();
         }
