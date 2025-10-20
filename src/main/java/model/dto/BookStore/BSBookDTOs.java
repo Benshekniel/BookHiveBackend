@@ -1,72 +1,36 @@
 package model.dto.BookStore;
 
-import model.entity.BSBook;
-
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+//import lombok.AllArgsConstructor;
+//import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 public class BSBookDTOs {
 
-    /** Has a userId field to be changed into storeId, use only for book registration. */
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class RegisterBookDTO {
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class RegisterDTO {
         private Integer userId;
 
         private String title;
         private List<String> authors;
         private List<String> genres;
         private List<String> tags;
-        private String description;
-
-        private String coverImage;
-
-        private BSBook.BookCondition condition;
-        private BSBook.ListingType listingType;
-        private Map<String, BigDecimal> pricing;
-
-        private BSBook.BookStatus status;
-
-        private String terms;
-        private Map<String, Object> lendingTerms;
-
-        private String isbn;
-        private String publisher;
-        private Integer publishedYear;
-        private String language;
-        private Integer pageCount;
-
-        private Map<String, String> seriesInfo;
-
-        private Integer bookCount;
-    }
-
-    /** Can be used for updating book details and viewing complete book info. */
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class BookDetailsDTO {
-        private String title;
-        private List<String> authors;
-        private List<String> genres;
-        private List<String> tags;
-
-        private String description;
-        private BSBook.BookCondition condition;
 
         private String coverImage;
         private List<String> images;
 
-        private BSBook.BookStatus status;
+        private String description;
+        private String condition;
 
-        private BSBook.ListingType listingType;
-        private Map<String, BigDecimal> pricing;
-
+        private BigDecimal lendFee;
         private String terms;
-        private Map<String, Object> lendingTerms;
+        private Integer lendingPeriod;
+        private BigDecimal lateFee;
+        private BigDecimal minTrustScore;
 
         private String isbn;
         private String publisher;
@@ -74,17 +38,16 @@ public class BSBookDTOs {
         private String language;
         private Integer pageCount;
 
-        private Map<String, String> seriesInfo;
+        private String seriesName;
+        private Integer seriesInstallment;
+        private Integer seriesTotalBooks;
 
-        private Integer bookCount;
-
-        private LocalDateTime createdAt;
-        private LocalDateTime updatedAt;
+        private Boolean isForSelling;
+        private BigDecimal sellPrice;
     }
 
-    /** Details for showing book lists, so not the whole data. */
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class BookListingDTO {
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class EditDTO {
         private Integer bookId;
 
         private String title;
@@ -92,16 +55,132 @@ public class BSBookDTOs {
         private List<String> genres;
         private List<String> tags;
 
-        private BSBook.BookCondition condition;
-        private BSBook.BookStatus status;
-        private BSBook.ListingType listingType;
+        private String coverImage;
+        private List<String> images;
 
-        private Map<String, BigDecimal> pricing;
-        private Map<String, Object> lendingTerms;   // is needed for lendingLists
+        private String description;
+        private String condition;
+
+        private BigDecimal lendFee;
+        private String terms;
+        private Integer lendingPeriod;
+        private BigDecimal lateFee;
+        private BigDecimal minTrustScore;
+
+        private Boolean isForSelling;
+        private BigDecimal sellPrice;
+
+        private String isbn;
+        private String publisher;
+        private Integer publishedYear;
+        private String language;
+        private Integer pageCount;
+
+        private String seriesName;
+        private Integer seriesInstallment;
+        private Integer seriesTotalBooks;
+    }
+
+
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class FullBookDTO {
+        private Integer bookId;
+
+        private String title;
+        private List<String> authors;
+        private List<String> genres;
+        private List<String> tags;
 
         private String coverImage;
-        private LocalDateTime createdAt;
+        private List<String> images;
 
-        private Integer bookCount;
+        private String description;
+        private String condition;
+
+        private BigDecimal lendFee;
+        private String terms;
+        private Integer lendingPeriod;
+        private BigDecimal lateFee;
+        private BigDecimal minTrustScore;
+
+        private Boolean isForSelling;
+        private BigDecimal sellPrice;
+
+        private String isbn;
+        private String publisher;
+        private Integer publishedYear;
+        private String language;
+        private Integer pageCount;
+
+        private Integer favouritesCount;
+
+        private String seriesName;
+        private Integer seriesInstallment;
+        private Integer seriesTotalBooks;
+
+        private LocalDateTime createdAt;
     }
+
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ConciseLendOnlyDTO {
+        private Integer bookId;
+
+        private String title;
+        private List<String> authors;
+        private List<String> genres;
+        private List<String> tags;
+
+        private Integer seriesInstallment;
+        private String seriesName;
+
+        private String coverImage;
+
+        private String condition;
+        private String status;
+
+        private BigDecimal lendFee;
+        private Integer lendingPeriod;
+        private BigDecimal lateFee;
+        private BigDecimal minTrustScore;
+
+        private String isbn;
+
+        private Integer circulations;
+        private Integer favouritesCount;
+
+        private LocalDateTime createdAt;
+    }
+
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ConciseSellAlsoDTO {
+        private Integer bookId;
+
+        private String title;
+        private List<String> authors;
+        private List<String> genres;
+        private List<String> tags;
+
+        private Integer seriesInstallment;
+        private String seriesName;
+
+        private String coverImage;
+
+        private String condition;
+        private String status;
+
+        private BigDecimal sellPrice;
+        private BigDecimal lendFee;
+
+        private Integer lendingPeriod;
+        private BigDecimal lateFee;
+        private BigDecimal minTrustScore;
+
+        private String isbn;
+
+        private Integer circulations;
+        private Integer favouritesCount;
+
+        private LocalDateTime createdAt;
+    }
+
 }

@@ -16,36 +16,36 @@ import java.util.List;
 @RequestMapping("/api/organization-donations")
 public class OrganizationDonationController {
 
-    private final OrganizationDonationService donationService;
+   private final OrganizationDonationService donationService;
 
-    @Autowired
-    public OrganizationDonationController(OrganizationDonationService donationService) {
-        this.donationService = donationService;
-    }
+   @Autowired
+   public OrganizationDonationController(OrganizationDonationService donationService) {
+       this.donationService = donationService;
+   }
 
-    @GetMapping("/organization/{organizationId}")
-    public ResponseEntity<List<DonationDTO>> getDonationsByOrganization(@PathVariable Long organizationId) {
-        List<DonationDTO> donations = donationService.getDonationsByOrganization(organizationId);
-        return ResponseEntity.ok(donations);
-    }
+   @GetMapping("/organization/{organizationId}")
+   public ResponseEntity<List<DonationDTO>> getDonationsByOrganization(@PathVariable Long organizationId) {
+       List<DonationDTO> donations = donationService.getDonationsByOrganization(organizationId);
+       return ResponseEntity.ok(donations);
+   }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<DonationDTO> getDonationById(@PathVariable Long id) {
-        DonationDTO donation = donationService.getDonationById(id);
-        return ResponseEntity.ok(donation);
-    }
+   @GetMapping("/{id}")
+   public ResponseEntity<DonationDTO> getDonationById(@PathVariable Long id) {
+       DonationDTO donation = donationService.getDonationById(id);
+       return ResponseEntity.ok(donation);
+   }
 
-    @PostMapping("/{id}/mark-received")
-    public ResponseEntity<DonationDTO> markDonationAsReceived(
-            @PathVariable Long id,
-            @Valid @RequestBody DonationReceiptDTO receiptDTO) {
-        DonationDTO updated = donationService.markDonationAsReceived(id, receiptDTO);
-        return ResponseEntity.ok(updated);
-    }
+   @PostMapping("/{id}/mark-received")
+   public ResponseEntity<DonationDTO> markDonationAsReceived(
+           @PathVariable Long id,
+           @Valid @RequestBody DonationReceiptDTO receiptDTO) {
+       DonationDTO updated = donationService.markDonationAsReceived(id, receiptDTO);
+       return ResponseEntity.ok(updated);
+   }
 
-    @GetMapping("/pending-feedback/{organizationId}")
-    public ResponseEntity<List<DonationDTO>> getPendingFeedbackDonations(@PathVariable Long organizationId) {
-        List<DonationDTO> pendingDonations = donationService.getPendingFeedbackDonations(organizationId);
-        return ResponseEntity.ok(pendingDonations);
-    }
+   @GetMapping("/pending-feedback/{organizationId}")
+   public ResponseEntity<List<DonationDTO>> getPendingFeedbackDonations(@PathVariable Long organizationId) {
+       List<DonationDTO> pendingDonations = donationService.getPendingFeedbackDonations(organizationId);
+       return ResponseEntity.ok(pendingDonations);
+   }
 }

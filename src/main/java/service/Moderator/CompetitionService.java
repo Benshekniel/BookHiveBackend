@@ -1,6 +1,7 @@
 package service.Moderator;
 
 import model.dto.CompetitionDTO;
+import model.entity.CompetitionSubmissions;
 import model.entity.Competitions;
 
 import java.util.List;
@@ -21,6 +22,16 @@ public interface CompetitionService {
     public String makePause(String competitionId,String email);
 
     public String makeResume(String competitionId,String email);
+
+    public String joinCompetition(String competitionId, String email);
+
+    public String leaveCompetition(String competitionId, String email);
+
+    public List<String> getCompetitionsByEmail(String email);
+
+    public List<CompetitionSubmissions> getSubmissionsByEmail(String email);
+
+    public List<Map<String, Object>> getUserParticipatingCompetitions(String email);
 
 
 }

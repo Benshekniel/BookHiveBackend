@@ -44,7 +44,7 @@ public class JwtImpl implements JwtService {
                 .add(claims)
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + (30 * 60 * 1000))) // ✅ 30 minutes
+                .expiration(new Date(System.currentTimeMillis() + (60 * 60 * 1000))) // ✅ 30 minutes
 //                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 30))
                 .and()
                 .signWith(getKey())

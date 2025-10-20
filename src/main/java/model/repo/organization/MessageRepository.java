@@ -1,5 +1,5 @@
-package model.repo.organization;
-
-public class MessageRepository {
-    
-}
+//package model.repo.organization;
+//
+//public class MessageRepository {
+//
+//}

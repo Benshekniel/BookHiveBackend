@@ -53,4 +53,8 @@ public interface CompetitionSubmissionsRepo extends JpaRepository<CompetitionSub
     @Transactional
     @Query("DELETE FROM CompetitionSubmissions cs WHERE cs.submissionId = :submissionId AND cs.userId = :userId")
     int deleteSubmission(@Param("submissionId") String submissionId, @Param("userId") String userId);
+
+    // Fetch all submissions for a given user email
+    @Query("SELECT cs FROM CompetitionSubmissions cs WHERE cs.email = :email")
+    List<CompetitionSubmissions> findAllByEmail(@Param("email") String email);
 }

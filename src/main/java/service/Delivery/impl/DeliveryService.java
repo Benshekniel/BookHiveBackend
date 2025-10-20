@@ -1,10 +1,16 @@
 package service.Delivery.impl;
 
-import io.hypersistence.utils.spring.repository.BaseJpaRepository;
 import model.dto.Delivery.DeliverySummaryDto;
-import model.entity.*;
+import model.entity.Delivery;
+import model.entity.Agent;
+import model.entity.Hub;
+import model.entity.Transaction;
+import model.entity.AllUsers;
 import model.dto.Delivery.DeliveryDto.*;
-import model.repo.Delivery.*;
+import model.repo.Delivery.DeliveryRepository;
+import model.repo.Delivery.AgentRepository;
+import model.repo.Delivery.HubRepository;
+import model.repo.Delivery.TransactionRepository;
 import model.repo.AllUsersRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +32,6 @@ public class DeliveryService {
     private final HubRepository hubRepository;
     private final TransactionRepository transactionRepository;
     private final AllUsersRepo allUsersRepo;
-    private final RouteAssignmentService routeAssignmentService; // Added
-    private final RouteRepository routeRepository; // ADD THIS LINE
 
     public DeliveryResponseDto createDelivery(DeliveryCreateDto createDto) {
         log.info("Creating delivery for user: {} to address: {}", createDto.getUserId(), createDto.getDeliveryAddress());
@@ -44,32 +48,7 @@ public class DeliveryService {
         delivery.setStatus(Delivery.DeliveryStatus.PENDING);
         delivery.setTrackingNumber(generateTrackingNumber());
         delivery.setCreatedAt(LocalDateTime.now());
-
-        // Automatic route assignment based on delivery address
-        if (createDto.getHubId() != null) {
-            Long routeId = routeAssignmentService.assignRouteByDeliveryAddress(
-                    createDto.getDeliveryAddress(),
-                    createDto.getHubId()
-            );
-            if (routeId != null) {
-                delivery.setRouteId(routeId);
-                log.info("Assigned route {} for delivery address: {}", routeId, createDto.getDeliveryAddress());
-            } else {
-                log.warn("Could not assign route for delivery address: {}", createDto.getDeliveryAddress());
-            }
-
-            // Automatic pickup route assignment based on pickup address
-            Long prouteId = routeAssignmentService.assignPickupRouteByAddress(
-                    createDto.getPickupAddress(),
-                    createDto.getHubId()
-            );
-            if (prouteId != null) {
-                delivery.setProuteId(prouteId);
-                log.info("Assigned pickup route {} for pickup address: {}", prouteId, createDto.getPickupAddress());
-            } else {
-                log.warn("Could not assign pickup route for pickup address: {}", createDto.getPickupAddress());
-            }
-        }
+//        delivery.setUpdatedAt(LocalDateTime.now());
 
         // Set optional fields
         if (createDto.getWeight() != null) {
@@ -83,11 +62,7 @@ public class DeliveryService {
         }
 
         Delivery savedDelivery = deliveryRepository.save(delivery);
-        log.info("Created delivery with ID: {}, tracking: {}, route: {}, pickup route: {}",
-                savedDelivery.getDeliveryId(),
-                savedDelivery.getTrackingNumber(),
-                savedDelivery.getRouteId(),
-                savedDelivery.getProuteId());
+        log.info("Created delivery with ID: {} and tracking number: {}", savedDelivery.getDeliveryId(), savedDelivery.getTrackingNumber());
 
         return convertToResponseDto(savedDelivery);
     }
@@ -220,6 +195,7 @@ public class DeliveryService {
                 .orElseThrow(() -> new RuntimeException("Delivery not found"));
 
         delivery.setStatus(newStatus);
+//        delivery.setUpdatedAt(LocalDateTime.now());
 
         // Set timestamps based on status
         switch (newStatus) {
@@ -245,6 +221,7 @@ public class DeliveryService {
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
         delivery.setStatus(Delivery.DeliveryStatus.ASSIGNED);
+//        delivery.setUpdatedAt(LocalDateTime.now());
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
         log.info("Assigned agent {} to delivery {}", agentId, deliveryId);
@@ -259,35 +236,6 @@ public class DeliveryService {
 
         deliveryRepository.deleteById(deliveryId);
         log.info("Deleted delivery {}", deliveryId);
-    }
-
-    /**
-     * Reassign routes for existing delivery
-     */
-    public DeliveryResponseDto reassignRoutes(Long deliveryId, Long hubId) {
-        log.info("Reassigning routes for delivery: {} in hub: {}", deliveryId, hubId);
-
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new RuntimeException("Delivery not found"));
-
-        // Reassign delivery route
-        Long newRouteId = routeAssignmentService.assignRouteByDeliveryAddress(
-                delivery.getDeliveryAddress(), hubId);
-        if (newRouteId != null) {
-            delivery.setRouteId(newRouteId);
-            log.info("Reassigned delivery route {} for delivery {}", newRouteId, deliveryId);
-        }
-
-        // Reassign pickup route
-        Long newProuteId = routeAssignmentService.assignPickupRouteByAddress(
-                delivery.getPickupAddress(), hubId);
-        if (newProuteId != null) {
-            delivery.setProuteId(newProuteId);
-            log.info("Reassigned pickup route {} for delivery {}", newProuteId, deliveryId);
-        }
-
-        Delivery updatedDelivery = deliveryRepository.save(delivery);
-        return convertToResponseDto(updatedDelivery);
     }
 
     // Helper methods
@@ -318,16 +266,6 @@ public class DeliveryService {
         dto.setTransactionId(delivery.getTransactionId());
         dto.setUserId(delivery.getUserId());
         dto.setRouteId(delivery.getRouteId());
-        dto.setProuteId(delivery.getProuteId());
-
-        // Get hubId from route if route exists
-        if (delivery.getRouteId() != null) {
-            Optional<Route> routeOpt = routeRepository.findById(delivery.getRouteId());
-            if (routeOpt.isPresent()) {
-                dto.setHubId(routeOpt.get().getHubId());
-            }
-        }
-
         dto.setPickupAddress(delivery.getPickupAddress());
         dto.setDeliveryAddress(delivery.getDeliveryAddress());
         dto.setStatus(delivery.getStatus());
@@ -335,6 +273,7 @@ public class DeliveryService {
         dto.setDeliveryTime(delivery.getDeliveryTime());
         dto.setTrackingNumber(delivery.getTrackingNumber());
         dto.setCreatedAt(delivery.getCreatedAt());
+//        dto.setUpdatedAt(delivery.getUpdatedAt());
 
         // Additional fields
         dto.setWeight(delivery.getWeight() != null ? delivery.getWeight() : "N/A");
@@ -348,7 +287,9 @@ public class DeliveryService {
         dto.setHubName("Hub");
 
         return dto;
-    }    private DeliveryResponseDto convertToResponseDtoWithAllDetails(Object[] result) {
+    }
+
+    private DeliveryResponseDto convertToResponseDtoWithAllDetails(Object[] result) {
         DeliveryResponseDto dto = new DeliveryResponseDto();
 
         Delivery delivery = (Delivery) result[0];
@@ -373,6 +314,7 @@ public class DeliveryService {
         dto.setDeliveryTime(delivery.getDeliveryTime());
         dto.setTrackingNumber(delivery.getTrackingNumber());
         dto.setCreatedAt(delivery.getCreatedAt());
+//        dto.setUpdatedAt(delivery.getUpdatedAt());
 
         // Related entity details
         dto.setHubName(hubName);

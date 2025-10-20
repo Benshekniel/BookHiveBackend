@@ -1,6 +1,7 @@
 package model.repo;
 
 
+import jakarta.transaction.Transactional;
 import model.entity.Competitions;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -87,7 +88,25 @@ public interface CompetitionRepo extends JpaRepository<Competitions, String> {
     @Query("SELECT c FROM Competitions c WHERE c.competitionId = :competitionId")
     Competitions findCompetitionById(String competitionId);
 
-    // ✅ Fetch active competitions (active_status = true and not paused)
-    @Query("SELECT c FROM Competitions c WHERE c.activeStatus = true AND c.pauseStatus = false ORDER BY c.createdAt DESC")
-    List<Competitions> findActiveCompetitions();
+    // ✅ Increment currentParticipants by 1
+    @Modifying
+    @Transactional
+    @Query("UPDATE Competitions c SET c.currentParticipants = c.currentParticipants + 1 WHERE c.competitionId = :competitionId")
+    int incrementParticipants(@Param("competitionId") String competitionId);
+
+    // ✅ Decrement currentParticipants by 1 (only if > 0)
+    @Modifying
+    @Transactional
+    @Query("UPDATE Competitions c SET c.currentParticipants = c.currentParticipants - 1 WHERE c.competitionId = :competitionId AND c.currentParticipants > 0")
+    int decrementParticipants(@Param("competitionId") String competitionId);
+
+    // ✅ Get all competitions a user participates in
+    @Query(value = """
+        SELECT c.* 
+        FROM competitions c
+        INNER JOIN competitions_participant_emails p 
+        ON c.competition_id = p.competition_id
+        WHERE p.email = :email
+    """, nativeQuery = true)
+    List<Map<String, Object>> findCompetitionsByParticipant(@Param("email") String email);
 }

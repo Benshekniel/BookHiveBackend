@@ -3,9 +3,11 @@ package service.SignUp.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.dto.OrgDTO;
+import model.dto.organizationNew.OrganizationNewDTO;
 import model.entity.AllUsers;
 import model.entity.Organization;
 import model.repo.AllUsersRepo;
+import model.repo.OrgRepo;
 import model.repo.organization.OrganizationRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,42 +30,37 @@ public class Org_RegisterImpl implements Register_OrgAccount {
     private final OrganizationRepository organizationRepository;
     private final AllUsersRepo allUsersRepo;
     private final PasswordEncoder passwordEncoder;
+    private final OrgRepo orgRepo;
 
     /**
-     * Creates a new organization account after validating the provided information.
+     * Creates a new organization account using the new DTO format.
      *
      * @param orgDTO The organization data transfer object containing registration information
      * @return A status message indicating the result of the registration attempt
      */
     @Override
     @Transactional
-    public String createOrg(OrgDTO orgDTO) {
+    public String newCreateOrg(OrganizationNewDTO orgDTO) {
         log.info("Processing organization registration request for: {}", orgDTO.getEmail());
 
-        if (!isValidInput(orgDTO)) {
-            log.warn("Invalid organization data provided");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid organization data provided");
-        }
-
-        // Check if email already exists in all users
-        AllUsers existingUser = allUsersRepo.findByEmail(orgDTO.getEmail());
-        if (existingUser != null) {
-            log.warn("Email already in use: {}", orgDTO.getEmail());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use: " + orgDTO.getEmail());
-        }
-
-        // Check if reg_no already exists in organizations
-        Optional<Organization> existingOrg = organizationRepository.findByRegNo(orgDTO.getReg_no());
-        if (existingOrg.isPresent()) {
-            log.warn("Registration number already in use: {}", orgDTO.getReg_no());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Registration number already in use: " + orgDTO.getReg_no());
-        }
-
         try {
-            // Create and save new organization
-            Organization organization = createOrganizationEntity(orgDTO);
-            organizationRepository.save(organization);
+            Organization organization = new Organization(
+                    orgDTO.getFname(),
+                    orgDTO.getLname(),
+                    orgDTO.getEmail(),
+                    orgDTO.getPassword(),
+                    orgDTO.getPhone(),
+                    orgDTO.getRegNo(),
+                    orgDTO.getYears(),
+                    orgDTO.getAddress(),
+                    orgDTO.getCity(),
+                    orgDTO.getState(),
+                    orgDTO.getZip(),
+                    orgDTO.getImageFileName(),
+                    orgDTO.getType()
+            );
 
+            organizationRepository.save(organization);
             log.info("Successfully created new organization account for: {}", orgDTO.getEmail());
             return "success";
         } catch (Exception e) {
@@ -73,77 +70,26 @@ public class Org_RegisterImpl implements Register_OrgAccount {
     }
 
     /**
-     * Validates the organization input data.
+     * Updates the organization ID by email after the organization is created in AllUsers table.
      *
-     * @param orgDTO The organization data to validate
-     * @return true if data is valid, false otherwise
+     * @param email The email of the organization
      */
-    private boolean isValidInput(OrgDTO orgDTO) {
-        // Check for null or empty required fields
-        if (orgDTO.getEmail() == null || orgDTO.getEmail().trim().isEmpty() ||
-                orgDTO.getReg_no() == null || orgDTO.getReg_no().trim().isEmpty() ||
-                orgDTO.getPassword() == null || orgDTO.getPassword().trim().isEmpty() ||
-                orgDTO.getFname() == null || orgDTO.getFname().trim().isEmpty() ||
-                orgDTO.getLname() == null || orgDTO.getLname().trim().isEmpty() ||
-                orgDTO.getPhone() == null || orgDTO.getPhone().trim().isEmpty()) {
-            return false;
+    @Override
+    @Transactional
+    public void updateOrganizationIdByEmail(String email) {
+        Integer userId = orgRepo.findUserIdByEmailinAllUsers(email);
+
+        if (userId == null) {
+            log.warn("No user found with email: {}", email);
+            return;
         }
 
-        // Stricter email format validation
-        if (!orgDTO.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            return false;
+        int updated = orgRepo.updateUserIdByEmail(userId, email);
+
+        if (updated > 0) {
+            log.info("Updated org_id in organizations for email: {}", email);
+        } else {
+            log.warn("No matching record in organizations for email: {}", email);
         }
-
-        // Basic password strength check
-        if (orgDTO.getPassword().length() < 8) {
-            return false;
-        }
-
-        // Validate phone as a numeric string
-        try {
-            Integer.parseInt(orgDTO.getPhone().trim());
-        } catch (NumberFormatException e) {
-            log.warn("Invalid phone number format: {}", orgDTO.getPhone());
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Creates an Organization entity from the provided DTO.
-     *
-     * @param orgDTO The data transfer object with organization information
-     * @return A new Organization entity
-     */
-    private Organization createOrganizationEntity(OrgDTO orgDTO) {
-        // Normalize data
-        String email = orgDTO.getEmail().toLowerCase().trim();
-        String phoneStr = orgDTO.getPhone().trim();
-        int phone;
-        try {
-            phone = Integer.parseInt(phoneStr);
-        } catch (NumberFormatException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid phone number format: " + phoneStr);
-        }
-
-        Organization organization = new Organization(
-                orgDTO.getType() != null ? orgDTO.getType().trim() : null,
-                orgDTO.getReg_no().trim(),
-                orgDTO.getFname().trim(),
-                orgDTO.getLname().trim(),
-                email,
-                passwordEncoder.encode(orgDTO.getPassword()),
-                orgDTO.getPhone(),
-                orgDTO.getYears(),
-                orgDTO.getAddress() != null ? orgDTO.getAddress().trim() : null,
-                orgDTO.getCity() != null ? orgDTO.getCity().trim() : null,
-                orgDTO.getState() != null ? orgDTO.getState().trim() : null,
-                orgDTO.getZip() != null ? orgDTO.getZip().trim() : null,
-                orgDTO.getImageFileName(),
-                orgDTO.getFileType()
-        );
-
-        return organization;
     }
 }

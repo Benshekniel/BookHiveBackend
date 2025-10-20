@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class ResourceNotFoundException extends RuntimeException {
-    
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -31,10 +31,10 @@ public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
-    
+
     /**
      * Creates a new exception instance for a resource identified by its ID.
-     * 
+     *
      * @param resourceName the name of the resource type
      * @param id the ID of the resource
      * @return the exception instance
@@ -42,10 +42,10 @@ public class ResourceNotFoundException extends RuntimeException {
     public static ResourceNotFoundException forId(String resourceName, Long id) {
         return new ResourceNotFoundException(resourceName + " not found with id: " + id);
     }
-    
+
     /**
      * Creates a new exception instance for a resource identified by a field value.
-     * 
+     *
      * @param resourceName the name of the resource type
      * @param fieldName the name of the field
      * @param fieldValue the value of the field

@@ -73,7 +73,7 @@ public class Delivery {
         IN_TRANSIT_TO_MAIN_HUB, // Order is being transferred to the main hub
         AT_MAIN_HUB,            // Order has arrived at the main hub
         IN_TRANSIT_TO_PROPER_LOCAL_HUB, // Order is being transferred to the respective local hub
-        AT_PROPER_LOCAL_HUB,    // Order has arrived at the respective local hub
+        //AT_PROPER_LOCAL_HUB: AT_LOCAL_HUB,    // Order has arrived at the respective local hub
         PENDING,                // Order is at the local hub, awaiting automatic agent assignment
         ASSIGNED,               // Order has been automatically assigned to an agent
         PICKED_UP,              // Agent has picked up the order from the local hub

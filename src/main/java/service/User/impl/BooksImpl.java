@@ -1,12 +1,19 @@
 package service.User.impl;
 
+import jakarta.transaction.Transactional;
 import model.dto.UserBooksDTO;
+import model.entity.AllUsers;
 import model.entity.UserBooks;
+import model.entity.Users;
+import model.repo.AllUsersRepo;
+import model.repo.Delivery.TransactionRepository;
 import model.repo.UserBooksRepo;
+import model.repo.UsersRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import service.User.BooksService;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -14,6 +21,15 @@ public class BooksImpl  implements BooksService {
 
     @Autowired
     private UserBooksRepo userBooksRepo;
+
+    @Autowired
+    private UsersRepo usersRepo;
+
+    @Autowired
+    private AllUsersRepo allUsersRepo;
+
+    @Autowired
+    private TransactionRepository transactionRepo;
 
     @Override
     public String addBook(UserBooksDTO userBooksDTO) {
@@ -155,5 +171,38 @@ public class BooksImpl  implements BooksService {
             return "success";
         }
         return "book not found";
+    }
+
+    @Override
+    @Transactional
+    public String updateTransactionDeliveryAddress(int allUsersId) {
+        // Step 1: Get the address from Users table using All_Users user_id
+        Optional<String> addressOpt = usersRepo.findAddressByAllUsersId(((int) allUsersId));
+        if (addressOpt.isEmpty()) {
+            return "Address not found for All_Users ID: " + allUsersId;
+        }
+        String address = addressOpt.get();
+
+        // Step 2: Get the email from All_Users to find the corresponding user_id in Users
+        Optional<AllUsers> allUsersOpt = allUsersRepo.findById(allUsersId);
+        if (allUsersOpt.isEmpty()) {
+            return "All_Users record not found for ID: " + allUsersId;
+        }
+        String email = allUsersOpt.get().getEmail();
+
+        // Step 3: Get the user_id from Users table using the email
+        Optional<Users> userOpt = usersRepo.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return "Users record not found for email: " + email;
+        }
+        Long usersTableUserId = userOpt.get().getUserId();
+
+        // Step 4: Update transactions with the address
+        int rowsAffected = usersRepo.updateAllDeliveryAddressesByUserId(((long) allUsersId), address);
+        if (rowsAffected > 0) {
+            return "Successfully updated " + rowsAffected + " transactions with delivery address";
+        } else {
+            return "No transactions found for user ID: " + usersTableUserId;
+        }
     }
 }
