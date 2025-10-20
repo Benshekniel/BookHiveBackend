@@ -21,7 +21,7 @@ public interface BSInventoryRepo extends JpaRepository<BSInventory, Integer> {
 
     long countByBookStore_StoreId (Integer storeId);
 
-    List<BSInventory> findAllByCategory (String category);
+    List<BSInventory> findAllByBookStore_StoreIdAndCategory(Integer storeId, String category);
 
     // REGULAR inventory stat functions:
     

@@ -16,6 +16,7 @@ import service.BookStore.BSDonationService;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service @Transactional
 @RequiredArgsConstructor
@@ -35,13 +36,30 @@ public class BSDonationServiceImpl implements BSDonationService {
                 .toList();
     }
 
-    public List<BSInventoryDTOs.ConciseDonationDTO> getInventoryListByCategory (String category) {
-        List<BSInventory> itemList = inventoryRepo.findAllByCategory(category);
+    public List<BSInventoryDTOs.ConciseDonationDTO> getInventoryListByCategory (String category, Integer storeId) {
+        List<BSInventory> itemList = inventoryRepo.findAllByBookStore_StoreIdAndCategory(storeId, category);
         if (itemList.isEmpty())
             return Collections.emptyList();
         return itemList.stream()
                 .map(item -> modelMapper.map(item, BSInventoryDTOs.ConciseDonationDTO.class))
                 .toList();
+    }
+
+    public boolean contributeToDonation (Long donationId, Integer addition) {
+        Optional<Donation> donationOpt = donationRepo.findById(donationId);
+        if (donationOpt.isEmpty())
+            return false;
+        else {
+            Donation donation = donationOpt.get();
+
+            Integer newQuantity = donation.getQuantityCurrent() + addition;
+            donation.setQuantityCurrent(newQuantity);
+            if (newQuantity > donation.getQuantity()) {
+                donation.setStatus("RECEIVED");
+            }
+            donationRepo.save(donation);
+            return true;
+        }
     }
 
 }

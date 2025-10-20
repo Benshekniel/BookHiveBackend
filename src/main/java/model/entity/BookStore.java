@@ -23,9 +23,7 @@ public class BookStore {
     @Column(nullable = false)
     private int user_id;
 
-
-    @Email
-    @Column(nullable = false)
+    @Email @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -76,12 +74,10 @@ public class BookStore {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    // "PENDING, YES, NO"
   
     @Column(nullable = true)
     private String isApproved;    // "PENDING, YES, NO"
 
-//    private String approvalNote;
 
     /** One-to-One relationship with AllUsers table */
 //    @OneToOne

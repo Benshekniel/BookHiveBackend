@@ -7,6 +7,7 @@ import service.BookStore.BSDonationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
+import service.BookStore.BookStoreService;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
 public class BSDonationController {
 
     private final BSDonationService donationService;
+    private final BookStoreService bookStoreService;
 
     @GetMapping("/current-donations")
     public ResponseEntity<List<BSDonationDTO.DonationDetailsDTO>> getCurrentDonationEvents () {
@@ -26,13 +28,17 @@ public class BSDonationController {
         return ResponseEntity.ok(events);
     }
 
-    @GetMapping("/matching-list/{category}")
-    public ResponseEntity<?> getInventoryListByCategory (
-            @PathVariable String category) {
-        List<BSInventoryDTOs.ConciseDonationDTO> itemList = donationService.getInventoryListByCategory(category);
+    @GetMapping("/matching-list/{category}/{userId}")
+    public ResponseEntity<List<BSInventoryDTOs.ConciseDonationDTO>> getInventoryListByCategory (
+            @PathVariable String category,
+            @PathVariable Integer userId) {
+        Integer storeId = bookStoreService.getStoreIdByUserId(userId);
+
+        List<BSInventoryDTOs.ConciseDonationDTO> itemList = donationService.getInventoryListByCategory(category, storeId);
         if (itemList.isEmpty())
             return ResponseEntity.noContent().build();
         return ResponseEntity.ok(itemList);
     }
+
 
 }
