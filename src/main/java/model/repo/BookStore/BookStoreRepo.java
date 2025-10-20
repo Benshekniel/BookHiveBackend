@@ -31,4 +31,11 @@ public interface BookStoreRepo extends JpaRepository<BookStore, Integer> {
     @Query("SELECT a.user_id FROM AllUsers a WHERE a.email = :email")
     Integer findUserIdByEmailinAllUsers(@Param("email") String email);
 
+    // for stats:
+
+    @Query("select bs.donatedCount from BookStore bs where bs.storeId = :storeId")
+    Integer getDonatedCountByStoreId(@Param("storeId")Integer storeId);
+
+    @Query("select bs.donatedClientCount from BookStore bs where bs.storeId = :storeId")
+    Integer getDonatedClientCountByStoreId(@Param("storeId")Integer storeId);
 }

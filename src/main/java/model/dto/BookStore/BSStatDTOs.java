@@ -30,22 +30,25 @@ public class BSStatDTOs {
 
     @Data @JsonIgnoreProperties(ignoreUnknown = true)
     public static class DonationInventoryDTO {
-        private long totalDonationBooks;
+        private long totalDonationInventory;
 
-        private long donatedStock;
-        private long pendingStock;
+        private Integer donatedCount;
+        private Integer donatedClientCount;
 
-        private long donatedClients;
-        private BigDecimal impactScore;
+//        private long pendingStock;
+//        private long donatedClients;
+//        private BigDecimal impactScore;
     }
 
     @Data @JsonIgnoreProperties(ignoreUnknown = true)
     public static class LendOnlyStatDTO {
         private long totalBooks;
+        private long onlyLending;
+
         private long currentLent;
 
-        private BigDecimal avgLendFee;
-        private long lendPeriod;
+        private Double avgLendFee;
+        private Double avgLendPeriod;
 
         private List<String> mostCirculated;
         private List<String> mostFavourite;
@@ -54,11 +57,14 @@ public class BSStatDTOs {
     @Data @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SellAlsoStatDTO {
         private long totalBooks;
+        private long totalSellable;
+
+        private long currentLent;
 
         private long soldCount;
         private BigDecimal sumSold;
 
-        private BigDecimal avgSellPrice;
+        private Double avgSellPrice;
         private List<String> topGenres;
     }
 }

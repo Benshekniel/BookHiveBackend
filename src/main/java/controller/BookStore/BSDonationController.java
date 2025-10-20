@@ -42,12 +42,14 @@ public class BSDonationController {
         return ResponseEntity.ok(itemList);
     }
 
-    @PutMapping("/contribute/{donationId}")
+    @PutMapping("/contribute/{donationId}/{userId}")
     public ResponseEntity<String> addContributions (
             @PathVariable Long donationId,
+            @PathVariable Integer userId,
             @RequestBody List<BSInventoryDTOs.ContributionDTO> contributions) {
 
-        boolean success = donationService.fullDonationProcess(donationId, contributions);
+        Integer storeId = bookStoreService.getStoreIdByUserId(userId);
+        boolean success = donationService.fullDonationProcess(donationId, storeId, contributions);
 
         if (success) return ResponseEntity.ok("Successful contribution.");
         else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong.");

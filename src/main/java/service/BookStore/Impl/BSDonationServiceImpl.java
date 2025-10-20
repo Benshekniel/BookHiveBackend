@@ -7,6 +7,7 @@ import model.entity.Donation;
 import model.repo.BookStore.BSDonationRepo;
 import model.repo.BookStore.BSInventoryRepo;
 
+import model.repo.BookStore.BookStoreRepo;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import service.BookStore.BSDonationService;
 import service.BookStore.BSInventoryService;
+import service.BookStore.BookStoreService;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +28,7 @@ public class BSDonationServiceImpl implements BSDonationService {
     private final BSInventoryRepo inventoryRepo;
     private final BSInventoryService inventoryService;
     private final BSDonationRepo donationRepo;
+    private final BookStoreService bookStoreService;
 
     private static final ModelMapper modelMapper = new ModelMapper();
 
@@ -67,7 +70,7 @@ public class BSDonationServiceImpl implements BSDonationService {
     }
 
     public boolean fullDonationProcess (
-            Long donationId, List<BSInventoryDTOs.ContributionDTO> contributions) {
+            Long donationId, Integer storeId, List<BSInventoryDTOs.ContributionDTO> contributions) {
 
         if (contributions == null || contributions.isEmpty()) return false;
 
@@ -89,11 +92,12 @@ public class BSDonationServiceImpl implements BSDonationService {
             }
             totalAddition += change;
         }
+        if (!allInventoryUpdated) return false;
 
-        if (!allInventoryUpdated) {
-            return false;
-        }
-        return this.contributeToDonation(donationId, totalAddition);
+        boolean contributed = this.contributeToDonation(donationId, totalAddition);
+        boolean bookstoreUpdate = bookStoreService.updateDonatedCount(storeId, totalAddition);
+
+        return (bookstoreUpdate && contributed);
     }
 
 }
