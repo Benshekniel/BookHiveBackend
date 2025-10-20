@@ -60,7 +60,7 @@ public class BookRequestServiceImpl implements BookRequestService {
         donation.setDonorId(0L); // No donor yet, set to 0 or null if allowed
         donation.setBookTitle(createDTO.getTitle());
         donation.setQuantity(createDTO.getQuantity());
-        donation.setQuantityCurrent(createDTO.getQuantity()); // Initially same as quantity
+        donation.setQuantityCurrent(null); // Keep NULL for book requests
         donation.setStatus("PENDING"); // Start as PENDING
         donation.setCategory(createDTO.getSubject()); // Use subject as category
         donation.setNotes(createDTO.getDescription());
@@ -167,7 +167,7 @@ public class BookRequestServiceImpl implements BookRequestService {
             // Update donation fields
             donation.setBookTitle(request.getTitle());
             donation.setQuantity(request.getQuantity());
-            donation.setQuantityCurrent(request.getQuantity());
+            donation.setQuantityCurrent(null); // Keep NULL for book requests
             donation.setCategory(request.getSubject());
             donation.setNotes(request.getDescription());
             donation.setPriority(mapUrgencyToPriority(request.getUrgency()));
