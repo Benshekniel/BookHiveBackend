@@ -1,5 +1,6 @@
 package service.Admin;
 
+
 import model.dto.Admin.DashboardDTO;
 import model.repo.Admin.DashboardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -71,8 +71,9 @@ public class DashboardService {
 
         // Pending Approvals
         Long pendingApprovals = dashboardRepository.getPendingUserApprovals();
+        // For pending approvals, a decrease is positive
         metrics.setPendingApprovals(pendingApprovals);
-        metrics.setPendingApprovalsChange("-15.3%");
+        metrics.setPendingApprovalsChange("-15.3%"); // Mock data as it's complex to calculate
 
         // Monthly Revenue
         BigDecimal monthlyRevenue = dashboardRepository.getMonthlyRevenue(monthStart);
@@ -82,7 +83,7 @@ public class DashboardService {
         metrics.setMonthlyRevenue(monthlyRevenue);
         metrics.setMonthlyRevenueChange(revenueChange);
 
-        // Mock Active Events
+        // Mock Active Events (you may need to create an Events entity)
         metrics.setActiveEvents(7L);
         metrics.setActiveEventsChange("+2");
 
@@ -104,12 +105,7 @@ public class DashboardService {
             recentActivity.setId(((Number) activity.get("id")).longValue());
             recentActivity.setType((String) activity.get("type"));
             recentActivity.setMessage((String) activity.get("message"));
-
-            // Handle timestamp conversion
-            Object timestampObj = activity.get("timestamp");
-            LocalDateTime timestamp = convertToLocalDateTime(timestampObj);
-            recentActivity.setTime(formatTimeAgo(timestamp));
-
+            recentActivity.setTime(formatTimeAgo((LocalDateTime) activity.get("timestamp")));
             recentActivity.setIcon("User");
             recentActivity.setColor("blue");
             activities.add(recentActivity);
@@ -122,12 +118,7 @@ public class DashboardService {
             recentActivity.setId(((Number) activity.get("id")).longValue());
             recentActivity.setType((String) activity.get("type"));
             recentActivity.setMessage((String) activity.get("message"));
-
-            // Handle timestamp conversion
-            Object timestampObj = activity.get("timestamp");
-            LocalDateTime timestamp = convertToLocalDateTime(timestampObj);
-            recentActivity.setTime(formatTimeAgo(timestamp));
-
+            recentActivity.setTime(formatTimeAgo((LocalDateTime) activity.get("timestamp")));
             recentActivity.setIcon("BookOpen");
             recentActivity.setColor("yellow");
             activities.add(recentActivity);
@@ -140,12 +131,7 @@ public class DashboardService {
             recentActivity.setId(((Number) activity.get("id")).longValue());
             recentActivity.setType((String) activity.get("type"));
             recentActivity.setMessage((String) activity.get("message"));
-
-            // Handle timestamp conversion
-            Object timestampObj = activity.get("timestamp");
-            LocalDateTime timestamp = convertToLocalDateTime(timestampObj);
-            recentActivity.setTime(formatTimeAgo(timestamp));
-
+            recentActivity.setTime(formatTimeAgo((LocalDateTime) activity.get("timestamp")));
             recentActivity.setIcon("AlertCircle");
             recentActivity.setColor("red");
             activities.add(recentActivity);
@@ -156,22 +142,6 @@ public class DashboardService {
         return activities.size() > 5 ? activities.subList(0, 5) : activities;
     }
 
-    private LocalDateTime convertToLocalDateTime(Object timestampObj) {
-        if (timestampObj == null) {
-            return null;
-        }
-
-        if (timestampObj instanceof LocalDateTime) {
-            return (LocalDateTime) timestampObj;
-        } else if (timestampObj instanceof Timestamp) {
-            return ((Timestamp) timestampObj).toLocalDateTime();
-        } else if (timestampObj instanceof java.util.Date) {
-            return new Timestamp(((java.util.Date) timestampObj).getTime()).toLocalDateTime();
-        }
-
-        return null;
-    }
-
     private DashboardDTO.QuickActionCounts buildQuickActionCounts() {
         DashboardDTO.QuickActionCounts quickActions = new DashboardDTO.QuickActionCounts();
 
@@ -179,7 +149,7 @@ public class DashboardService {
         quickActions.setReportedItems(dashboardRepository.getReportedItems());
         quickActions.setActiveDisputes(dashboardRepository.getActiveDisputes());
         quickActions.setActiveModerators(dashboardRepository.getActiveModerators());
-        quickActions.setTotalEvents(7L);
+        quickActions.setTotalEvents(7L); // Mock data - implement events entity if needed
 
         return quickActions;
     }

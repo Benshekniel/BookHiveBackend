@@ -1,4 +1,4 @@
-package model.entity;//package model.entity;
+//package model.entity;
 //
 //import Utils.StringListConverter;
 //import jakarta.persistence.*;
