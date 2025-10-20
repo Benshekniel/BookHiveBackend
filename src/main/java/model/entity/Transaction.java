@@ -138,11 +138,11 @@ public class Transaction {
     }
 
     public enum TransactionType {
-        SALE, LOAN, DONATION, AUCTION
+        SALE, LEND, EXCHANGE, BIDDING, AUCTION
     }
 
     public enum TransactionStatus {
-        PENDING, ACTIVE, COMPLETED, CANCELLED, OVERDUE
+        ACTIVE, PENDING, COMPLETED, CANCELLED, OVERDUE
     }
 
     public enum PaymentStatus {
