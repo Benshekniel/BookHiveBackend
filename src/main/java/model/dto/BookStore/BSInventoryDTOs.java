@@ -106,6 +106,12 @@ public class BSInventoryDTOs {
         private Integer sellableCount;
     }
 
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ContributionDTO {
+        private Integer inventoryId;
+        private Integer contributionCount;
+    }
+
 
     @Data @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FullInventoryDTO {
@@ -168,9 +174,9 @@ public class BSInventoryDTOs {
 
         private String condition;
 
+        private BigDecimal sellPrice;
         private Integer stockCount;
         private Integer sellableCount;
-        private BigDecimal sellPrice;
 
         private LocalDateTime createdAt;
     }
@@ -195,6 +201,7 @@ public class BSInventoryDTOs {
 
         private String condition;
 
+        private BigDecimal sellPrice;
         private Integer stockCount;
         private Integer otherCount;
 
