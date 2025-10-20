@@ -16,7 +16,7 @@ import service.Register.RegisterAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import service.SignUp.Register_ModeratorAccount;
-//import service.SignUp.Register_OrgAccount;
+import service.SignUp.Register_OrgAccount;
 import service.SignUp.Register_UserAccount;
 import service.TrustScore.TrustScoreService;
 
@@ -33,8 +33,8 @@ public class RegisterController {
     @Autowired
     private RegisterAccount registerAccount;
 
-//    @Autowired
-//    private Register_OrgAccount register_OrgAccount;
+    @Autowired
+    private Register_OrgAccount register_OrgAccount;
 
     @Autowired
     private Register_UserAccount registerUserAccount;
