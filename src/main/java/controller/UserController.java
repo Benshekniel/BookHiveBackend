@@ -8,6 +8,7 @@ import model.dto.Bidding.UserBorrowRequestDTO;
 import model.entity.*;
 import model.entity.Bid.*;
 import model.messageResponse.LoginResponse;
+import model.repo.Delivery.DeliveryRepository;
 import model.repo.Delivery.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import service.User.UserCompetitionService;
 import model.repo.UsersRepo;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,9 @@ public class UserController {
 
     @Autowired
     private BorrowService borrowRequestService;
+
+    @Autowired
+    private DeliveryRepository deliveryRepository;
 
     //Books APIs
     @PostMapping("/saveBook-User")
@@ -270,6 +275,7 @@ public class UserController {
     @PostMapping("/userTranscation")
     public ResponseEntity<Transaction> createTransaction(@RequestBody NewTransactionDTO dto) {
 
+        // 🧱 Step 1: Create Transaction
         Transaction transaction = new Transaction();
         transaction.setType(Transaction.TransactionType.SALE);
         transaction.setStatus(dto.getStatus());
@@ -294,6 +300,31 @@ public class UserController {
 
         // Save new transaction (with address)
         Transaction savedTransaction = transactionService.save(transaction);
+
+        // 🚚 Step 2: Auto-create Delivery record
+        Delivery delivery = new Delivery();
+        delivery.setTransactionId(savedTransaction.getTransactionId());
+        delivery.setUserId(savedTransaction.getUserId());
+        delivery.setValue(savedTransaction.getPaymentAmount());
+        delivery.setPickupAddress(savedTransaction.getDeliveryAddress());
+        delivery.setDeliveryAddress(savedTransaction.getDeliveryAddress());
+        delivery.setStatus(Delivery.DeliveryStatus.PLACED);
+        // Payment method mapping
+        if ("cash".equalsIgnoreCase(paymentMethod)) {
+            delivery.setPaymentMethod(Delivery.PaymentMethod.CASH);
+        } else {
+            delivery.setPaymentMethod(Delivery.PaymentMethod.CREDIT_CARD);
+        }
+
+        // 🆔 Generate tracking number (PKP + random 4 digits)
+        int randomNum = (int) (Math.random() * 9000) + 1000; // 1000–9999
+        delivery.setTrackingNumber("PKP" + randomNum);
+
+        delivery.setCreatedAt(LocalDateTime.now());
+
+        // 💾 Save Delivery
+        deliveryRepository.save(delivery);
+
 
         return ResponseEntity.ok(savedTransaction);
     }
