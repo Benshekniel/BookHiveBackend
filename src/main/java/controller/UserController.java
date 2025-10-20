@@ -2,11 +2,15 @@ package controller;
 
 import model.dto.*;
 //import model.dto.BooksDTO;
+import model.dto.Bidding.Exchange_BooksDTO;
+import model.dto.Bidding.UserBidDTO;
+import model.dto.Bidding.UserBorrowRequestDTO;
+import model.entity.*;
+import model.entity.Bid.*;
 import model.entity.CompetitionSubmissions;
 import model.entity.Transaction;
 import model.entity.Users;
 import model.messageResponse.LoginResponse;
-import model.entity.Competitions;
 import model.repo.Delivery.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +24,8 @@ import service.Login.LoginService;
 import service.Moderator.CompetitionService;
 import service.Moderator.TrustScoreRegulationService;
 import service.User.BooksService;
+import service.User.BorrowService;
+import service.User.ExchangeService;
 import service.User.UserCompetitionService;
 import model.repo.UsersRepo;
 
@@ -37,6 +43,8 @@ public class UserController {
     @Autowired
     private BooksService booksService;
 
+    @Autowired
+    private ExchangeService exchangeService;
 
     @Autowired
     private UploadService uploadService;
@@ -304,5 +312,102 @@ public class UserController {
         }
     }
 
+
+    /// EXCHANGE //////////////////////////////////////////////////////////////////
+    /// EXCHANGE///////////////////////////////////////////////////////////////////
+    @PostMapping("/createExchange")
+    public ResponseEntity<Exchange_Books> createExchange(@RequestBody Exchange_BooksDTO exchangeDTO) {
+        Exchange_Books exchange = exchangeService.createExchangeAndReturnEntity(exchangeDTO);
+        if (exchange == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Approver not found
+        }
+        return ResponseEntity.ok(exchange);
+    }
+
+    // ✅ Get all books for a user by email
+    @GetMapping("/exchangeGetBooks/{email}")
+    public ResponseEntity<List<UserBooks>> getBooksByEmail(@PathVariable String email) {
+        List<UserBooks> books = exchangeService.getAllBooksByEmail(email);
+        return ResponseEntity.ok(books);
+    }
+
+    // ✅ Check if exchange exists for user and book
+    @GetMapping("/exchangeCheck/{userId}/{bookId}")
+    public ResponseEntity<Boolean> checkExchangeExists(
+            @PathVariable int userId,
+            @PathVariable Long bookId
+    ) {
+        boolean exists = exchangeService.checkExchangeExists(userId, bookId);
+        return ResponseEntity.ok(exists);
+    }
+
+    /// /////////////////////////////////////////////////////////////////////////////////////
+    // Outgoing exchanges for user
+    @GetMapping("/outgoingExchange/{userId}")
+    public ResponseEntity<List<Exchange_Books>> getOutgoing(@PathVariable int userId) {
+        return ResponseEntity.ok(exchangeService.getOutgoingExchanges(userId));
+    }
+
+    // Incoming exchanges for approver
+    @GetMapping("/incomingExchange/{userId}")
+    public ResponseEntity<List<Exchange_Books>> getIncoming(@PathVariable int userId) {
+        return ResponseEntity.ok(exchangeService.getIncomingExchanges(userId));
+    }
+
+    // Get single book by bookId
+    @GetMapping("/getBookExchangeById/{bookId}")
+    public ResponseEntity<UserBooks> getBook(@PathVariable Long bookId) {
+        return ResponseEntity.ok(exchangeService.getBookById(bookId));
+    }
+
+    // Approve exchange
+    @PutMapping("/approveExchange/{exchangeId}")
+    public ResponseEntity<Map<String, String>> approve(
+            @PathVariable Integer exchangeId,
+            @RequestParam double deliveryFee,
+            @RequestParam double handlingFee
+    ) {
+        String result = exchangeService.approveExchange(exchangeId, deliveryFee, handlingFee);
+        if ("approved".equals(result)) {
+            return ResponseEntity.ok(Map.of("status", "APPROVED"));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Exchange not found"));
+    }
+
+    // Reject exchange
+    @PutMapping("/rejectExchange/{exchangeId}")
+    public ResponseEntity<Map<String, String>> reject(
+            @PathVariable Integer exchangeId,
+            @RequestParam String reason
+    ) {
+        String result = exchangeService.rejectExchange(exchangeId, reason);
+        if ("rejected".equals(result)) {
+            return ResponseEntity.ok(Map.of("status", "REJECTED"));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Exchange not found"));
+    }
+
+
+    // ✅ Single endpoint: from user_id → email → address
+    @GetMapping("/getAddressAlluser/{userId}")
+    public ResponseEntity<Map<String, String>> getAddressByUserId(@PathVariable int userId) {
+        String address = exchangeService.getAddressByUserId(userId);
+        if (address == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Address not found for this user ID"));
+        }
+        return ResponseEntity.ok(Map.of("address", address));
+    }
+
+    // ✅ Get address from email
+    @GetMapping("/getAddressUsers/{email}")
+    public ResponseEntity<Map<String, String>> getAddressByEmail(@PathVariable String email) {
+        String address = exchangeService.getAddressByEmail(email);
+        if (address == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Address not found"));
+        }
+        return ResponseEntity.ok(Map.of("address", address));
+    }
 
 }
