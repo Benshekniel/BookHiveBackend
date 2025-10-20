@@ -138,7 +138,7 @@ public class Transaction {
     }
 
     public enum TransactionType {
-        SALE, LEND, EXCHANGE, BIDDING, AUCTION
+        SALE, LEND, EXCHANGE, BIDDING, AUCTION, DONATION
     }
 
     public enum TransactionStatus {
