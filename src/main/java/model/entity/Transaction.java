@@ -45,12 +45,21 @@ public class Transaction {
     @Column(name = "updated_at")  // 🔥 Add explicit mapping
     private LocalDateTime updatedAt;
 
+    private String paMethodNew;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
     private PaymentStatus paymentStatus;
 
+    /** book belonging to a customer type regular user */
     @Column(name = "book_id")
     private Long bookId;
+
+    /** individual book items belonging to a bookstore user */
+    private Integer bsBookId;
+
+    /** bulk book items belonging to a bookstore user */
+    private Integer bsInventoryId;
 
     @Column(name = "user_id")
     private Long userId;
@@ -131,6 +140,10 @@ public class Transaction {
             paymentMethod = PaymentMethod.CASH_ON_DELIVERY;
         }
     }
+
+    @Column(name = "delivery_address",columnDefinition="TEXT")
+    private String deliveryAddress;
+
 
     @PreUpdate
     protected void onUpdate() {

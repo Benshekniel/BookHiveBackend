@@ -76,7 +76,6 @@ public class Donation {
     @Column(nullable = true)
     private String rejectedReason;
 
-
     @Column(nullable = true)
     private String orgName;
 }

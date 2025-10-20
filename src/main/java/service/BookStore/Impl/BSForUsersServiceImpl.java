@@ -1,6 +1,5 @@
 package service.BookStore.Impl;
 
-//import model.dto.BookStore.BSBookDTOs;
 import model.dto.BookStore.BSForUserDTOs.FullInventoryDTO;
 import model.dto.BookStore.BSForUserDTOs.FullBookDTO;
 //import model.dto.UserBooksDTO;
@@ -29,7 +28,7 @@ public class BSForUsersServiceImpl implements BSForUsersService {
 
     /** The bulk stuff in inventory with stockCount */
     public List<FullInventoryDTO> getBSInventory () {
-        List<BSInventory> bookList = inventoryRepo.findByIsForDonationFalse ();
+        List<BSInventory> bookList = inventoryRepo.findAllByIsForDonationFalse();
         if (bookList.isEmpty())
             return Collections.emptyList();
         return bookList.stream()

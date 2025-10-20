@@ -3,6 +3,7 @@ package controller;
 import model.dto.AllUsersDTO;
 import model.dto.CompetitionDTO;
 import model.dto.UserBooksDTO;
+import model.entity.BookStore;
 import model.entity.Competitions;
 import model.entity.Donation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -252,4 +253,35 @@ public class ModeratorController {
     public List<Donation> getRejectedDonations() {
         return moderatorService.getRejectedDonations();
     }
+
+    @GetMapping("/bookstores/pending")
+    public ResponseEntity<List<BookStore>> getPendingOrUnapprovedBookStores() {
+        List<BookStore> bookStores = moderatorService.getPendingOrUnapprovedBookStores();
+        return ResponseEntity.ok(bookStores);
+    }
+
+    @GetMapping("/bookstores/approved")
+    public ResponseEntity<List<BookStore>> getApprovedBookStores() {
+        List<BookStore> bookStores = moderatorService.getApprovedBookStores();
+        return ResponseEntity.ok(bookStores);
+    }
+
+    @GetMapping("/bookstores/rejected")
+    public ResponseEntity<List<BookStore>> getRejectedBookStores() {
+        List<BookStore> bookStores = moderatorService.getRejectedBookStores();
+        return ResponseEntity.ok(bookStores);
+    }
+
+    @PostMapping("/bookstores/setReject")
+    public ResponseEntity<Map<String, String>> rejectBookStore(@RequestParam("userId") Integer userId) {
+        String response = moderatorService.rejectBookStore(userId);
+        return ResponseEntity.ok(Map.of("message", response));
+    }
+
+    @PostMapping("/bookstores/setApprove")
+    public ResponseEntity<Map<String, String>> approveBookStore(@RequestParam("userId") Integer userId) {
+        String response = moderatorService.approveBookStore(userId);
+        return ResponseEntity.ok(Map.of("message", response));
+    }
+
 }

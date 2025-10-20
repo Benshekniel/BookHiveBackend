@@ -9,6 +9,7 @@ public class Organization {
 
     @Id
     @Column(name="org_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orgId;
 
     @Column(name="type", length = 255)
@@ -68,6 +69,22 @@ public class Organization {
         this.zip = zip;
         this.imageFileName = imageFileName;
         this.fileType = fileType;
+    }
+
+    public Organization(String fname, String lname, String email, String password, int phone, String regNo, int years, String address, String city, String state, String zip, String imageFileName, String type) {
+        this.fname = fname;
+        this.lname = lname;
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
+        this.regNo = regNo;
+        this.years = years;
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.imageFileName = imageFileName;
+        this.type = type;
     }
 
     public Organization() {
