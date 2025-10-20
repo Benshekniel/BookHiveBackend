@@ -78,6 +78,8 @@ public class BookStore {
     @Column(nullable = true)
     private String isApproved;    // "PENDING, YES, NO"
 
+    private Integer donatedCount;
+    private Integer donatedClientCount;
 
     /** One-to-One relationship with AllUsers table */
 //    @OneToOne
@@ -92,6 +94,8 @@ public class BookStore {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        donatedCount = 0;
+        donatedClientCount = 0;
     }
     @PreUpdate
     protected void onUpdate() {

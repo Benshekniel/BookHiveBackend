@@ -5,6 +5,7 @@ import model.entity.BSInventory;
 import model.dto.BookStore.BSInventoryDTOs;
 import model.entity.BookStore;
 import model.repo.BookStore.BSInventoryRepo;
+import model.repo.BookStore.BookStoreRepo;
 import service.BookStore.BSInventoryService;
 
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ import org.modelmapper.ModelMapper;
 public class BSInventoryServiceImpl implements BSInventoryService {
     
     private final BSInventoryRepo inventoryRepo;
+    private final BookStoreRepo storeRepo;
+
     private static final ModelMapper modelMapper = new ModelMapper();
     
     public boolean createInventory (BSInventoryDTOs.RegisterDTO registerDTO, Integer storeId) {
@@ -129,7 +132,9 @@ public class BSInventoryServiceImpl implements BSInventoryService {
     public BSStatDTOs.DonationInventoryDTO getDonationInventoryStats(Integer storeId) {
         BSStatDTOs.DonationInventoryDTO statDTO = new BSStatDTOs.DonationInventoryDTO();
 
-//        statDTO.setTotalDonationBooks();
+        statDTO.setTotalDonationInventory(inventoryRepo.getTotalDonationStockByStoreId(storeId));
+        statDTO.setDonatedCount(storeRepo.getDonatedCountByStoreId(storeId));
+        statDTO.setDonatedClientCount(storeRepo.getDonatedClientCountByStoreId(storeId));
 
         return statDTO;
     }

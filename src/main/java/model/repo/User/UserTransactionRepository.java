@@ -72,7 +72,7 @@ public interface UserTransactionRepository extends JpaRepository<Transaction, Lo
                                                  @Param("type") Transaction.TransactionType type,
                                                  Pageable pageable);
 
-    // ✅ Native SQL fallback with proper casting - SAFE
+    // ✅ FIXED: Native SQL fallback with correct column name
     @Query(value = "SELECT * FROM transactions t WHERE " +
             "(t.user_id = :userId OR t.borrower_id = :userId OR t.seller_id = :userId OR " +
             "t.lender_id = :userId OR t.exchanger_id = :userId) " +
@@ -84,8 +84,8 @@ public interface UserTransactionRepository extends JpaRepository<Transaction, Lo
     Optional<Transaction> findByTrackingNumber(@Param("trackingNumber") String trackingNumber);
 
     @Query("SELECT t FROM Transaction t WHERE " +
-            "t.status = 'ACTIVE' AND t.endDate < :currentDate AND " +
-            "(t.type = 'LOAN' OR t.type = 'AUCTION') " +
+            "t.status = 'PENDING' AND t.endDate < :currentDate AND " +
+            "(t.type = 'LEND' OR t.type = 'BIDDING') " +
             "ORDER BY t.endDate ASC")
     List<Transaction> findOverdueTransactions(@Param("currentDate") LocalDateTime currentDate);
 
@@ -117,20 +117,20 @@ public interface UserTransactionRepository extends JpaRepository<Transaction, Lo
 
     @Query("SELECT " +
             "COUNT(t) as totalCount, " +
-            "SUM(CASE WHEN t.status = 'ACTIVE' THEN 1 ELSE 0 END) as activeCount, " +
+            "SUM(CASE WHEN t.status = 'PENDING' THEN 1 ELSE 0 END) as activeCount, " +
             "SUM(CASE WHEN t.status = 'COMPLETED' THEN 1 ELSE 0 END) as completedCount, " +
             "SUM(CASE WHEN t.status = 'OVERDUE' THEN 1 ELSE 0 END) as overdueCount, " +
             "SUM(CASE WHEN t.status = 'CANCELLED' THEN 1 ELSE 0 END) as cancelledCount, " +
-            "SUM(CASE WHEN t.type = 'LOAN' THEN 1 ELSE 0 END) as borrowedCount, " +
+            "SUM(CASE WHEN t.type = 'LEND' THEN 1 ELSE 0 END) as borrowedCount, " +
             "SUM(CASE WHEN t.type = 'SALE' THEN 1 ELSE 0 END) as purchasedCount, " +
-            "SUM(CASE WHEN t.type = 'AUCTION' THEN 1 ELSE 0 END) as auctionCount " +
+            "SUM(CASE WHEN t.type = 'BIDDING' THEN 1 ELSE 0 END) as auctionCount " +
             "FROM Transaction t WHERE " +
             "(t.userId = :userId OR t.borrowerId = :userId OR t.sellerId = :userId OR " +
             "t.lenderId = :userId OR t.exchangerId = :userId)")
     Object[] getUserTransactionSummary(@Param("userId") Long userId);
 
     @Query("SELECT t FROM Transaction t WHERE " +
-            "t.borrowerId = :userId AND t.type = 'LOAN' AND t.status = 'ACTIVE' " +
+            "t.borrowerId = :userId AND t.type = 'LEND' AND t.status = 'PENDING' " +
             "ORDER BY t.endDate ASC")
     List<Transaction> findActiveBorrowedBooks(@Param("userId") Long userId);
 
@@ -143,7 +143,7 @@ public interface UserTransactionRepository extends JpaRepository<Transaction, Lo
     @Query("SELECT CASE WHEN COUNT(t) > 0 THEN TRUE ELSE FALSE END FROM Transaction t WHERE " +
             "t.transactionId = :transactionId AND " +
             "(t.userId = :userId OR t.borrowerId = :userId) AND " +
-            "t.status IN ('PENDING', 'ACTIVE')")
+            "t.status IN ('PENDING', 'COMPLETED')")
     boolean canUserCancelTransaction(@Param("transactionId") Long transactionId,
                                      @Param("userId") Long userId);
 }

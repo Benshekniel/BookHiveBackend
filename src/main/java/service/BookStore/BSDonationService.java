@@ -13,5 +13,5 @@ public interface BSDonationService {
 
     boolean contributeToDonation (Long donationId, Integer addition);
 
-    boolean fullDonationProcess ( Long donationId, List<BSInventoryDTOs.ContributionDTO> contributions);
+    boolean fullDonationProcess ( Long donationId, Integer storeId, List<BSInventoryDTOs.ContributionDTO> contributions);
 }
