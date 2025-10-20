@@ -52,19 +52,14 @@ public class BSBookServiceImpl implements BSBookService {
         return true;
     }
 
-    @Override
-    public boolean createBook(BSBookDTOs.RegisterDTO registerDTO, Integer storeId) {
-        return false;
+    public boolean createBook (BSBookDTOs.RegisterDTO registerDTO, Integer storeId) {
+        BSBook book = modelMapper.map(registerDTO, BSBook.class);
+            BookStore bookStore = new BookStore();
+            bookStore.setStoreId(storeId);
+            book.setBookStore(bookStore);
+        bookRepo.save(book);
+        return true;
     }
-
-//    public boolean createBook (BSBookDTOs.RegisterDTO registerDTO, Integer storeId) {
-//        BSBook book = modelMapper.map(registerDTO, BSBook.class);
-//            BookStore bookStore = new BookStore();
-//            bookStore.setStoreId(storeId);
-//            book.setBookStore(bookStore);
-//        bookRepo.save(book);
-//        return true;
-//    }
 
     public List<BSBookDTOs.ConciseLendOnlyDTO> getLendOnlyList(Integer storeId) {
         List<BSBook> bookList = bookRepo.findByBookStore_StoreIdAndIsForSellingFalse(storeId);
@@ -102,54 +97,38 @@ public class BSBookServiceImpl implements BSBookService {
         return null;
     }
 
-    @Override
     public boolean editBook(BSBookDTOs.EditDTO editDTO) {
-        return false;
+        Integer bookId = editDTO.getBookId();
+        Optional<BSBook> bookOpt = bookRepo.findByBookId (bookId);
+        if (bookOpt.isEmpty())
+            return false;
+        else {
+            BSBook book = bookOpt.get();
+
+            if (editDTO.getCoverImage() == null) editDTO.setCoverImage(book.getCoverImage());
+            modelMapper.map(editDTO, book);
+            bookRepo.save(book);
+            return true;
+        }
     }
 
-    @Override
-    public boolean unmarkForSelling(Integer bookId) {
-        return false;
+    public boolean unmarkForSelling (Integer bookId) {
+        return bookRepo.findByBookId(bookId)
+                .map(existingItem -> {
+                    existingItem.setIsForSelling(false);
+                    bookRepo.save(existingItem);
+                    return true;
+                })
+                .orElse(false);
     }
 
-    @Override
-    public boolean deleteBook(Integer inventoryId) {
-        return false;
+    public boolean deleteBook(Integer bookId) {
+        return bookRepo.findByBookId(bookId)
+                .map(existingItem -> {
+                    existingItem.setIsDeleted(true);
+                    bookRepo.save(existingItem);
+                    return true;
+                })
+                .orElse(false);
     }
-
-
-//    public boolean editBook(BSBookDTOs.EditDTO editDTO) {
-//        Integer bookId = editDTO.getBookId();
-//        Optional<BSBook> bookOpt = bookRepo.findByBookId (bookId);
-//        if (bookOpt.isEmpty())
-//            return false;
-//        else {
-//            BSBook book = bookOpt.get();
-//
-//            if (editDTO.getCoverImage() == null) editDTO.setCoverImage(book.getCoverImage());
-//            modelMapper.map(editDTO, book);
-//            bookRepo.save(book);
-//            return true;
-//        }
-//    }
-
-//    public boolean unmarkForSelling (Integer bookId) {
-//        return bookRepo.findByBookId(bookId)
-//                .map(existingItem -> {
-//                    existingItem.setIsForSelling(false);
-//                    bookRepo.save(existingItem);
-//                    return true;
-//                })
-//                .orElse(false);
-//    }
-//
-//    public boolean deleteBook(Integer bookId) {
-//        return bookRepo.findByBookId(bookId)
-//                .map(existingItem -> {
-//                    existingItem.setIsDeleted(true);
-//                    bookRepo.save(existingItem);
-//                    return true;
-//                })
-//                .orElse(false);
-//    }
 }

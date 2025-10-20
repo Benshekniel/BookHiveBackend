@@ -43,6 +43,15 @@
             <scope>test</scope>
         </dependency>
 
+        <dependencies>
+            <!-- Other dependencies -->
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>10.20.0</version>
+            </dependency>
+        </dependencies>
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -191,6 +200,9 @@
             <artifactId>cloudinary-http44</artifactId>
             <version>1.34.0</version>
         </dependency>
+
+
+
 
         <dependency>
             <groupId>com.corundumstudio.socketio</groupId>

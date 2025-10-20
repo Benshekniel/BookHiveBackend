@@ -617,7 +617,7 @@ public class UserTransactionService {
         switch (type) {
             case SALE: return "purchase";
             case LEND: return "borrow";
-            case BIDDING: return "bidding";
+            case BIDDING:  return "bidding";
             case DONATION: return "exchange"; // Map donation to exchange for frontend
             default: return type.name().toLowerCase();
         }

@@ -2,11 +2,13 @@ package controller.BookStore;
 
 import model.dto.BookStore.BSDonationDTO;
 import model.dto.BookStore.BSInventoryDTOs;
+import org.springframework.http.HttpStatus;
 import service.BookStore.BSDonationService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
+import service.BookStore.BSInventoryService;
 import service.BookStore.BookStoreService;
 
 import java.util.List;
@@ -40,5 +42,15 @@ public class BSDonationController {
         return ResponseEntity.ok(itemList);
     }
 
+    @PutMapping("/contribute/{donationId}")
+    public ResponseEntity<String> addContributions (
+            @PathVariable Long donationId,
+            @RequestBody List<BSInventoryDTOs.ContributionDTO> contributions) {
+
+        boolean success = donationService.fullDonationProcess(donationId, contributions);
+
+        if (success) return ResponseEntity.ok("Successful contribution.");
+        else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong.");
+    }
 
 }

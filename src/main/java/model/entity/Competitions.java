@@ -129,6 +129,14 @@ public class Competitions {
         this.activeStatus = activeStatus;
     }
 
+    public boolean getPauseStatus() {
+        return pauseStatus;
+    }
+
+    public void setPauseStatus(boolean pauseStatus) {
+        this.pauseStatus = pauseStatus;
+    }
+
     public String getCreatedBy() {
         return createdBy;
     }

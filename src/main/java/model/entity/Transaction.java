@@ -141,6 +141,10 @@ public class Transaction {
         }
     }
 
+//    @Column(name = "delivery_address",columnDefinition="TEXT")
+//    private String deliveryAddress;
+
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
