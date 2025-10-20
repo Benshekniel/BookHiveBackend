@@ -4,8 +4,10 @@
 
         package controller.organization;
 
+import model.dto.organization.ActiveCompetitionDTO;
 import model.dto.organization.DashboardStatsDTO;
 import model.dto.organization.RecentRequestsDTO;
+import model.dto.organization.TopDonorDTO;
 import model.dto.organization.UpcomingEventsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +62,28 @@ public class OrganizationDashboardController {
             return ResponseEntity.status(404).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ErrorResponse("Failed to fetch upcoming events: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/top-donors/{organizationId}")
+    public ResponseEntity<?> getTopDonors(@PathVariable Long organizationId) {
+        try {
+            List<TopDonorDTO> topDonors = dashboardService.getTopDonors(organizationId);
+            return ResponseEntity.ok(topDonors);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(404).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ErrorResponse("Failed to fetch top donors: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/active-competitions")
+    public ResponseEntity<?> getActiveCompetitions() {
+        try {
+            List<ActiveCompetitionDTO> competitions = dashboardService.getActiveCompetitions();
+            return ResponseEntity.ok(competitions);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ErrorResponse("Failed to fetch active competitions: " + e.getMessage()));
         }
     }
 

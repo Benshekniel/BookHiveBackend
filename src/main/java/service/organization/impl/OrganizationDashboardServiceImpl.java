@@ -2,10 +2,14 @@
 
 package service.organization.impl;
 
+import model.dto.organization.ActiveCompetitionDTO;
 import model.dto.organization.DashboardStatsDTO;
 import model.dto.organization.RecentRequestsDTO;
+import model.dto.organization.TopDonorDTO;
 import model.dto.organization.UpcomingEventsDTO;
 import model.entity.BookRequest;
+import model.entity.Competitions;
+import model.repo.CompetitionRepo;
 import model.repo.OrgRepo;
 import model.repo.organization.BookRequestRepository;
 import model.repo.organization.DonationRepository;
@@ -26,15 +30,18 @@ public class OrganizationDashboardServiceImpl implements OrganizationDashboardSe
     private final OrgRepo orgRepo;
     private final BookRequestRepository bookRequestRepository;
     private final DonationRepository donationRepository;
+    private final CompetitionRepo competitionRepo;
 
     @Autowired
     public OrganizationDashboardServiceImpl(
             OrgRepo orgRepo,
             BookRequestRepository bookRequestRepository,
-            DonationRepository donationRepository) {
+            DonationRepository donationRepository,
+            CompetitionRepo competitionRepo) {
         this.orgRepo = orgRepo;
         this.bookRequestRepository = bookRequestRepository;
         this.donationRepository = donationRepository;
+        this.competitionRepo = competitionRepo;
     }
 
     @Override
@@ -161,6 +168,48 @@ public class OrganizationDashboardServiceImpl implements OrganizationDashboardSe
         return List.of(event1, event2, event3);
     }
 
+    @Override
+    public List<TopDonorDTO> getTopDonors(Long orgId) {
+        try {
+            // Verify organization exists
+            if (!orgRepo.existsByOrgId(orgId)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found with orgId: " + orgId);
+            }
+
+            // Get top donors from repository
+            List<TopDonorDTO> topDonors = donationRepository.findTopDonorsByOrganization(orgId);
+            
+            System.out.println("Found " + topDonors.size() + " top donors for orgId: " + orgId);
+            
+            return topDonors;
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Error in getTopDonors for orgId " + orgId + ": " + e.getMessage());
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch top donors: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<ActiveCompetitionDTO> getActiveCompetitions() {
+        try {
+            // Get active competitions from repository
+            List<Competitions> activeCompetitions = competitionRepo.findActiveCompetitions();
+            
+            System.out.println("Found " + activeCompetitions.size() + " active competitions");
+            
+            // Map to DTOs
+            return activeCompetitions.stream()
+                    .map(this::mapToActiveCompetitionDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error in getActiveCompetitions: " + e.getMessage());
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch active competitions: " + e.getMessage(), e);
+        }
+    }
+
     private int calculatePercentageChange(long previous, long current) {
         if (previous == 0) {
             return current > 0 ? 100 : 0;
@@ -176,6 +225,28 @@ public class OrganizationDashboardServiceImpl implements OrganizationDashboardSe
         dto.setQuantity(request.getQuantity());
         dto.setStatus(request.getStatus());
         dto.setDateRequested(request.getDateRequested().toString());
+        return dto;
+    }
+
+    private ActiveCompetitionDTO mapToActiveCompetitionDTO(Competitions competition) {
+        ActiveCompetitionDTO dto = new ActiveCompetitionDTO();
+        dto.setCompetitionId(competition.getCompetitionId());
+        dto.setActiveStatus(competition.isActiveStatus());
+        dto.setPauseStatus(competition.getPauseStatus());
+        dto.setTitle(competition.getTitle());
+        dto.setTheme(competition.getTheme());
+        dto.setDescription(competition.getDescription());
+        dto.setPrizeTrustScore(competition.getPrizeTrustScore());
+        dto.setEntryTrustScore(competition.getEntryTrustScore());
+        dto.setStartDateTime(competition.getStartDateTime());
+        dto.setEndDateTime(competition.getEndDateTime());
+        dto.setVotingStartDateTime(competition.getVotingStartDateTime());
+        dto.setVotingEndDateTime(competition.getVotingEndDateTime());
+        dto.setMaxParticipants(competition.getMaxParticipants());
+        dto.setCurrentParticipants(competition.getCurrentParticipants());
+        dto.setBannerImage(competition.getBannerImage());
+        dto.setCreatedAt(competition.getCreatedAt());
+        dto.setActivatedAt(competition.getActivatedAt());
         return dto;
     }
 }
