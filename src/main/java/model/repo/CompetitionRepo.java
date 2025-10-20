@@ -86,4 +86,8 @@ public interface CompetitionRepo extends JpaRepository<Competitions, String> {
     // ✅ Fetch competition by ID (optional shortcut)
     @Query("SELECT c FROM Competitions c WHERE c.competitionId = :competitionId")
     Competitions findCompetitionById(String competitionId);
+
+    // ✅ Fetch active competitions (active_status = true and not paused)
+    @Query("SELECT c FROM Competitions c WHERE c.activeStatus = true AND c.pauseStatus = false ORDER BY c.createdAt DESC")
+    List<Competitions> findActiveCompetitions();
 }
