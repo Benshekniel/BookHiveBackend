@@ -2,7 +2,9 @@ package controller.Admin;
 
 import model.dto.ModeratorDto;
 import model.entity.Moderator;
+import model.entity.Organization;
 import service.Admin.AdminModeratorService;
+import service.Admin.OrganizationFetching.OrgAdminService;
 import util.MessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,30 +21,10 @@ public class AdminModeratorController {
     @Autowired
     private AdminModeratorService moderatorService;
 
+    @Autowired
+    private OrgAdminService organizationAdminService;
+
     // ==================== CREATE OPERATIONS ====================
-
-    // Create moderator
-    @PostMapping("/moderators")
-    public ResponseEntity<MessageResponse> createModerator(@RequestBody ModeratorDto moderatorDto) {
-        try {
-            // Validate DTO for creation
-            if (!moderatorDto.isValidForCreation()) {
-                return ResponseEntity.badRequest()
-                        .body(MessageResponse.error("Invalid moderator data for creation"));
-            }
-
-            Moderator moderator = moderatorService.createModerator(moderatorDto);
-            ModeratorDto responseDto = moderatorService.convertToDto(moderator);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(MessageResponse.success("Moderator created successfully", responseDto));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest()
-                    .body(MessageResponse.error("Failed to create moderator: " + e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(MessageResponse.error("Internal server error: " + e.getMessage()));
-        }
-    }
 
     // ==================== READ OPERATIONS ====================
 
@@ -73,6 +55,7 @@ public class AdminModeratorController {
         }
     }
 
+
     // Get moderator by email
     @GetMapping("/moderators/email/{email}")
     public ResponseEntity<MessageResponse> getModeratorByEmail(@PathVariable String email) {
@@ -89,7 +72,7 @@ public class AdminModeratorController {
     }
 
     // Search moderators by name or email
-    @GetMapping("/moderators/search")
+    //@GetMapping("/moderators/search")
     public ResponseEntity<MessageResponse> searchModerators(
             @RequestParam(required = false) String searchTerm) {
         try {
@@ -199,18 +182,6 @@ public class AdminModeratorController {
             @PathVariable Long id,
             @RequestBody ModeratorDto moderatorDto) {
         try {
-            // Basic null check
-            if (moderatorDto == null) {
-                return ResponseEntity.badRequest()
-                        .body(MessageResponse.error("Request body cannot be null"));
-            }
-
-            // Validate DTO for update
-            if (!moderatorDto.isValidForUpdate()) {
-                return ResponseEntity.badRequest()
-                        .body(MessageResponse.error("Invalid moderator data for update"));
-            }
-
             Moderator moderator = moderatorService.updateModerator(id, moderatorDto);
             ModeratorDto responseDto = moderatorService.convertToDto(moderator);
             return ResponseEntity.ok(MessageResponse.success("Moderator updated successfully", responseDto));
@@ -291,7 +262,7 @@ public class AdminModeratorController {
         }
     }
 
-    // Soft delete moderator
+    // Soft delete moderator (placeholder for future implementation)
     @PatchMapping("/moderators/{id}/soft-delete")
     public ResponseEntity<MessageResponse> softDeleteModerator(@PathVariable Long id) {
         try {
@@ -304,5 +275,47 @@ public class AdminModeratorController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(MessageResponse.error("Internal server error: " + e.getMessage()));
         }
+    }
+//================================organization======================================
+
+    @GetMapping("/activeOrgs")
+    public ResponseEntity<List<Organization>> getActiveOrganizations() {
+        return ResponseEntity.ok(organizationAdminService.getActiveOrganizations());
+    }
+
+    @GetMapping("/bannedOrgs")
+    public ResponseEntity<List<Organization>> getBannedOrganizations() {
+        return ResponseEntity.ok(organizationAdminService.getBannedOrganizations());
+    }
+
+    @GetMapping("/pendingOrgs")
+    public ResponseEntity<List<Organization>> getPendingOrganizations() {
+        return ResponseEntity.ok(organizationAdminService.getPendingOrganizations());
+    }
+
+    @GetMapping("/rejectedOrgs")
+    public ResponseEntity<List<Organization>> getRejectedOrganizations() {
+        return ResponseEntity.ok(organizationAdminService.getRejectedOrganizations());
+    }
+
+    // ✅ Activate organization
+    @PutMapping("/applyActivateOrgs/{userId}")
+    public ResponseEntity<String> activateOrganization(@PathVariable Integer userId) {
+        String message = organizationAdminService.activateOrganization(userId);
+        return ResponseEntity.ok(message);
+    }
+
+    // ✅ Ban organization
+    @PutMapping("/applyBanOrgs/{userId}")
+    public ResponseEntity<String> banOrganization(@PathVariable Integer userId) {
+        String message = organizationAdminService.banOrganization(userId);
+        return ResponseEntity.ok(message);
+    }
+
+    // ✅ Reject organization
+    @PutMapping("/applyRejectOrgs/{userId}")
+    public ResponseEntity<String> rejectOrganization(@PathVariable Integer userId) {
+        String message = organizationAdminService.rejectOrganization(userId);
+        return ResponseEntity.ok(message);
     }
 }

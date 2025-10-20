@@ -1,65 +1,67 @@
 package model.entity;
 
+
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "organizations")
+@Table(name="organizations")
 public class Organization {
 
     @Id
-    @Column(name = "org_id")
+    @Column(name="org_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orgId;
 
-    @Column(name = "type", length = 255)
+    @Column(name="type", length = 255)
     private String type;
 
-    @Column(name = "reg_no", length = 255)
+    @Column(name="reg_no", length = 255)
     private String regNo;
 
-    @Column(name = "fname", length = 255)
+    @Column(name="fname", length = 255)
     private String fname;
 
-    @Column(name = "lname", length = 255)
+    @Column(name="lname", length = 255)
     private String lname;
 
-    @Column(name = "email", length = 255)
+    @Column(name="email", length = 255)
     private String email;
 
-    @Column(name = "password", length = 255)
+    @Column(name="password", length = 255)
     private String password;
 
-    @Column(name = "phone", length = 255)
-    private String phone; // Changed from int to String
+    @Column(name="phone", length = 255)
+    private int phone;
 
-    @Column(name = "years", length = 255)
+    @Column(name="years", length = 255)
     private int years;
 
-    @Column(name = "address", length = 255)
+    @Column(name="address", length = 255)
     private String address;
 
-    @Column(name = "city", length = 255)
+    @Column(name="city", length = 255)
     private String city;
 
-    @Column(name = "state", length = 255)
+    @Column(name="state", length = 255)
     private String state;
 
-    @Column(name = "zip", length = 255)
+    @Column(name="zip", length = 255)
     private String zip;
 
-    @Column(name = "imageFileName", length = 255)
-    private String imageFileName;
+    @Column(name="imageFileName", length = 255)
+    private String imageFileName;     // Stored filename (you'll generate and save it)
 
-    @Column(name = "fileType", length = 255)
+    @Column(name="fileType", length = 255)
     private String fileType;
 
-    public Organization(String type, String regNo, String fname, String lname, String email, String password, String phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
+    public Organization(String type, String regNo, String fname, String lname, String email, String password, int phone, int years, String address, String city, String state, String zip, String imageFileName, String fileType) {
         this.type = type;
         this.regNo = regNo;
         this.fname = fname;
         this.lname = lname;
         this.email = email;
         this.password = password;
-        this.phone = phone; // Updated to String
+        this.phone = phone;
         this.years = years;
         this.address = address;
         this.city = city;
@@ -67,6 +69,22 @@ public class Organization {
         this.zip = zip;
         this.imageFileName = imageFileName;
         this.fileType = fileType;
+    }
+
+    public Organization(String fname, String lname, String email, String password, int phone, String regNo, int years, String address, String city, String state, String zip, String imageFileName, String type) {
+        this.fname = fname;
+        this.lname = lname;
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
+        this.regNo = regNo;
+        this.years = years;
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.imageFileName = imageFileName;
+        this.type = type;
     }
 
     public Organization() {
@@ -100,7 +118,7 @@ public class Organization {
         return password;
     }
 
-    public String getPhone() { // Updated to String
+    public int getPhone() {
         return phone;
     }
 
@@ -160,7 +178,7 @@ public class Organization {
         this.password = password;
     }
 
-    public void setPhone(String phone) { // Updated to String
+    public void setPhone(int phone) {
         this.phone = phone;
     }
 
@@ -202,7 +220,7 @@ public class Organization {
                 ", lname='" + lname + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", phone='" + phone + '\'' + // Updated to String
+                ", phone=" + phone +
                 ", years=" + years +
                 ", address='" + address + '\'' +
                 ", city='" + city + '\'' +
