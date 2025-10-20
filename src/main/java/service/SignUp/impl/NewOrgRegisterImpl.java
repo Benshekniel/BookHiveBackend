@@ -10,11 +10,13 @@ import model.repo.AllUsersRepo;
 import model.repo.ModeratorRepo;
 import model.repo.OrgRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import service.Register.RegisterAccount;
 import service.SignUp.Register_OrgAccount;
 
 @Service
+@Primary
 public class NewOrgRegisterImpl implements Register_OrgAccount {
 
     @Autowired

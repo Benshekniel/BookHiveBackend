@@ -22,6 +22,11 @@ public interface OrgRepo extends JpaRepository<Organization, Long> {
 
     Optional<Organization> findByEmail(String email);
 
+    // Find organization by orgId
+    Optional<Organization> findByOrgId(Long orgId);
+
+    // Check if organization exists by orgId
+    boolean existsByOrgId(Long orgId);
 
     // ✅ Get user_id from all_users by email
     @Query("SELECT a.user_id FROM AllUsers a WHERE a.email = :email")

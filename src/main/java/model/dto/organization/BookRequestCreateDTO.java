@@ -3,6 +3,11 @@ package model.dto.organization;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// Add Jakarta validation imports
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 @Data
 @NoArgsConstructor
 public class BookRequestCreateDTO {
