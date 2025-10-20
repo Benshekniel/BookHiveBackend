@@ -47,4 +47,10 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
 
     // Added for FeedbackServiceImpl
     Optional<Donation> findById(Long id);
+
+    // Find donation by book request ID
+    Optional<Donation> findByBookRequestId(Long bookRequestId);
+
+    // Delete donation by book request ID
+    void deleteByBookRequestId(Long bookRequestId);
 }
