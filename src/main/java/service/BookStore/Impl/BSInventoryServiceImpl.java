@@ -125,6 +125,7 @@ public class BSInventoryServiceImpl implements BSInventoryService {
 
         return statDTO;
     }
+
     public BSStatDTOs.DonationInventoryDTO getDonationInventoryStats(Integer storeId) {
         BSStatDTOs.DonationInventoryDTO statDTO = new BSStatDTOs.DonationInventoryDTO();
 

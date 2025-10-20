@@ -12,4 +12,6 @@ public interface BSDonationService {
     List<BSInventoryDTOs.ConciseDonationDTO> getInventoryListByCategory (String category, Integer storeId);
 
     boolean contributeToDonation (Long donationId, Integer addition);
+
+    boolean fullDonationProcess ( Long donationId, List<BSInventoryDTOs.ContributionDTO> contributions);
 }

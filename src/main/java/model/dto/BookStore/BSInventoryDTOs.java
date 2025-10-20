@@ -106,6 +106,12 @@ public class BSInventoryDTOs {
         private Integer sellableCount;
     }
 
+    @Data @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ContributionDTO {
+        private Integer inventoryId;
+        private Integer contributionCount;
+    }
+
 
     @Data @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FullInventoryDTO {
