@@ -54,7 +54,7 @@ public class BSBookController {
 
     @PostMapping(path= "/new", consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> registerBook (
-            @RequestPart("newBookData") BSBookDTOs.RegisterDTO registerDTO,
+            @RequestPart("newBookData") BSBookDTOs.RegisterDTO newBookData,
             @RequestPart("coverImage") MultipartFile coverImage,
             @RequestPart("images") List<MultipartFile> images) throws IOException {
 
@@ -71,17 +71,17 @@ public class BSBookController {
             fileStorageService.uploadFile(image, "BSItem/images", randName);
             savedImageNames.add(randName);
         }
-        registerDTO.setImages(savedImageNames);
+        newBookData.setImages(savedImageNames);
 
-        Integer userId = registerDTO.getUserId();
+        Integer userId = newBookData.getUserId();
         Integer storeId = bookStoreService.getStoreIdByUserId(userId);
 
-        registerDTO.setCoverImage(coverImageRandName);
+        newBookData.setCoverImage(coverImageRandName);
 
-        boolean saved = bookService.createBook(registerDTO, storeId);
+        boolean saved = bookService.createBook(newBookData, storeId);
 
-        if (saved) return ResponseEntity.ok("Inventory created successfully");
-        else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Inventory could not be created!");
+        if (saved) return ResponseEntity.ok("Book created successfully");
+        else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Book could not be created!");
     }
 
 
@@ -110,8 +110,8 @@ public class BSBookController {
 
         boolean saved = bookService.editBook(editDTO);
 
-        if (saved) return ResponseEntity.ok("Inventory created successfully");
-        else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Inventory could not be created!");
+        if (saved) return ResponseEntity.ok("Book edited successfully");
+        else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Book could not be edited!");
     }
 
 
@@ -158,6 +158,15 @@ public class BSBookController {
         return ResponseEntity.ok(stats);
     }
 
+    @GetMapping("/stats/sellAlso/{userId}")
+    public ResponseEntity<BSStatDTOs.SellAlsoStatDTO> getSellAlsoStats (
+            @PathVariable Integer userId) {
+        Integer storeId = bookStoreService.getStoreIdByUserId(userId);
+
+        BSStatDTOs.SellAlsoStatDTO stats = bookService.getSellAlsoStats(storeId);
+        return ResponseEntity.ok(stats);
+    }
+
 
 
     @DeleteMapping("/{bookId}")
@@ -165,8 +174,8 @@ public class BSBookController {
             @PathVariable("bookId") Integer bookId ) {
 
         boolean updated = bookService.deleteBook(bookId);
-        if (updated) return ResponseEntity.ok("Item deleted successfully");
+        if (updated) return ResponseEntity.ok("Book deleted successfully");
         else
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item Not found!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book Not found!");
     }
 }
