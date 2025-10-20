@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface BSDonationRepo extends JpaRepository<Donation, Integer> {
+public interface BSDonationRepo extends JpaRepository<Donation, Long> {
 
     /** pass "approved" as the status to get currently ongoing donation events */
     List<Donation> findAllByStatusEqualsIgnoreCase(String status);
