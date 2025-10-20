@@ -1,5 +1,6 @@
 package controller.User;
 
+import lombok.RequiredArgsConstructor;
 import model.dto.UserTransactionDto;
 import service.User.impl.UserTransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user-transactions")
+@RequiredArgsConstructor
 public class UserTransactionController {
 
     @Autowired

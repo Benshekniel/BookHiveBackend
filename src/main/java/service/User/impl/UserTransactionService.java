@@ -3,10 +3,15 @@ package service.User.impl;
 import model.dto.UserTransactionDto;
 import model.entity.Transaction;
 import model.entity.Delivery;
+import model.entity.Users;
+import model.entity.UserBooks;
 import model.repo.User.UserTransactionRepository;
-import model.repo.Delivery.DeliveryRepository; // Your existing delivery repo
+import model.repo.Delivery.DeliveryRepository;
+import model.repo.UsersRepo;
+import model.repo.UserBooksRepo;
 import service.User.impl.DeliveryTrackingService;
-import service.Delivery.impl.DeliveryService; // Your existing delivery service
+import service.Delivery.impl.DeliveryService;
+import service.GoogleDriveUpload.FileStorageService; // Add this import
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,20 +38,19 @@ public class UserTransactionService {
     private DeliveryTrackingService deliveryTrackingService;
 
     @Autowired
-    private DeliveryRepository deliveryRepository; // Your existing delivery repo
+    private DeliveryRepository deliveryRepository;
 
     @Autowired
-    private DeliveryService deliveryService; // Your existing delivery service
+    private DeliveryService deliveryService;
 
-    // Mock data for users and books (replace with actual service calls)
-    private Map<Long, UserTransactionDto.UserDetailsDto> mockUsers;
-    private Map<Long, Map<String, String>> mockBooks;
+    @Autowired
+    private UsersRepo usersRepo;
 
-    // Initialize mock data in constructor
-    public UserTransactionService() {
-        this.mockUsers = createMockUsers();
-        this.mockBooks = createMockBooks();
-    }
+    @Autowired
+    private UserBooksRepo userBooksRepo;
+
+    @Autowired
+    private FileStorageService fileStorageService; // Add this
 
     public Page<UserTransactionDto.TransactionResponseDto> getUserTransactions(
             Long userId, UserTransactionDto.TransactionFilterDto filter) {
@@ -58,39 +62,39 @@ public class UserTransactionService {
             // Use conditional logic to call appropriate repository method
             if (filter.getStatus() != null && filter.getType() != null) {
                 // Both status and type filters
-                Transaction.TransactionStatus status = Transaction.TransactionStatus.valueOf(filter.getStatus().toUpperCase());
+                Transaction.TransactionStatus status = mapFrontendStatusToBackend(filter.getStatus());
                 Transaction.TransactionType type = Transaction.TransactionType.valueOf(mapFrontendTypeToBackend(filter.getType()));
                 transactions = transactionRepository.findByUserAndStatusAndType(userId, status, type, pageable);
             } else if (filter.getStatus() != null) {
-                // Status filter only
-                Transaction.TransactionStatus status = Transaction.TransactionStatus.valueOf(filter.getStatus().toUpperCase());
-                transactions = transactionRepository.findByUserAndStatus(userId, status, pageable);
+                // Status filter only - UPDATED: Handle completed status properly
+                if ("completed".equalsIgnoreCase(filter.getStatus()) || "delivered".equalsIgnoreCase(filter.getStatus())) {
+                    // Get all transactions and filter by delivery status
+                    transactions = transactionRepository.findByUserInvolved(userId, pageable);
+                    transactions = filterByDeliveryStatus(transactions, Delivery.DeliveryStatus.DELIVERED);
+                } else {
+                    Transaction.TransactionStatus status = mapFrontendStatusToBackend(filter.getStatus());
+                    transactions = transactionRepository.findByUserAndStatus(userId, status, pageable);
+                }
             } else if (filter.getType() != null) {
                 // Type filter only
                 String backendType = mapFrontendTypeToBackend(filter.getType());
                 Transaction.TransactionType type = Transaction.TransactionType.valueOf(backendType);
                 transactions = transactionRepository.findByUserAndType(userId, type, pageable);
             } else if (filter.getPaymentStatus() != null) {
-                // Payment status filter only
                 Transaction.PaymentStatus paymentStatus = Transaction.PaymentStatus.valueOf(filter.getPaymentStatus().toUpperCase());
                 transactions = transactionRepository.findByUserAndPaymentStatus(userId, paymentStatus, pageable);
             } else if (filter.getFromDate() != null && filter.getToDate() != null) {
-                // Date range filter only
                 transactions = transactionRepository.findByUserAndDateRange(userId, filter.getFromDate(), filter.getToDate(), pageable);
             } else {
-                // No filters
                 transactions = transactionRepository.findByUserInvolved(userId, pageable);
             }
         } catch (IllegalArgumentException e) {
-            // Handle invalid enum values
             System.err.println("Invalid filter values: " + e.getMessage());
             transactions = transactionRepository.findByUserInvolved(userId, pageable);
         } catch (Exception e) {
-            // Fallback to native query
             System.err.println("Query failed, using native fallback: " + e.getMessage());
             transactions = transactionRepository.findByUserInvolvedNative(userId, pageable);
 
-            // Apply in-memory filtering for complex cases
             if (hasFilters(filter)) {
                 transactions = filterInMemory(transactions, filter);
             }
@@ -99,152 +103,33 @@ public class UserTransactionService {
         return transactions.map(this::convertToResponseDto);
     }
 
-    // FIXED: Better stats handling
-    public UserTransactionDto.TransactionStatsDto getUserTransactionStats(Long userId) {
-        try {
-            Object[] result = transactionRepository.getUserTransactionSummary(userId);
-
-            if (result == null || result.length == 0) {
-                System.out.println("No stats data found for user: " + userId);
-                return createEmptyStats();
-            }
-
-            // The query returns an Object[] where the first element might be another Object[]
-            Object firstElement = result[0];
-            Object[] statsArray;
-
-            if (firstElement instanceof Object[]) {
-                // If the first element is an array, use it
-                statsArray = (Object[]) firstElement;
-            } else {
-                // If not, use the result array directly
-                statsArray = result;
-            }
-
-            UserTransactionDto.TransactionStatsDto statsDto = new UserTransactionDto.TransactionStatsDto();
-
-            try {
-                statsDto.setTotalOrders(extractLongValue(statsArray, 0));
-                statsDto.setActiveOrders(extractLongValue(statsArray, 1));
-                statsDto.setCompletedOrders(extractLongValue(statsArray, 2));
-                statsDto.setOverdueOrders(extractLongValue(statsArray, 3));
-                statsDto.setCancelledOrders(extractLongValue(statsArray, 4));
-                statsDto.setBorrowedBooks(extractLongValue(statsArray, 5));
-                statsDto.setPurchasedBooks(extractLongValue(statsArray, 6));
-                statsDto.setWonAuctions(statsArray.length > 7 ? extractLongValue(statsArray, 7) : 0L);
-
-                // These might need separate queries
-                statsDto.setExchangedBooks(0L);
-                statsDto.setTotalSpent(BigDecimal.ZERO);
-                statsDto.setTotalEarned(BigDecimal.ZERO);
-
-                System.out.println("Successfully parsed stats for user: " + userId);
-                return statsDto;
-            } catch (Exception parseEx) {
-                System.err.println("Error parsing individual stat values: " + parseEx.getMessage());
-                return createEmptyStats();
-            }
-        } catch (Exception e) {
-            System.err.println("Error getting transaction stats for user " + userId + ": " + e.getMessage());
-            return createEmptyStats();
+    // ✅ FIXED: Map frontend status to backend enum values
+    private Transaction.TransactionStatus mapFrontendStatusToBackend(String frontendStatus) {
+        switch (frontendStatus.toLowerCase()) {
+            case "active":
+            case "pending":
+                return Transaction.TransactionStatus.PENDING;
+            case "completed":
+            case "delivered":
+                return Transaction.TransactionStatus.COMPLETED;
+            case "cancelled":
+                return Transaction.TransactionStatus.CANCELLED;
+            case "overdue":
+                return Transaction.TransactionStatus.OVERDUE;
+            default:
+                return Transaction.TransactionStatus.valueOf(frontendStatus.toUpperCase());
         }
     }
 
-    // Helper method to safely extract Long values
-    private Long extractLongValue(Object[] result, int index) {
-        if (index >= result.length || result[index] == null) {
-            return 0L;
-        }
-
-        Object value = result[index];
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
-        } else if (value instanceof String) {
-            try {
-                return Long.parseLong((String) value);
-            } catch (NumberFormatException e) {
-                System.err.println("Could not parse string to long: " + value);
-                return 0L;
-            }
-        } else {
-            System.err.println("Unexpected value type at index " + index + ": " + value.getClass().getSimpleName());
-            return 0L;
-        }
-    }
-
-    // Alternative method using individual queries (more reliable)
-    public UserTransactionDto.TransactionStatsDto getUserTransactionStatsAlternative(Long userId) {
-        try {
-            UserTransactionDto.TransactionStatsDto stats = new UserTransactionDto.TransactionStatsDto();
-
-            // Get total count
-            Long totalCount = transactionRepository.countByUserAndStatus(userId, null);
-            stats.setTotalOrders(totalCount != null ? totalCount : 0L);
-
-            // Get counts by status
-            stats.setActiveOrders(transactionRepository.countByUserAndStatus(userId, Transaction.TransactionStatus.ACTIVE));
-            stats.setCompletedOrders(transactionRepository.countByUserAndStatus(userId, Transaction.TransactionStatus.COMPLETED));
-            stats.setOverdueOrders(transactionRepository.countByUserAndStatus(userId, Transaction.TransactionStatus.OVERDUE));
-            stats.setCancelledOrders(transactionRepository.countByUserAndStatus(userId, Transaction.TransactionStatus.CANCELLED));
-
-            // Get counts by type
-            stats.setBorrowedBooks(transactionRepository.countByUserAndType(userId, Transaction.TransactionType.LEND));
-            stats.setPurchasedBooks(transactionRepository.countByUserAndType(userId, Transaction.TransactionType.SALE));
-            stats.setWonAuctions(transactionRepository.countByUserAndType(userId, Transaction.TransactionType.BIDDING));
-            stats.setExchangedBooks(transactionRepository.countByUserAndType(userId, Transaction.TransactionType.DONATION));
-
-            // Set defaults for financial data
-            stats.setTotalSpent(BigDecimal.ZERO);
-            stats.setTotalEarned(BigDecimal.ZERO);
-
-            return stats;
-        } catch (Exception e) {
-            System.err.println("Error in alternative stats method: " + e.getMessage());
-            return createEmptyStats();
-        }
-    }
-
-    // In-memory filtering as fallback
-    private Page<Transaction> filterInMemory(Page<Transaction> transactions, UserTransactionDto.TransactionFilterDto filter) {
+    // UPDATED: Filter by delivery status using your existing repository
+    private Page<Transaction> filterByDeliveryStatus(Page<Transaction> transactions, Delivery.DeliveryStatus deliveryStatus) {
         List<Transaction> filtered = transactions.getContent().stream()
-                .filter(t -> {
+                .filter(transaction -> {
                     try {
-                        // Status filter
-                        if (filter.getStatus() != null) {
-                            Transaction.TransactionStatus targetStatus = Transaction.TransactionStatus.valueOf(filter.getStatus().toUpperCase());
-                            if (t.getStatus() != targetStatus) {
-                                return false;
-                            }
-                        }
-
-                        // Type filter
-                        if (filter.getType() != null) {
-                            String mappedType = mapFrontendTypeToBackend(filter.getType());
-                            Transaction.TransactionType targetType = Transaction.TransactionType.valueOf(mappedType);
-                            if (t.getType() != targetType) {
-                                return false;
-                            }
-                        }
-
-                        // Payment status filter
-                        if (filter.getPaymentStatus() != null) {
-                            Transaction.PaymentStatus targetPaymentStatus = Transaction.PaymentStatus.valueOf(filter.getPaymentStatus().toUpperCase());
-                            if (t.getPaymentStatus() != targetPaymentStatus) {
-                                return false;
-                            }
-                        }
-
-                        // Date range filter
-                        if (filter.getFromDate() != null && t.getCreatedAt().isBefore(filter.getFromDate())) {
-                            return false;
-                        }
-                        if (filter.getToDate() != null && t.getCreatedAt().isAfter(filter.getToDate())) {
-                            return false;
-                        }
-
-                        return true;
-                    } catch (IllegalArgumentException e) {
-                        // If enum conversion fails, exclude the transaction
+                        List<Delivery> deliveries = deliveryRepository.findByTransactionId(transaction.getTransactionId());
+                        return !deliveries.isEmpty() &&
+                                deliveries.get(0).getStatus() == deliveryStatus;
+                    } catch (Exception e) {
                         return false;
                     }
                 })
@@ -253,17 +138,157 @@ public class UserTransactionService {
         return new org.springframework.data.domain.PageImpl<>(
                 filtered,
                 transactions.getPageable(),
-                filtered.size() // Use filtered size, not original total
+                filtered.size()
         );
     }
 
+    // UPDATED: New type mapping according to your requirements
     private String mapFrontendTypeToBackend(String frontendType) {
         switch (frontendType.toLowerCase()) {
+            case "purchased": return "SALE";        // purchasedBooks
+            case "borrowed": return "LEND";         // borrowedBooks
+            case "bidding": return "BIDDING";       // wonAuctions
+            case "exchanged": return "EXCHANGE";    // exchangedBooks
             case "purchase": return "SALE";
-            case "borrow": return "LOAN";
-            case "bidding": return "AUCTION";
-            case "exchange": return "DONATION";
+            case "borrow": return "LEND";
+            case "exchange": return "EXCHANGE";
             default: return frontendType.toUpperCase();
+        }
+    }
+
+    // UPDATED: Enhanced stats with correct mapping
+    public UserTransactionDto.TransactionStatsDto getUserTransactionStats(Long userId) {
+        try {
+            UserTransactionDto.TransactionStatsDto stats = new UserTransactionDto.TransactionStatsDto();
+
+            // Get all transactions for the user using native query for reliability
+            Page<Transaction> allTransactionsPage = transactionRepository.findByUserInvolvedNative(userId, Pageable.unpaged());
+            List<Transaction> allTransactions = allTransactionsPage.getContent();
+
+            stats.setTotalOrders((long) allTransactions.size());
+
+            // Count by type - UPDATED mapping according to your requirements
+            long purchasedBooks = allTransactions.stream()
+                    .filter(t -> t.getType() == Transaction.TransactionType.SALE)
+                    .count();
+            stats.setPurchasedBooks(purchasedBooks);
+
+            long borrowedBooks = allTransactions.stream()
+                    .filter(t -> t.getType() == Transaction.TransactionType.LEND)
+                    .count();
+            stats.setBorrowedBooks(borrowedBooks);
+
+            long wonAuctions = allTransactions.stream()
+                    .filter(t -> t.getType() == Transaction.TransactionType.BIDDING)
+                    .count();
+            stats.setWonAuctions(wonAuctions);
+
+            long exchangedBooks = allTransactions.stream()
+                    .filter(t -> t.getType() == Transaction.TransactionType.EXCHANGE)
+                    .count();
+            stats.setExchangedBooks(exchangedBooks);
+
+            // Count by status - FIXED: Use correct enum values
+            long activeOrders = allTransactions.stream()
+                    .filter(t -> t.getStatus() == Transaction.TransactionStatus.PENDING)
+                    .count();
+            stats.setActiveOrders(activeOrders);
+
+            // UPDATED: Count completed as delivered in delivery table
+            long completedOrders = allTransactions.stream()
+                    .filter(this::isTransactionCompleted)
+                    .count();
+            stats.setCompletedOrders(completedOrders);
+
+            long overdueOrders = allTransactions.stream()
+                    .filter(t -> t.getStatus() == Transaction.TransactionStatus.OVERDUE)
+                    .count();
+            stats.setOverdueOrders(overdueOrders);
+
+            long cancelledOrders = allTransactions.stream()
+                    .filter(t -> t.getStatus() == Transaction.TransactionStatus.CANCELLED)
+                    .count();
+            stats.setCancelledOrders(cancelledOrders);
+
+            // Financial data
+            stats.setTotalSpent(BigDecimal.ZERO);
+            stats.setTotalEarned(BigDecimal.ZERO);
+
+            return stats;
+        } catch (Exception e) {
+            System.err.println("Error getting transaction stats: " + e.getMessage());
+            return createEmptyStats();
+        }
+    }
+
+    // Check if transaction is completed based on delivery status
+    private boolean isTransactionCompleted(Transaction transaction) {
+        try {
+            List<Delivery> deliveries = deliveryRepository.findByTransactionId(transaction.getTransactionId());
+            return !deliveries.isEmpty() &&
+                    deliveries.get(0).getStatus() == Delivery.DeliveryStatus.DELIVERED;
+        } catch (Exception e) {
+            return transaction.getStatus() == Transaction.TransactionStatus.COMPLETED;
+        }
+    }
+
+    // ✅ NEW: Get delivery status for transaction
+    private String getDeliveryStatus(Transaction transaction) {
+        try {
+            List<Delivery> deliveries = deliveryRepository.findByTransactionId(transaction.getTransactionId());
+            if (!deliveries.isEmpty()) {
+                return mapDeliveryStatusToSimple(deliveries.get(0).getStatus());
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting delivery status: " + e.getMessage());
+        }
+        // Fallback to transaction status
+        return mapTransactionStatusToDelivery(transaction.getStatus());
+    }
+
+    // ✅ NEW: Map delivery status to 4 simple states
+    private String mapDeliveryStatusToSimple(Delivery.DeliveryStatus status) {
+        switch (status) {
+            case PLACED:
+            case PENDING:
+                return "Order Placed";
+            case PICKED_UP_FROM_HOME:
+            case PICKED_UP:
+            case ASSIGNED:
+                return "Picked Up";
+            case IN_TRANSIT_TO_LOCAL_HUB:
+            case AT_LOCAL_HUB:
+            case IN_TRANSIT_TO_MAIN_HUB:
+            case AT_MAIN_HUB:
+            case IN_TRANSIT_TO_PROPER_LOCAL_HUB:
+            case IN_TRANSIT:
+                return "In Transit";
+            case DELIVERED:
+                return "Delivered";
+            case CANCELLED:
+                return "Cancelled";
+            case FAILED:
+                return "Failed";
+            case DELAYED:
+                return "Delayed";
+            default:
+                return "Order Placed";
+        }
+    }
+
+    // ✅ NEW: Fallback mapping from transaction status
+    private String mapTransactionStatusToDelivery(Transaction.TransactionStatus status) {
+        switch (status) {
+            case PENDING:
+                return "Order Placed";
+            case COMPLETED:
+                return "Delivered";
+            case CANCELLED:
+                return "Cancelled";
+            case OVERDUE:
+                return "In Transit"; // Assume it's in transit if overdue
+            default:
+                return "Order Placed";
         }
     }
 
@@ -339,8 +364,7 @@ public class UserTransactionService {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
-        Transaction.TransactionStatus newStatus =
-                Transaction.TransactionStatus.valueOf(updateDto.getStatus().toUpperCase());
+        Transaction.TransactionStatus newStatus = mapFrontendStatusToBackend(updateDto.getStatus());
 
         transaction.setStatus(newStatus);
 
@@ -408,15 +432,18 @@ public class UserTransactionService {
         });
     }
 
-    // Helper methods
+    // UPDATED: Enhanced conversion with real user and book data
     private UserTransactionDto.TransactionResponseDto convertToResponseDto(Transaction transaction) {
         UserTransactionDto.TransactionResponseDto dto = new UserTransactionDto.TransactionResponseDto();
 
         // Basic fields
         dto.setTransactionId(transaction.getTransactionId());
-        dto.setOrderId("ORD" + String.format("%03d", transaction.getTransactionId()));
+        dto.setOrderId("ORD" + String.format("%05d", transaction.getTransactionId()));
         dto.setType(mapTransactionType(transaction.getType()));
-        dto.setStatus(mapTransactionStatus(transaction.getStatus()));
+
+        // ✅ UPDATED: Use delivery status instead of transaction status
+        dto.setStatus(getDeliveryStatus(transaction));
+
         dto.setCreatedAt(transaction.getCreatedAt());
         dto.setOrderDate(transaction.getCreatedAt());
         dto.setStartDate(transaction.getStartDate());
@@ -433,22 +460,11 @@ public class UserTransactionService {
         dto.setPaymentMethod(transaction.getPaymentMethod() != null ?
                 transaction.getPaymentMethod().name() : null);
 
-        // Book details - Enhanced with better fallbacks
-        dto.setBookId(transaction.getBookId());
-        Map<String, String> bookDetails = mockBooks.get(transaction.getBookId());
-        if (bookDetails != null) {
-            dto.setBookTitle(bookDetails.get("title"));
-            dto.setBookAuthor(bookDetails.get("author"));
-            dto.setBookCover(bookDetails.get("cover"));
-        } else {
-            // Fallback book details
-            dto.setBookTitle("Book " + transaction.getBookId());
-            dto.setBookAuthor("Unknown Author");
-            dto.setBookCover(generateFallbackBookImage(transaction.getBookId()));
-        }
+        // UPDATED: Real book details with proper image handling
+        setRealBookDetails(dto, transaction.getBookId());
 
-        // User details based on transaction type
-        setUserDetails(dto, transaction);
+        // UPDATED: Real user details
+        setRealUserDetails(dto, transaction);
 
         // Delivery details
         dto.setDeliveryMethod(transaction.getDeliveryMethod() != null ?
@@ -471,18 +487,18 @@ public class UserTransactionService {
         dto.setRefundAmount(transaction.getRefundAmount());
         dto.setDeductionAmount(transaction.getDeductionAmount());
 
-        // ✅ UPDATED: Generate tracking information using real delivery data
+        // UPDATED: Real tracking information using your existing service
         dto.setTracking(generateTrackingInfo(transaction));
 
         return dto;
     }
 
-    // ✅ UPDATED: Use real delivery tracking instead of mock data
+    // UPDATED: Use your existing DeliveryTrackingService
     private List<UserTransactionDto.TrackingDto> generateTrackingInfo(Transaction transaction) {
         List<UserTransactionDto.TrackingDto> trackingList = new ArrayList<>();
 
         try {
-            // Get real tracking info from delivery service using your existing delivery system
+            // Get tracking info from your existing service
             List<DeliveryTrackingService.TrackingInfo> deliveryTracking =
                     deliveryTrackingService.getTrackingInfoByTransactionId(transaction.getTransactionId());
 
@@ -500,7 +516,6 @@ public class UserTransactionService {
 
         } catch (Exception e) {
             System.err.println("Error getting delivery tracking, using fallback: " + e.getMessage());
-            // Fallback to basic tracking
             trackingList = generateFallbackTrackingInfo(transaction);
         }
 
@@ -538,27 +553,18 @@ public class UserTransactionService {
         List<UserTransactionDto.TrackingDto> tracking = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a");
 
-        // Basic tracking as fallback
         tracking.add(createTrackingEntry(
                 "Order Placed",
                 transaction.getCreatedAt().format(formatter),
                 "Your order has been confirmed"
         ));
 
-        // Status-based tracking
         switch (transaction.getStatus()) {
             case PENDING:
                 tracking.add(createTrackingEntry(
                         "Awaiting Confirmation",
                         transaction.getCreatedAt().format(formatter),
                         "Waiting for seller confirmation"
-                ));
-                break;
-            case ACTIVE:
-                tracking.add(createTrackingEntry(
-                        "Processing",
-                        transaction.getCreatedAt().plusHours(1).format(formatter),
-                        "Order is being processed"
                 ));
                 break;
             case COMPLETED:
@@ -575,34 +581,85 @@ public class UserTransactionService {
         return tracking;
     }
 
-    // Enhanced book image fallback - FIXED VERSION
-    private String generateFallbackBookImage(Long bookId) {
-        // Generate a simple data URL for SVG without String.format
-        String title = "Book " + bookId;
-        StringBuilder svg = new StringBuilder();
-        svg.append("data:image/svg+xml,");
-        svg.append("%3csvg width='150' height='200' xmlns='http://www.w3.org/2000/svg'%3e");
-        svg.append("%3crect width='150' height='200' fill='%234F46E5'/%3e");
-        svg.append("%3ctext x='75' y='100' text-anchor='middle' fill='%23FFFFFF' font-size='12'%3e");
-        svg.append(title.replace(" ", "%20"));
-        svg.append("%3c/text%3e");
-        svg.append("%3c/svg%3e");
-        return svg.toString();
+    // ✅ UPDATED: Get real book details with proper image handling using FileStorageService
+// ✅ UPDATED: Get real book details with proper image handling using your working method
+    private void setRealBookDetails(UserTransactionDto.TransactionResponseDto dto, Long bookId) {
+        try {
+            Optional<UserBooks> bookOpt = userBooksRepo.findById(bookId);
+            if (bookOpt.isPresent()) {
+                UserBooks book = bookOpt.get();
+                dto.setBookId(bookId);
+                dto.setBookTitle(book.getTitle());
+                dto.setBookAuthor(book.getAuthors() != null && !book.getAuthors().isEmpty() ?
+                        String.join(", ", book.getAuthors()) : "Unknown Author");
+
+                // ✅ UPDATED: Just pass the fileName, let frontend handle the image retrieval
+                if (book.getBookImage() != null && !book.getBookImage().trim().isEmpty()) {
+                    dto.setBookCover(book.getBookImage()); // Pass fileName directly
+                } else {
+                    dto.setBookCover(null); // No image available
+                }
+            } else {
+                // Fallback
+                dto.setBookId(bookId);
+                dto.setBookTitle("Book " + bookId);
+                dto.setBookAuthor("Unknown Author");
+                dto.setBookCover(null);
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting book details: " + e.getMessage());
+            // Fallback
+            dto.setBookId(bookId);
+            dto.setBookTitle("Book " + bookId);
+            dto.setBookAuthor("Unknown Author");
+            dto.setBookCover(null);
+        }
+    }
+    //UPDATED: Get real user details from Users table using your existing repo
+    private void setRealUserDetails(UserTransactionDto.TransactionResponseDto dto, Transaction transaction) {
+        try {
+            if (transaction.getSellerId() != null) {
+                dto.setSeller(getUserDetails(transaction.getSellerId()));
+            }
+            if (transaction.getLenderId() != null) {
+                dto.setLender(getUserDetails(transaction.getLenderId()));
+            }
+            if (transaction.getExchangerId() != null) {
+                dto.setExchanger(getUserDetails(transaction.getExchangerId()));
+            }
+            if (transaction.getBorrowerId() != null) {
+                dto.setBorrower(getUserDetails(transaction.getBorrowerId()));
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting user details: " + e.getMessage());
+        }
     }
 
-    private void setUserDetails(UserTransactionDto.TransactionResponseDto dto, Transaction transaction) {
-        if (transaction.getSellerId() != null) {
-            dto.setSeller(mockUsers.get(transaction.getSellerId()));
+    private UserTransactionDto.UserDetailsDto getUserDetails(Long userId) {
+        try {
+            Optional<Users> userOpt = usersRepo.findById(userId);
+            if (userOpt.isPresent()) {
+                Users user = userOpt.get();
+                UserTransactionDto.UserDetailsDto userDto = new UserTransactionDto.UserDetailsDto();
+                userDto.setUserId(userId);
+                userDto.setName(user.getName());
+                userDto.setEmail(user.getEmail());
+                userDto.setPhone(String.valueOf(user.getPhone()));
+                userDto.setLocation(user.getAddress() + (user.getCity() != null ? ", " + user.getCity() : ""));
+                return userDto;
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting user " + userId + ": " + e.getMessage());
         }
-        if (transaction.getLenderId() != null) {
-            dto.setLender(mockUsers.get(transaction.getLenderId()));
-        }
-        if (transaction.getExchangerId() != null) {
-            dto.setExchanger(mockUsers.get(transaction.getExchangerId()));
-        }
-        if (transaction.getBorrowerId() != null) {
-            dto.setBorrower(mockUsers.get(transaction.getBorrowerId()));
-        }
+
+        // Fallback
+        UserTransactionDto.UserDetailsDto userDto = new UserTransactionDto.UserDetailsDto();
+        userDto.setUserId(userId);
+        userDto.setName("User " + userId);
+        userDto.setEmail("user" + userId + "@example.com");
+        userDto.setPhone("+94 77 123 4567");
+        userDto.setLocation("Unknown");
+        return userDto;
     }
 
     private UserTransactionDto.TrackingDto createTrackingEntry(String status, String timestamp, String description) {
@@ -613,19 +670,24 @@ public class UserTransactionService {
         return tracking;
     }
 
+    // UPDATED: Type mapping according to your requirements
     private String mapTransactionType(Transaction.TransactionType type) {
         switch (type) {
-            case SALE: return "purchase";
-            case LEND: return "borrow";
-            case BIDDING:  return "bidding";
-            case DONATION: return "exchange"; // Map donation to exchange for frontend
+            case SALE: return "purchase";      // purchasedBooks
+            case LEND: return "borrow";        // borrowedBooks
+            case BIDDING: return "bidding";    // wonAuctions
+            case EXCHANGE: return "exchange";  // exchangedBooks
             default: return type.name().toLowerCase();
         }
     }
 
+    // FIXED: Status mapping to use correct enum values
     private String mapTransactionStatus(Transaction.TransactionStatus status) {
         switch (status) {
             case COMPLETED: return "delivered";
+            case PENDING: return "pending";
+            case CANCELLED: return "cancelled";
+            case OVERDUE: return "overdue";
             default: return status.name().toLowerCase();
         }
     }
@@ -669,7 +731,7 @@ public class UserTransactionService {
         }
 
         // Status-based deductions
-        if (transaction.getStatus() == Transaction.TransactionStatus.ACTIVE) {
+        if (transaction.getStatus() == Transaction.TransactionStatus.PENDING) {
             deductionAmount = deductionAmount.add(new BigDecimal("150")); // Shipping fee
         }
 
@@ -729,6 +791,58 @@ public class UserTransactionService {
                 filter.getToDate() != null;
     }
 
+    // FIXED: In-memory filtering with proper enum mapping
+    private Page<Transaction> filterInMemory(Page<Transaction> transactions, UserTransactionDto.TransactionFilterDto filter) {
+        List<Transaction> filtered = transactions.getContent().stream()
+                .filter(t -> {
+                    try {
+                        // Status filter - FIXED
+                        if (filter.getStatus() != null) {
+                            Transaction.TransactionStatus targetStatus = mapFrontendStatusToBackend(filter.getStatus());
+                            if (t.getStatus() != targetStatus) {
+                                return false;
+                            }
+                        }
+
+                        // Type filter
+                        if (filter.getType() != null) {
+                            String mappedType = mapFrontendTypeToBackend(filter.getType());
+                            Transaction.TransactionType targetType = Transaction.TransactionType.valueOf(mappedType);
+                            if (t.getType() != targetType) {
+                                return false;
+                            }
+                        }
+
+                        // Payment status filter
+                        if (filter.getPaymentStatus() != null) {
+                            Transaction.PaymentStatus targetPaymentStatus = Transaction.PaymentStatus.valueOf(filter.getPaymentStatus().toUpperCase());
+                            if (t.getPaymentStatus() != targetPaymentStatus) {
+                                return false;
+                            }
+                        }
+
+                        // Date range filter
+                        if (filter.getFromDate() != null && t.getCreatedAt().isBefore(filter.getFromDate())) {
+                            return false;
+                        }
+                        if (filter.getToDate() != null && t.getCreatedAt().isAfter(filter.getToDate())) {
+                            return false;
+                        }
+
+                        return true;
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
+                })
+                .collect(Collectors.toList());
+
+        return new org.springframework.data.domain.PageImpl<>(
+                filtered,
+                transactions.getPageable(),
+                filtered.size()
+        );
+    }
+
     private UserTransactionDto.TransactionStatsDto createEmptyStats() {
         UserTransactionDto.TransactionStatsDto stats = new UserTransactionDto.TransactionStatsDto();
         stats.setTotalOrders(0L);
@@ -745,92 +859,17 @@ public class UserTransactionService {
         return stats;
     }
 
-    // Mock data creation methods - FIXED VERSION
-    private Map<Long, UserTransactionDto.UserDetailsDto> createMockUsers() {
-        Map<Long, UserTransactionDto.UserDetailsDto> users = new HashMap<>();
-
-        for (long i = 2001; i <= 2015; i++) {
-            UserTransactionDto.UserDetailsDto user = new UserTransactionDto.UserDetailsDto();
-            user.setUserId(i);
-            user.setName("User " + i);
-            user.setEmail("user" + i + "@example.com");
-            user.setPhone("+94 77 123 " + String.format("%04d", i));
-            user.setLocation("Colombo " + (i % 10));
-            users.put(i, user);
-        }
-
-        return users;
-    }
-
-    private Map<Long, Map<String, String>> createMockBooks() {
-        Map<Long, Map<String, String>> books = new HashMap<>();
-
-        String[] titles = {
-                "Advanced Java Programming", "React Development Guide", "Spring Boot Mastery",
-                "Database Design Principles", "Web Development Essentials", "Python for Beginners",
-                "Data Structures & Algorithms", "Machine Learning Basics", "Cloud Computing Guide",
-                "Mobile App Development", "Software Engineering", "Computer Networks",
-                "Operating Systems", "Artificial Intelligence", "Cybersecurity Fundamentals"
-        };
-
-        String[] authors = {
-                "John Smith", "Jane Doe", "Bob Wilson", "Alice Johnson", "Charlie Brown",
-                "Diana Prince", "Edward Norton", "Fiona Clark", "George Lucas", "Helen Troy",
-                "Ian Fleming", "Julia Roberts", "Kevin Spacey", "Laura Palmer", "Mike Ross"
-        };
-
-        for (long i = 101; i <= 160; i++) {
-            Map<String, String> book = new HashMap<>();
-            int index = (int) (i - 101) % titles.length;
-            book.put("title", titles[index]);
-            book.put("author", authors[index]);
-            // Use simple SVG generation
-            book.put("cover", generateSimpleBookCover(titles[index], authors[index], i));
-            books.put(i, book);
-        }
-
-        return books;
-    }
-
-    // FIXED: Simple book cover generation without String.format issues
-    private String generateSimpleBookCover(String title, String author, Long bookId) {
-        // Create a reliable SVG without complex formatting
+    // Enhanced book image fallback
+    private String generateFallbackBookImage(Long bookId) {
+        String title = "Book " + bookId;
         StringBuilder svg = new StringBuilder();
-
-        // Clean the title and author for SVG
-        String cleanTitle = title.replaceAll("[^a-zA-Z0-9\\s]", "").trim();
-        String cleanAuthor = author.replaceAll("[^a-zA-Z0-9\\s]", "").trim();
-
-        // Truncate if too long
-        if (cleanTitle.length() > 15) {
-            cleanTitle = cleanTitle.substring(0, 15) + "...";
-        }
-        if (cleanAuthor.length() > 20) {
-            cleanAuthor = cleanAuthor.substring(0, 20) + "...";
-        }
-
-        // URL encode the text
-        cleanTitle = cleanTitle.replace(" ", "%20");
-        cleanAuthor = cleanAuthor.replace(" ", "%20");
-
-        // Build SVG data URL
         svg.append("data:image/svg+xml,");
-        svg.append("%3csvg%20width='300'%20height='400'%20xmlns='http://www.w3.org/2000/svg'%3e");
-        svg.append("%3cdefs%3e");
-        svg.append("%3clinearGradient%20id='grad'%20x1='0%25'%20y1='0%25'%20x2='100%25'%20y2='100%25'%3e");
-        svg.append("%3cstop%20offset='0%25'%20style='stop-color:%234F46E5;stop-opacity:1'%20/%3e");
-        svg.append("%3cstop%20offset='100%25'%20style='stop-color:%236366F1;stop-opacity:1'%20/%3e");
-        svg.append("%3c/linearGradient%3e");
-        svg.append("%3c/defs%3e");
-        svg.append("%3crect%20width='300'%20height='400'%20fill='url(%23grad)'/%3e");
-        svg.append("%3ctext%20x='150'%20y='200'%20text-anchor='middle'%20fill='%23FFFFFF'%20font-size='16'%20font-weight='bold'%3e");
-        svg.append(cleanTitle);
-        svg.append("%3c/text%3e");
-        svg.append("%3ctext%20x='150'%20y='240'%20text-anchor='middle'%20fill='%23E5E7EB'%20font-size='12'%3e");
-        svg.append(cleanAuthor);
+        svg.append("%3csvg width='150' height='200' xmlns='http://www.w3.org/2000/svg'%3e");
+        svg.append("%3crect width='150' height='200' fill='%234F46E5'/%3e");
+        svg.append("%3ctext x='75' y='100' text-anchor='middle' fill='%23FFFFFF' font-size='12'%3e");
+        svg.append(title.replace(" ", "%20"));
         svg.append("%3c/text%3e");
         svg.append("%3c/svg%3e");
-
         return svg.toString();
     }
 

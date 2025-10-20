@@ -2,12 +2,13 @@ package controller.organization;
 
 import model.dto.organization.DonationDTO;
 import model.dto.organization.DonationReceiptDTO;
-import service.organization.OrganizationDonationService;
+import service.organization.OrganizationDashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import service.organization.OrganizationDonationService;
 
 import java.util.List;
 @CrossOrigin(origins = {"http://localhost:9999", "http://localhost:3000"})
