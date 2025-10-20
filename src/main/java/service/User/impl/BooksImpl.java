@@ -1,14 +1,22 @@
 package service.User.impl;
 
 import jakarta.transaction.Transactional;
+import model.dto.Bidding.UserBidDTO;
 import model.dto.UserBooksDTO;
 import model.entity.AllUsers;
+import model.entity.Bid.Bid_History;
+import model.entity.Bid.SellorMode;
+import model.entity.Bid.User_Bid;
+import model.entity.Delivery;
 import model.entity.UserBooks;
 import model.entity.Users;
 import model.repo.AllUsersRepo;
 import model.repo.Delivery.TransactionRepository;
 import model.repo.UserBooksRepo;
 import model.repo.UsersRepo;
+import model.repo.bid.BidHistoryRepo;
+import model.repo.bid.SellorModeRepo;
+import model.repo.bid.UserBidRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import service.User.BooksService;
@@ -23,10 +31,19 @@ public class BooksImpl  implements BooksService {
     private UserBooksRepo userBooksRepo;
 
     @Autowired
+    private UserBidRepo userBidRepo;
+
+    @Autowired
+    private BidHistoryRepo bidHistoryRepo;
+
+    @Autowired
     private UsersRepo usersRepo;
 
     @Autowired
     private AllUsersRepo allUsersRepo;
+
+    @Autowired
+    private SellorModeRepo sellorModeRepo;
 
     @Autowired
     private TransactionRepository transactionRepo;
@@ -66,7 +83,26 @@ public class BooksImpl  implements BooksService {
                 userBooksDTO.getBookImage()
         );
 
-        userBooksRepo.save(userBooks);
+        // Save book entry
+        UserBooks savedBook = userBooksRepo.save(userBooks);
+
+
+        // ✅ If "forBidding" is true, create a new Bid_History entry
+        if (Boolean.TRUE.equals(userBooksDTO.getForBidding())) {
+            Bid_History bid = new Bid_History();
+            bid.setBookId(savedBook.getBookId()); // or savedBook.getBookId() based on your entity field
+            bid.setBiddingStartDate(userBooksDTO.getBiddingStartDate());
+            bid.setBiddingEndDate(userBooksDTO.getBiddingEndDate());
+            bid.setInitial_bid_amount(userBooksDTO.getInitialBidPrice());
+            bid.setBidEnd(false);
+            bid.setBidWinner(null);
+            bid.setBookImage(userBooksDTO.getBookImage());
+
+            // Save bid entry
+            bidHistoryRepo.save(bid);
+        }
+
+
         return "success";
     }
 
@@ -205,4 +241,57 @@ public class BooksImpl  implements BooksService {
             return "No transactions found for user ID: " + usersTableUserId;
         }
     }
+
+    @Override
+    public String placeUserBid(UserBidDTO userBidDTO) {
+        try {
+            User_Bid userBid = new User_Bid(
+                    userBidDTO.getBidId(),
+                    userBidDTO.getBookId(),
+                    userBidDTO.getUserId(),
+                    userBidDTO.getBidAmount(),
+                    userBidDTO.getName()
+            );
+
+            userBidRepo.save(userBid);
+            return "Bid placed successfully!";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed to place bid: " + e.getMessage();
+        }
+    }
+
+    @Override
+    public List<User_Bid> getBidsByBookId(Long bookId) {
+        return userBidRepo.findByBookId(bookId);
+    }
+
+    // Fetch all bids for a given bookId
+    @Override
+    public List<Bid_History> getBidHistoryByBookId(Long bookId) {
+        return bidHistoryRepo.findByBookId(bookId);
+    }
+
+    @Override
+    public boolean updateBidWinner(Long bidId, String winnerName) {
+        int updated = bidHistoryRepo.updateBidWinnerAndEndBid(winnerName, bidId);
+        return updated > 0; // true if update successful
+    }
+
+    // Set seller mode to true for a user
+    // Directly save or update a SellorMode object
+    @Override
+    public SellorMode setSellorMode(SellorMode sellorMode) {
+        return sellorModeRepo.save(sellorMode);
+    }
+
+    @Override
+    public SellorMode getSellorMode(int userId) {
+        return sellorModeRepo.findByUserIdCustom(userId);
+    }
+
+//    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
 }
