@@ -9,11 +9,12 @@ public class DonationDTO {
     private Long id;
     private Long organizationId;
     private Long donorId;
-    private String donorName;
-    private String donorLocation;
+    private String donorName; // Nullable, as not in Donation.java
+    private String donorLocation; // Nullable, as not in Donation.java
     private String bookTitle;
     private Integer quantity;
-    private String condition;
+    private Integer quantityCurrent; // Added to match Donation.java
+    private String condition; // Nullable, as not in Donation.java
     private String status;
     private String trackingNumber;
     private String notes;
@@ -21,4 +22,5 @@ public class DonationDTO {
     private String dateShipped;
     private String estimatedDelivery;
     private String dateReceived;
+    private String priority; // Added to match Donation.java
 }

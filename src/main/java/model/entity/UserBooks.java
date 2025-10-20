@@ -1,7 +1,6 @@
 package model.entity;
 
 import Utils.JsonbListType;
-import Utils.StringListConverter;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
 

@@ -6,6 +6,7 @@ import model.dto.BookStore.NewBookStoreDTO;
 import model.dto.ModeratorDto;
 import model.dto.OrgDTO;
 import model.dto.UsersDto;
+import model.dto.organizationNew.OrganizationNewDTO;
 import model.entity.AllUsers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -218,6 +219,40 @@ public class RegisterController {
                 // Upload files to Google Drive only if user creation is successful
                 Map<String, String> idFrontResult = fileStorageService.uploadFile(registrationCopy, "bookStoreRegistrations", registerImageName);
                 registerUserAccount.updateBookStoreIdByEmail(allUsersDTO.getEmail());
+            }
+        }
+
+        return ResponseEntity.ok(Map.of("message", response));
+    }
+
+
+    @PostMapping("/registerOrganization")
+    public ResponseEntity<Map<String, String>> registerUser(
+            @RequestPart("registrationCopy") MultipartFile registrationCopy,
+            @RequestPart("userData") OrganizationNewDTO organizationNewDTO) throws IOException {
+
+        // Generate random filenames before user creation
+        String registerImageName = fileStorageService.generateRandomFilename(registrationCopy);
+
+        // Assign random filenames to DTO
+        organizationNewDTO.setImageFileName(registerImageName);
+
+        // Save user logic
+        String response = register_OrgAccount.newCreateOrg(organizationNewDTO);
+        if ("success".equals(response)) {
+            // Create account in AllUsersDTO
+            AllUsersDTO allUsersDTO = new AllUsersDTO();
+            allUsersDTO.setEmail(organizationNewDTO.getEmail());
+            allUsersDTO.setPassword(organizationNewDTO.getPassword());
+            allUsersDTO.setRole("organization");
+            allUsersDTO.setName(organizationNewDTO.getOrganizationName());
+            allUsersDTO.setStatus(AllUsers.Status.pending);
+            response = registerAccount.createAccount(allUsersDTO);
+
+            if ("success&pending".equals(response)){
+                // Upload files to Google Drive only if user creation is successful
+                Map<String, String> idFrontResult = fileStorageService.uploadFile(registrationCopy, "organizationRegistrations", registerImageName);
+                register_OrgAccount.updateOrganizationIdByEmail(organizationNewDTO.getEmail());
             }
         }
 

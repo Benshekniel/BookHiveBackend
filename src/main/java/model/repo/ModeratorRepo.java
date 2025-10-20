@@ -1,6 +1,7 @@
 package model.repo;
 
 import jakarta.transaction.Transactional;
+import model.entity.BookStore;
 import model.entity.Donation;
 import model.entity.Moderator;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -111,5 +112,50 @@ public interface ModeratorRepo extends JpaRepository<Moderator, Long> {
     // ✅ Optional: Fetch donations by priority (e.g., High / Medium / Low)
 //    @Query("SELECT d FROM Donation d WHERE d.priority = :priority")
 //    List<Donation> findDonationsByPriority(String priority);
+
+
+    @Query("SELECT b FROM BookStore b WHERE b.isApproved = 'PENDING' OR b.isApproved IS NULL")
+    List<BookStore> findPendingOrUnapprovedBookStores();
+
+    @Query("SELECT b FROM BookStore b WHERE b.isApproved = 'APPROVED' OR b.isApproved IS NULL")
+    List<BookStore> findApprovedBookStores();
+
+    @Query("SELECT b FROM BookStore b WHERE b.isApproved = 'REJECTED' OR b.isApproved IS NULL")
+    List<BookStore> findRejectedBookStores();
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE BookStore b SET b.isApproved = 'REJECTED' WHERE b.user_id = :userId")
+    int rejectBookStoreByUserId(@Param("userId") Integer userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE BookStore b SET b.isApproved = 'APPROVED' WHERE b.user_id = :userId")
+    int approveBookStoreByUserId(@Param("userId") Integer userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE BookStore b SET b.isApproved = 'BANNED' WHERE b.user_id = :userId")
+    int banBookStoreByUserId(@Param("userId") Integer userId);
+
+//    @Modifying
+//    @Transactional
+//    @Query("UPDATE AllUsers a SET a.status = 'disabled' WHERE a.email = :email AND a.role = 'bookstore'")
+//    int disableBookStoreByEmail(@Param("email") String email);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE AllUsers a SET a.status = 'active' WHERE a.user_id = :user_id AND a.role = 'bookstore'")
+    int activeBookStoreById(@Param("user_id") Integer user_id);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE AllUsers a SET a.status = 'banned' WHERE a.user_id = :user_id AND a.role = 'bookstore'")
+    int banBookStoreById(@Param("user_id") Integer user_id);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE AllUsers a SET a.status = 'rejected' WHERE a.user_id = :user_id AND a.role = 'bookstore'")
+    int rejectBookStoreById(@Param("user_id") Integer user_id);
 
 }
