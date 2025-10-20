@@ -13,4 +13,5 @@ public interface BookStoreService {
     BookStoreDTOs.ProfileBookStoreDTO getStoreProfileDetails (Integer userId);
 
     BSStatDTOs.DashboardStatsDTO getBookStoreStats(Integer userId);
+    boolean updateDonatedCount (Integer storeId, Integer addition);
 }

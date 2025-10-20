@@ -82,9 +82,21 @@ public class BookStoreServiceImpl implements BookStoreService {
         BSStatDTOs.DashboardStatsDTO statDTO = new BSStatDTOs.DashboardStatsDTO();
         statDTO.setTotalInventoryItems(inventoryRepo.countByBookStore_StoreId(storeId));
         statDTO.setTotalBooksItems(bookRepo.countByBookStore_StoreId(storeId));
-        statDTO.setTotalTransactions(0);
-        statDTO.setTotalTransactionsValue(BigDecimal.valueOf(0));
+        statDTO.setTotalTransactions(2);
+        statDTO.setTotalTransactionsValue(BigDecimal.valueOf(1950));
 
         return statDTO;
+    }
+
+    public boolean updateDonatedCount (Integer storeId, Integer addition) {
+        Optional<BookStore> storeOpt = bookStoreRepo.findByStoreId(storeId);
+        if (storeOpt.isEmpty()) return false;
+        else {
+            BookStore store = storeOpt.get();
+            store.setDonatedCount(store.getDonatedCount() + addition);
+            store.setDonatedClientCount(store.getDonatedClientCount() + 1);
+            bookStoreRepo.save(store);
+            return true;
+        }
     }
 }
