@@ -91,10 +91,26 @@ public class BSBookServiceImpl implements BSBookService {
 
 
     public BSStatDTOs.LendOnlyStatDTO getLendOnlyStats(Integer storeId) {
-        return null;
+        BSStatDTOs.LendOnlyStatDTO statDTO = new BSStatDTOs.LendOnlyStatDTO();
+
+        statDTO.setTotalBooks(bookRepo.countByBookStore_StoreId(storeId));
+        statDTO.setOnlyLending(bookRepo.countByBookStore_StoreIdAndIsForSellingFalse(storeId));
+        statDTO.setCurrentLent(bookRepo.countByBookStore_StoreIdAndIsForSellingFalseAndStatusEquals(storeId, BSBook.BookStatus.LENT));
+        statDTO.setAvgLendFee(bookRepo.getAverageLendFee(storeId));
+        statDTO.setAvgLendPeriod(bookRepo.getAverageLendingPeriod(storeId));
+
+        return statDTO;
     }
     public BSStatDTOs.SellAlsoStatDTO getSellAlsoStats(Integer storeId) {
-        return null;
+        BSStatDTOs.SellAlsoStatDTO statDTO = new BSStatDTOs.SellAlsoStatDTO();
+
+        statDTO.setTotalBooks(bookRepo.countByBookStore_StoreId(storeId));
+        statDTO.setTotalSellable(bookRepo.countByBookStore_StoreIdAndIsForSellingTrue(storeId));
+        statDTO.setCurrentLent(bookRepo.countByBookStore_StoreIdAndIsForSellingTrueAndStatusEquals(storeId, BSBook.BookStatus.LENT));
+        statDTO.setAvgSellPrice(bookRepo.getAverageSellPrice(storeId));
+        statDTO.setSoldCount(bookRepo.countByBookStore_StoreIdAndIsForSellingTrueAndStatusEquals(storeId, BSBook.BookStatus.SOLD));
+
+        return statDTO;
     }
 
     public boolean editBook(BSBookDTOs.EditDTO editDTO) {

@@ -141,21 +141,17 @@ public class Transaction {
         }
     }
 
-//    @Column(name = "delivery_address",columnDefinition="TEXT")
-//    private String deliveryAddress;
-
-
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
     public enum TransactionType {
-        SALE, LEND, DONATION, BIDDING
+        SALE, LEND, EXCHANGE, BIDDING, AUCTION, DONATION
     }
 
     public enum TransactionStatus {
-        PENDING, ACTIVE, COMPLETED, CANCELLED, OVERDUE
+        ACTIVE, PENDING, COMPLETED, CANCELLED, OVERDUE
     }
 
     public enum PaymentStatus {

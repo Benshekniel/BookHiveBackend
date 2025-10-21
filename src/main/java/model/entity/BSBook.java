@@ -117,8 +117,8 @@ public class BSBook {
         NEW, USED, FAIR
     }
 
-    /** AVAILABLE, SOLD, LENT, AUCTION */
+    /** AVAILABLE, SOLD, LENT */
     public enum BookStatus {
-        AVAILABLE, SOLD, LENT, AUCTION,
+        AVAILABLE, SOLD, LENT
     }
 }
